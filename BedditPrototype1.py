@@ -14,13 +14,12 @@ import random
 #--------------------#
 # BOOTUP SHIT
 #--------------------#
-reddit = praw.Reddit(client_id = 'CLIENT ID HERE',
-                     client_secret = 'CLIENT SECRET HERE',
-                     username='USERNAME HERE',
-                     password='PASSWORLD HERE',
-                     user_agent='USER AGENT HERE')
-os.chdir("FILE PATH TO FOLDER HERE")
-bot = discord.Client()
+reddit = praw.Reddit(client_id = 'CLIENT ID',
+                     client_secret = 'CLIENT SECRET',
+                     username='USERNAME',
+                     password='PASSWORD',
+                     user_agent='USER AGENT')
+os.chdir("PATH HERE")
 bot = commands.Bot(command_prefix='&')
 bad_chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 #--------------------#
@@ -171,32 +170,35 @@ async def bet(ctx, arg, arg2, arg3, arg4):
         prediction2 = prediction - firstupvote
     if 0 < prediction2 < 500:
         predicmulti = -1
-    if 500 < prediction2 < 1000:
+    elif 500 < prediction2 < 1000:
         predicmulti = -0.5
-    if 1000 < prediction2 < 2500:
+    elif 1000 < prediction2 < 2500:
         predicmulti = 0
-    if 2500 < prediction2 < 5000:
+    elif 2500 < prediction2 < 5000:
         predicmulti = 0.5
-    if 5000 < prediction2 < 10000:
+    elif 5000 < prediction2 < 10000:
         predicmulti = 1
-    if 10000 < prediction2 < 20000:
+    elif 10000 < prediction2 < 20000:
         predicmulti = 1.5
-    if 20000 < prediction2 < 30000:
+    elif 20000 < prediction2 < 30000:
         predicmulti = 2
-    if 30000 < prediction2 < 40000:
+    elif 30000 < prediction2 < 40000:
         predicmulti = 2.5
-    if 40000 < prediction2 < 50000:
+    elif 40000 < prediction2 < 50000:
         predicmulti = 3
-    if 50000 < prediction2 < 60000:
+    elif 50000 < prediction2 < 60000:
         predicmulti = 3.5
-    if 60000 < prediction2 < 70000:
+    elif 60000 < prediction2 < 70000:
         predicmulti = 4
-    if 70000 < prediction2 < 80000:
+    elif 70000 < prediction2 < 80000:
         predicmulti = 5
-    if 80000 < prediction2 < 90000:
+    elif 80000 < prediction2 < 90000:
         predicmulti = 6
-    if prediction2 > 90000:
+    elif prediction2 > 90000:
         predicmulti = 7.5
+    else:
+        await ctx.send("Something went wrong! Error: PredicMulti!")
+
 
 #Calculating the time multiplier based on how long the bet takes
     if 0 < timeinseconds < 61:
@@ -341,15 +343,14 @@ async def role(ctx):
     await ctx.send("You have the correct perms!")
 
 @bot.command()
-@commands.has_permissions(manage_messages=True)
 async def gibcash(ctx):
     await open_account(ctx.author)
     user = ctx.author
     users = await get_bank_data()    
-    users[str(user.id)]["wallet"] += 100
+    users[str(user.id)]["wallet"] += 1000
     with open("mainbank.json","w") as f:
         json.dump(users,f)
-    await ctx.send("I deposited 100 points to your bank account, moderator god!")
+    await ctx.send("I deposited 1000 points to your bank account!")
 
 async def open_account(user):
 
@@ -399,4 +400,4 @@ async def repeat_error(ctx, error):
 # BOT TOKEN GOES HERE
 #--------------------#
 
-bot.run('BOT TOKEN HERE')
+bot.run('TOKEN HERE')
