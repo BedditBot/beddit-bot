@@ -122,6 +122,9 @@ async def bet(ctx, arg, arg2, arg3, arg4):
         await ctx.send("You can't ping people in your arguments!")
     if '@' in arg4:
         await ctx.send("You can't ping people in your arguments!")
+    if prediction == firstupvote:
+        await ctx.send("You can't bet on it being the same amount of upvotes!")
+        return
     users[str(user.id)]["bets"] += 1
     with open("runningbets.json","w") as f:
         json.dump(users,f)
@@ -167,32 +170,34 @@ async def bet(ctx, arg, arg2, arg3, arg4):
 
 #Calculatng the prediction multiplier based on how many upvotes were bet on
     if prediction > firstupvote:
-        prediction2 = prediction - firstupvote
-    if 0 < prediction2 < 500:
-        predicmulti = -1
-    elif 500 < prediction2 < 1000:
+        prediction2 = prediction - firstupvote       
+    if 0 < prediction2 < 251: 
+        predicmulti = -8
+    elif 250 < prediction2 < 501:
+        predicmulti = -3
+    elif 500 < prediction2 < 1001:
         predicmulti = -0.5
-    elif 1000 < prediction2 < 2500:
+    elif 1000 < prediction2 < 2501:
         predicmulti = 0
-    elif 2500 < prediction2 < 5000:
+    elif 2500 < prediction2 < 5001:
         predicmulti = 0.5
-    elif 5000 < prediction2 < 10000:
+    elif 5000 < prediction2 < 10001:
         predicmulti = 1
-    elif 10000 < prediction2 < 20000:
+    elif 10000 < prediction2 < 20001:
         predicmulti = 1.5
-    elif 20000 < prediction2 < 30000:
+    elif 20000 < prediction2 < 30001:
         predicmulti = 2
-    elif 30000 < prediction2 < 40000:
+    elif 30000 < prediction2 < 40001:
         predicmulti = 2.5
-    elif 40000 < prediction2 < 50000:
+    elif 40000 < prediction2 < 50001:
         predicmulti = 3
-    elif 50000 < prediction2 < 60000:
+    elif 50000 < prediction2 < 60001:
         predicmulti = 3.5
-    elif 60000 < prediction2 < 70000:
+    elif 60000 < prediction2 < 70001:
         predicmulti = 4
-    elif 70000 < prediction2 < 80000:
+    elif 70000 < prediction2 < 80001:
         predicmulti = 5
-    elif 80000 < prediction2 < 90000:
+    elif 80000 < prediction2 < 90001:
         predicmulti = 6
     elif prediction2 > 90000:
         predicmulti = 7.5
@@ -281,10 +286,11 @@ async def bet(ctx, arg, arg2, arg3, arg4):
     accuracypost = int(accuracy)
     finalbalance = balstart + winnings
     if winnings > 0:
-        await ctx.send(f"It's {arg3} later, and it has {link2.ups} upvotes right now! The difference is {difference} upvotes! You were {accuracypost}% accurate and earned ${winnings}!") 
+        await ctx.send(f"Hi {ctx.author.mention}... It's {arg3} later, and it has {link2.ups} upvotes right now! The difference is {difference} upvotes! You were {accuracypost}% accurate and earned ${winnings}!") 
     else:
-        await ctx.send(f"It's {arg3} later, and it has {link2.ups} upvotes right now! The difference is {difference} upvotes! You were {accuracypost}% accurate and unfortunately lost ${winnings}!")
-    users[str(user.id)]["bets"] -= 1
+        winnings2 = winnings - winnings - winnings
+        await ctx.send(f"Hi {ctx.author.mention}... It's {arg3} later, and it has {link2.ups} upvotes right now! The difference is {difference} upvotes! You were {accuracypost}% accurate and unfortunately lost ${winnings2}!")
+    users[str(user.id)]["bets"] += -1
     with open("runningbets.json","w") as f:
         json.dump(users,f)     
 #Making sure user balance doesn't go negative   
@@ -400,4 +406,4 @@ async def repeat_error(ctx, error):
 # BOT TOKEN GOES HERE
 #--------------------#
 
-bot.run('TOKEN HERE')
+bot.run('BOT TOKEN')
