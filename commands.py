@@ -85,6 +85,7 @@ async def upstime(ctx, link, seconds):
     final_post = reddit_client.submission(url=link)
     final_ups = final_post.ups
     ups_difference = final_ups - initial_ups
+
     await ctx.send(
         f"It's {seconds} seconds later, and it has "
         f"{final_ups} upvotes right now! The difference is "
@@ -127,12 +128,12 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
 
         return
 
-    if bank_data[str(user.id)]["wallet"] < bet_amount:
+    if bank_data[str(user.id)]["balance"] < bet_amount:
         await ctx.send("You do not have enough chips to bet this much!")
 
         return
 
-    if bank_data[str(user.id)]["bets"] >= 3:
+    if bank_data[str(user.id)]["active_bets"] >= 3:
         await ctx.send("You already have 3 bets running!")
 
         return
@@ -147,7 +148,7 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
 
         return
 
-    bank_data[str(user.id)]["bets"] += 1
+    bank_data[str(user.id)]["active_bets"] += 1
 
     with open("bank.json", "w") as file:
         json.dump(bank_data, file)
@@ -199,11 +200,11 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
     )
 
     # removes bet amount from bank account
-    bank_data[str(user.id)]["wallet"] -= bet_amount
+    bank_data[str(user.id)]["balance"] -= bet_amount
     with open("bank.json", "w") as file:
         json.dump(bank_data, file)
 
-    initial_balance = bank_data[str(user.id)]["wallet"]
+    initial_balance = bank_data[str(user.id)]["balance"]
 
     # calculates the prediction multiplier based on the predicted upvotes
     predicted_ups_increase = predicted_ups - initial_ups
@@ -293,17 +294,14 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
     final_post = reddit_client.submission(url=link)
     final_ups = final_post.ups
 
-    if final_ups > predicted_ups:
-        try:
-            accuracy = predicted_ups / final_ups * 100
-        except ZeroDivisionError:
-            await ctx.send("Oops! Something went wrong.")
+    # both in %
+    try:
+        percent_error = 100 * abs(predicted_ups - final_ups) / abs(final_ups)
+    except ZeroDivisionError:
+        await ctx.send("Oops! Something went wrong.")
 
-            return
-    elif final_ups < predicted_ups:
-        accuracy = final_ups / predicted_ups * 100
-    else:
-        accuracy = 100
+        return
+    accuracy = 100 - percent_error
 
     # determines the accuracy multiplier based on
     # how accurate the prediction was
@@ -360,33 +358,35 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
             f"Hello {user.mention}! It's {time} later, and it has "
             f"{final_ups} upvotes right now! The difference is "
             f"{ups_difference} upvotes! You were {accuracy}% accurate and "
-            f"won ${winnings}!"
+            f"won {winnings} {'bedcoins' if winnings != 1 else 'bedcoin'}!"
         )
     elif winnings == 0:
         await ctx.send(
-            f"It's {time} later, and it has {final_ups} upvotes right "
-            f"now! The difference is {ups_difference} upvotes! You were "
-            f"{accuracy}% accurate but earned nothing."
+            f"Hello {user.mention}! It's {time} later, and it has "
+            f"{final_ups} upvotes right now! The difference is "
+            f"{ups_difference} upvotes! You were {accuracy}% accurate but "
+            f"won nothing."
         )
     else:
         await ctx.send(
-            f"It's {time} later, and it has {final_ups} upvotes right "
-            f"now! The difference is {ups_difference} upvotes! You were "
-            f"{accuracy}% accurate and unfortunately lost "
-            f"${abs(winnings)}!"
+            f"Hello {user.mention}! It's {time} later, and it has "
+            f"{final_ups} upvotes right now! The difference is "
+            f"{ups_difference} upvotes! You were {accuracy}% accurate and "
+            f"lost {abs(winnings)} "
+            f"{'bedcoins' if abs(winnings) != 1 else 'bedcoin'}!"
         )
 
-    bank_data[str(user.id)]["bets"] -= 1
+    bank_data[str(user.id)]["active_bets"] -= 1
     with open("bank.json", "w") as file:
         json.dump(bank_data, file)
 
     # makes sure user balance doesn't go negative
     if final_balance < 0:
-        bank_data[str(user.id)]["wallet"] = 0
+        bank_data[str(user.id)]["balance"] = 0
         with open("bank.json", "w") as file:
             json.dump(bank_data, file)
     else:
-        bank_data[str(user.id)]["wallet"] += winnings
+        bank_data[str(user.id)]["balance"] += winnings
         with open("bank.json", "w") as file:
             json.dump(bank_data, file)
 
@@ -398,13 +398,13 @@ async def balance(ctx):
     await open_account(user)
     bank_data = await get_bank_data()
 
-    user_balance = bank_data[str(user.id)]["wallet"]
+    user_balance = bank_data[str(user.id)]["balance"]
 
     embed = discord.Embed(
         title=f"{user.name}'s Beddit balance",
         color=0x96d35f
     )
-    embed.add_field(name="Your chips:", value=user_balance)
+    embed.add_field(name="Your bedcoins:", value=user_balance)
     embed.set_thumbnail(url="https://i.imgur.com/vrtyPEN.png")
 
     await ctx.send(embed=embed)
@@ -418,7 +418,7 @@ async def daily(ctx):
     await open_account(user)
     bank_data = await get_bank_data()
 
-    bank_data[str(user.id)]["wallet"] += 100
+    bank_data[str(user.id)]["balance"] += 100
     with open("bank.json", "w") as file:
         json.dump(bank_data, file)
     await ctx.send("You collected your daily reward of $100!")
@@ -433,8 +433,11 @@ async def gamble(ctx, gamble_amount):
     await open_account(user)
     bank_data = await get_bank_data()
 
-    if bank_data[str(user.id)]["wallet"] < gamble_amount:
-        await ctx.send("You do not have enough money to gamble that much! YOU ARE POOR LOL!!!")
+    if bank_data[str(user.id)]["balance"] < gamble_amount:
+        await ctx.send(
+            "You do not have enough money to gamble that much! "
+            "YOU ARE POOR LOL!!!"
+        )
 
         return
 
@@ -446,14 +449,14 @@ async def gamble(ctx, gamble_amount):
     outcome = random.randint(0, 1)
 
     if outcome == 0:
-        bank_data[str(user.id)]["wallet"] += gamble_amount
+        bank_data[str(user.id)]["balance"] += gamble_amount
 
         with open("bank.json", "w") as file:
             json.dump(bank_data, file)
 
         await ctx.send("Yay! You doubled your gamble amount!")
     else:
-        bank_data[str(user.id)]["wallet"] -= gamble_amount
+        bank_data[str(user.id)]["balance"] -= gamble_amount
 
         with open("bank.json", "w") as file:
             json.dump(bank_data, file)
@@ -475,7 +478,7 @@ async def gibcash(ctx):
     await open_account(user)
     bank_data = await get_bank_data()
 
-    bank_data[str(user.id)]["wallet"] += 1000
+    bank_data[str(user.id)]["balance"] += 1000
     with open("bank.json", "w") as file:
         json.dump(bank_data, file)
 
