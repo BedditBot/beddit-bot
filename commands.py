@@ -161,8 +161,6 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
 
     # gets time unit, then removes it and converts time to seconds
 
-    unit_check = int(chosen_time)
-
     if "s" in chosen_time:
         for char in bad_chars: 
             chosen_time = chosen_time.replace(char, '')  
@@ -178,7 +176,7 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
             chosen_time = chosen_time.replace(char, '')  
 
         chosen_time_in_seconds = int(chosen_time) * 60 * 60
-    elif chosen_time == unit_check:
+    elif chosen_time.isdigit():
         await ctx.send("Please specify a time unit.")
 
         return
