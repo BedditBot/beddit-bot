@@ -1,15 +1,13 @@
 import sys
-import os
 
 import praw
 import asyncio
 import discord
 import random
 from discord.ext import commands
+
 import config
 from custom import *
-
-os.chdir(config.file_path)
 
 bot = config.bot
 

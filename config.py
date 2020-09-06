@@ -1,8 +1,3 @@
-import os
-
-# OS
-file_path = None
-
 # Discord
 D_TOKEN = None
 
