@@ -199,8 +199,9 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
         f"chips on it reaching {predicted_ups} upvotes in {time}!"
     )
 
-    # removes bet amount from bank account
+    # removes bet amount from bank balance
     bank_data[str(user.id)]["balance"] -= bet_amount
+
     with open("bank.json", "w") as file:
         json.dump(bank_data, file)
 
@@ -377,16 +378,19 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
         )
 
     bank_data[str(user.id)]["active_bets"] -= 1
+
     with open("bank.json", "w") as file:
         json.dump(bank_data, file)
 
     # makes sure user balance doesn't go negative
     if final_balance < 0:
         bank_data[str(user.id)]["balance"] = 0
+
         with open("bank.json", "w") as file:
             json.dump(bank_data, file)
     else:
         bank_data[str(user.id)]["balance"] += winnings
+
         with open("bank.json", "w") as file:
             json.dump(bank_data, file)
 
