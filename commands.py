@@ -354,22 +354,22 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
 
     if winnings > 0:
         await ctx.send(
-            f"Hello {user.mention}! It's {chosen_time} later, and it has "
+            f"Hello {user.mention}! It's {time_for_message} later, and it has "
             f"{final_ups} upvotes right now! The difference is "
             f"{ups_difference} upvotes! You were {accuracy}% accurate and "
             f"won ${winnings}!"
         )
     elif winnings == 0:
         await ctx.send(
-            f"It's {chosen_time} later, and it has {final_ups} upvotes right "
+            f"It's {time_for_message} later, and it has {final_ups} upvotes right "
             f"now! The difference is {ups_difference} upvotes! You were "
             f"{accuracy}% accurate but earned nothing."
         )
     else:
         await ctx.send(
-            f"It's {chosen_time} later, and it has {final_ups} upvotes right "
+            f"It's {time_for_message} later, and it has {final_ups} upvotes right "
             f"now! The difference is {ups_difference} upvotes! You were "
-            f"{accuracy}% accurate and unfortunately lost"
+            f"{accuracy}% accurate and unfortunately lost "
             f"${abs(winnings)}!"
         )
 
