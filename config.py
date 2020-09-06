@@ -10,6 +10,8 @@ def set_bot():
     global bot
     bot = commands.Bot(command_prefix="&")
 
+#os
+filepath = None
 
 set_bot()
 

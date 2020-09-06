@@ -1,13 +1,16 @@
 import sys
+import os
 
 import praw
 import asyncio
 import discord
 import random
 from discord.ext import commands
-
 import config
 from custom import *
+
+os.chdir(config.filepath)
+
 
 bot = config.bot
 
@@ -146,7 +149,7 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
 
         return
 
-    if "@" in bet_amount or "@" in chosen_time or "@" in predicted_ups:
+    if "@" in chosen_time:
         await ctx.send("You can't ping people in your arguments!")
 
         return
@@ -157,22 +160,20 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
         json.dump(bank_data, file)
 
     # gets time unit, then removes it and converts time to seconds
-    def remove_bad_chars(text):
-        for char in bad_chars:
-            text = text.replace(char, "")
-
-        return text
 
     if "s" in chosen_time:
-        remove_bad_chars(chosen_time)
+        for char in bad_chars: 
+            chosen_time = chosen_time.replace(char, '')  
 
         chosen_time_in_seconds = int(chosen_time)
     elif "m" in chosen_time:
-        remove_bad_chars(chosen_time)
+        for char in bad_chars: 
+            chosen_time = chosen_time.replace(char, '')  
 
         chosen_time_in_seconds = int(chosen_time) * 60
     elif "h" in chosen_time:
-        remove_bad_chars(chosen_time)
+        for char in bad_chars: 
+            chosen_time = chosen_time.replace(char, '')  
 
         chosen_time_in_seconds = int(chosen_time) * 60 * 60
     elif chosen_time == remove_bad_chars(chosen_time):
