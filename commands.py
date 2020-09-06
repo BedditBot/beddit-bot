@@ -395,7 +395,7 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
             json.dump(bank_data, file)
 
 
-@bot.command()
+@bot.command(aliases=["bal"])
 async def balance(ctx):
     user = ctx.author
 
