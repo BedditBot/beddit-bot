@@ -24,9 +24,10 @@ async def open_account(user):
     if str(user.id) in bank_data:
         return
 
-    bank_data[str(user.id)] = {}
-    bank_data[str(user.id)]["balance"] = 100
-    bank_data[str(user.id)]["active_bets"] = 0
+    bank_data[str(user.id)] = {
+        "balance": 100,
+        "active_bets": 0
+    }
 
     with open("bank.json", "w") as file:
         json.dump(bank_data, file)
