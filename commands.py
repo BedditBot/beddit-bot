@@ -406,6 +406,18 @@ async def balance(ctx):
 
     await ctx.send(embed=embed)
 
+@bot.command(pass_context=True)
+@commands.cooldown(1, 60*60*24, commands.BucketType.user)
+async def daily(ctx):
+    user = ctx.author
+
+    await open_account(user)
+    bank_data = await get_bank_data()
+
+    bank_data[str(user.id)]["wallet"] += 100
+    with open("bank.json", "w") as file:
+        json.dump(bank_data, file)    
+    await ctx.send("You collected your daily reward of $100!")
 
 @bot.command()
 async def gamble(ctx, gamble_amount):
@@ -477,6 +489,10 @@ async def downvotes_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("You must specify a Reddit post's URL!")
 
+@daily.error
+async def daily_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send("You already claimed your daily reward today!")
 
 @bet.error
 async def bet_error(ctx, error):
