@@ -102,6 +102,7 @@ bad_chars = (
 @bot.command()
 async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
     user = ctx.author
+    time_for_message = chosen_time
 
     try:
         bet_amount = int(bet_amount)
@@ -191,7 +192,7 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
     # sends initial message with specifics
     await ctx.send(
         f"This post has {initial_ups} upvotes right now! You bet {bet_amount} "
-        f"chips on it reaching {predicted_ups} upvotes in {chosen_time}!"
+        f"chips on it reaching {predicted_ups} upvotes in {time_for_message}!"
     )
 
     # removes bet amount from bank account
@@ -353,22 +354,22 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
 
     if winnings > 0:
         await ctx.send(
-            f"Hello {user.mention}! It's {chosen_time} later, and it has "
+            f"Hello {user.mention}! It's {time_for_message} later, and it has "
             f"{final_ups} upvotes right now! The difference is "
             f"{ups_difference} upvotes! You were {accuracy}% accurate and "
-            f"**won** ${winnings}!"
+            f"won ${winnings}!"
         )
     elif winnings == 0:
         await ctx.send(
-            f"It's {chosen_time} later, and it has {final_ups} upvotes right "
+            f"It's {time_for_message} later, and it has {final_ups} upvotes right "
             f"now! The difference is {ups_difference} upvotes! You were "
-            f"{accuracy}% accurate but earned **nothing**."
+            f"{accuracy}% accurate but earned nothing."
         )
     else:
         await ctx.send(
-            f"It's {chosen_time} later, and it has {final_ups} upvotes right "
+            f"It's {time_for_message} later, and it has {final_ups} upvotes right "
             f"now! The difference is {ups_difference} upvotes! You were "
-            f"{accuracy}% accurate and unfortunately **lost**."
+            f"{accuracy}% accurate and unfortunately lost "
             f"${abs(winnings)}!"
         )
 
@@ -405,6 +406,18 @@ async def balance(ctx):
 
     await ctx.send(embed=embed)
 
+@bot.command(pass_context=True)
+@commands.cooldown(1, 60*60*24, commands.BucketType.user)
+async def daily(ctx):
+    user = ctx.author
+
+    await open_account(user)
+    bank_data = await get_bank_data()
+
+    bank_data[str(user.id)]["wallet"] += 100
+    with open("bank.json", "w") as file:
+        json.dump(bank_data, file)    
+    await ctx.send("You collected your daily reward of $100!")
 
 @bot.command()
 async def gamble(ctx, gamble_amount):
@@ -476,6 +489,10 @@ async def downvotes_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("You must specify a Reddit post's URL!")
 
+@daily.error
+async def daily_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send("You already claimed your daily reward today!")
 
 @bet.error
 async def bet_error(ctx, error):
