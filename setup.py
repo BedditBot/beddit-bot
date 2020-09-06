@@ -100,11 +100,12 @@ def handle_constants():
 
 
 def handle_files():
-    with open("bank.json", "a"):
-        pass
-
-    with open("running_bets.json", "a"):
-        pass
+    try:
+        with open("bank.json", "r"):
+            pass
+    except FileNotFoundError:
+        with open("bank.json", "w") as file:
+            file.write("{\n}")
 
 
 logging_setup()
