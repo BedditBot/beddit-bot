@@ -102,6 +102,7 @@ bad_chars = (
 @bot.command()
 async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
     user = ctx.author
+    time_for_message = chosen_time
 
     try:
         bet_amount = int(bet_amount)
@@ -191,7 +192,7 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
     # sends initial message with specifics
     await ctx.send(
         f"This post has {initial_ups} upvotes right now! You bet {bet_amount} "
-        f"chips on it reaching {predicted_ups} upvotes in {chosen_time}!"
+        f"chips on it reaching {predicted_ups} upvotes in {time_for_message}!"
     )
 
     # removes bet amount from bank account
@@ -356,19 +357,19 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
             f"Hello {user.mention}! It's {chosen_time} later, and it has "
             f"{final_ups} upvotes right now! The difference is "
             f"{ups_difference} upvotes! You were {accuracy}% accurate and "
-            f"**won** ${winnings}!"
+            f"won ${winnings}!"
         )
     elif winnings == 0:
         await ctx.send(
             f"It's {chosen_time} later, and it has {final_ups} upvotes right "
             f"now! The difference is {ups_difference} upvotes! You were "
-            f"{accuracy}% accurate but earned **nothing**."
+            f"{accuracy}% accurate but earned nothing."
         )
     else:
         await ctx.send(
             f"It's {chosen_time} later, and it has {final_ups} upvotes right "
             f"now! The difference is {ups_difference} upvotes! You were "
-            f"{accuracy}% accurate and unfortunately **lost**."
+            f"{accuracy}% accurate and unfortunately lost"
             f"${abs(winnings)}!"
         )
 
