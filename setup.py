@@ -1,9 +1,8 @@
 import os
 
-import config
-
-# see line 61
 import logging
+
+import config
 
 
 def logging_setup():
@@ -114,12 +113,12 @@ def handle_constants():
 
         load_dotenv()
 
-    config.TOKEN = os.environ["TOKEN"]
-    config.CLIENT_ID = os.environ["CLIENT_ID"]
-    config.CLIENT_SECRET = os.environ["CLIENT_SECRET"]
-    config.USERNAME = os.environ["USERNAME"]
-    config.PASSWORD = os.environ["PASSWORD"]
-    config.USER_AGENT = os.environ["USER_AGENT"]
+    config.D_TOKEN = os.environ["D_TOKEN"]
+    config.R_CLIENT_ID = os.environ["R_CLIENT_ID"]
+    config.R_CLIENT_SECRET = os.environ["R_CLIENT_SECRET"]
+    config.R_USERNAME = os.environ["R_USERNAME"]
+    config.R_PASSWORD = os.environ["R_PASSWORD"]
+    config.R_USER_AGENT = os.environ["R_USER_AGENT"]
 
 
 def handle_files():

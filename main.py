@@ -7,9 +7,9 @@ import commands
 
 
 def run_bot():
-    from config import bot, TOKEN
+    from config import bot, D_TOKEN
 
-    bot.run(TOKEN)
+    bot.run(D_TOKEN)
 
 
 run_bot()

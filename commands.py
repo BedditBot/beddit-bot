@@ -9,16 +9,17 @@ from discord.ext import commands
 import config
 from custom import *
 
-os.chdir(config.filepath)
-
+os.chdir(config.file_path)
 
 bot = config.bot
 
-reddit_client = praw.Reddit(client_id=config.CLIENT_ID,
-                            client_secret=config.CLIENT_SECRET,
-                            username=config.USERNAME,
-                            password=config.PASSWORD,
-                            user_agent=config.USER_AGENT)
+reddit_client = praw.Reddit(
+    client_id=config.R_CLIENT_ID,
+    client_secret=config.R_CLIENT_SECRET,
+    username=config.R_USERNAME,
+    password=config.R_PASSWORD,
+    user_agent=config.R_USER_AGENT
+)
 
 
 # closes the bot (only bot owners)
@@ -93,16 +94,9 @@ async def upstime(ctx, link, seconds):
     )
 
 
-bad_chars = (
-    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
-    "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-)
-
-
 @bot.command()
-async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
+async def bet(ctx, link, bet_amount, time, predicted_ups):
     user = ctx.author
-    time_for_message = chosen_time
 
     try:
         bet_amount = int(bet_amount)
@@ -145,12 +139,12 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
 
         return
 
-    if None in (link, bet_amount, chosen_time, predicted_ups):
+    if None in (link, bet_amount, time, predicted_ups):
         await ctx.send("You did not fill in all the arguments!")
 
         return
 
-    if "@" in chosen_time:
+    if "@" in time:
         await ctx.send("You can't ping people in your arguments!")
 
         return
@@ -161,38 +155,49 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
         json.dump(bank_data, file)
 
     # gets time unit, then removes it and converts time to seconds
+    if "s" in time:
+        time_in_seconds = time.replace("s", "", 1)
 
-    if "s" in chosen_time:
-        for char in bad_chars: 
-            chosen_time = chosen_time.replace(char, '')  
+        try:
+            time_in_seconds = int(time_in_seconds)
+        except ValueError:
+            await ctx.send("You can't use that as time!")
 
-        chosen_time_in_seconds = int(chosen_time)
-    elif "m" in chosen_time:
-        for char in bad_chars: 
-            chosen_time = chosen_time.replace(char, '')  
+            return
+    elif "m" in time:
+        time_in_seconds = time.replace("m", "", 1)
 
-        chosen_time_in_seconds = int(chosen_time) * 60
-    elif "h" in chosen_time:
-        for char in bad_chars: 
-            chosen_time = chosen_time.replace(char, '')  
+        try:
+            time_in_seconds = int(time_in_seconds) * 60
+        except ValueError:
+            await ctx.send("You can't use that as time!")
 
-        chosen_time_in_seconds = int(chosen_time) * 60 * 60
-    elif chosen_time.isdigit():
+            return
+    elif "h" in time:
+        time_in_seconds = time.replace("h", "", 1)
+
+        try:
+            time_in_seconds = int(time_in_seconds) * 3600
+        except ValueError:
+            await ctx.send("You can't use that as time!")
+
+            return
+    elif time.isdigit():
         await ctx.send("Please specify a time unit.")
 
         return
     else:
-        await ctx.send("You can't use words as arguments!")
+        await ctx.send("You can't use that as time!")
 
         return
 
-    if chosen_time_in_seconds < 0:
+    if time_in_seconds < 0:
         await ctx.send("You can't input negative time!")
 
     # sends initial message with specifics
     await ctx.send(
         f"This post has {initial_ups} upvotes right now! You bet {bet_amount} "
-        f"chips on it reaching {predicted_ups} upvotes in {time_for_message}!"
+        f"chips on it reaching {predicted_ups} upvotes in {time}!"
     )
 
     # removes bet amount from bank account
@@ -247,45 +252,45 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
                 prediction_multiplier = 7.5
 
     # calculates the time multiplier based on the chosen time
-    if chosen_time_in_seconds < 21600:
-        if chosen_time_in_seconds < 7200:
-            if chosen_time_in_seconds < 300:
-                if chosen_time_in_seconds < 60:
+    if time_in_seconds < 21600:
+        if time_in_seconds < 7200:
+            if time_in_seconds < 300:
+                if time_in_seconds < 60:
                     time_multiplier = -10
                 else:
                     time_multiplier = -4
             else:
-                if chosen_time_in_seconds < 3600:
+                if time_in_seconds < 3600:
                     time_multiplier = -2
                 else:
                     time_multiplier = 0
         else:
-            if chosen_time_in_seconds < 14400:
-                if chosen_time_in_seconds < 10800:
+            if time_in_seconds < 14400:
+                if time_in_seconds < 10800:
                     time_multiplier = 0.5
                 else:
                     time_multiplier = 1
             else:
-                if chosen_time_in_seconds < 18000:
+                if time_in_seconds < 18000:
                     time_multiplier = 1.5
                 else:
                     time_multiplier = 2.3
     else:
-        if chosen_time_in_seconds < 28800:
-            if chosen_time_in_seconds < 25200:
+        if time_in_seconds < 28800:
+            if time_in_seconds < 25200:
                 time_multiplier = 3.8
             else:
                 time_multiplier = 4.5
         else:
-            if chosen_time_in_seconds < 32400:
+            if time_in_seconds < 32400:
                 time_multiplier = 6
-            elif chosen_time_in_seconds < 36000:
+            elif time_in_seconds < 36000:
                 time_multiplier = 7.5
             else:
                 time_multiplier = 10
 
     # waits until the chosen time runs out, then calculates the accuracy
-    await asyncio.sleep(chosen_time_in_seconds)
+    await asyncio.sleep(time_in_seconds)
 
     final_post = reddit_client.submission(url=link)
     final_ups = final_post.ups
@@ -354,20 +359,20 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
 
     if winnings > 0:
         await ctx.send(
-            f"Hello {user.mention}! It's {time_for_message} later, and it has "
+            f"Hello {user.mention}! It's {time} later, and it has "
             f"{final_ups} upvotes right now! The difference is "
             f"{ups_difference} upvotes! You were {accuracy}% accurate and "
             f"won ${winnings}!"
         )
     elif winnings == 0:
         await ctx.send(
-            f"It's {time_for_message} later, and it has {final_ups} upvotes right "
+            f"It's {time} later, and it has {final_ups} upvotes right "
             f"now! The difference is {ups_difference} upvotes! You were "
             f"{accuracy}% accurate but earned nothing."
         )
     else:
         await ctx.send(
-            f"It's {time_for_message} later, and it has {final_ups} upvotes right "
+            f"It's {time} later, and it has {final_ups} upvotes right "
             f"now! The difference is {ups_difference} upvotes! You were "
             f"{accuracy}% accurate and unfortunately lost "
             f"${abs(winnings)}!"
@@ -406,8 +411,9 @@ async def balance(ctx):
 
     await ctx.send(embed=embed)
 
+
 @bot.command(pass_context=True)
-@commands.cooldown(1, 60*60*24, commands.BucketType.user)
+@commands.cooldown(1, 60 * 60 * 24, commands.BucketType.user)
 async def daily(ctx):
     user = ctx.author
 
@@ -416,8 +422,9 @@ async def daily(ctx):
 
     bank_data[str(user.id)]["wallet"] += 100
     with open("bank.json", "w") as file:
-        json.dump(bank_data, file)    
+        json.dump(bank_data, file)
     await ctx.send("You collected your daily reward of $100!")
+
 
 @bot.command()
 async def gamble(ctx, gamble_amount):
@@ -489,10 +496,12 @@ async def downvotes_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("You must specify a Reddit post's URL!")
 
+
 @daily.error
 async def daily_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send("You already claimed your daily reward today!")
+
 
 @bet.error
 async def bet_error(ctx, error):
