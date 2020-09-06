@@ -153,7 +153,7 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
 
     bank_data[str(user.id)]["bets"] += 1
 
-    with open("running_bets.json", "w") as file:
+    with open("bank.json", "w") as file:
         json.dump(bank_data, file)
 
     # gets time unit, then removes it and converts time to seconds
@@ -372,7 +372,7 @@ async def bet(ctx, link, bet_amount, chosen_time, predicted_ups):
         )
 
     bank_data[str(user.id)]["bets"] -= 1
-    with open("running_bets.json", "w") as file:
+    with open("bank.json", "w") as file:
         json.dump(bank_data, file)
 
     # makes sure user balance doesn't go negative
