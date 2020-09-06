@@ -7,26 +7,49 @@ import logging
 
 
 def logging_setup():
-    logger = logging.getLogger("discord")
-    logger.setLevel(logging.DEBUG)
+    # Discord
+    discord_logger = logging.getLogger("discord")
+    discord_logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.FileHandler(
+    discord_file_handler = logging.FileHandler(
         filename="discord.log",
         encoding="utf-8",
         mode="a"
     )
 
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.WARNING)
+    discord_console_handler = logging.StreamHandler()
+    discord_console_handler.setLevel(logging.WARNING)
 
-    formatter = logging.Formatter(
+    discord_formatter = logging.Formatter(
         "%(asctime)s - %(levelname)s - %(name)s: %(message)s"
     )
-    file_handler.setFormatter(formatter)
-    console_handler.setFormatter(formatter)
+    discord_file_handler.setFormatter(discord_formatter)
+    discord_console_handler.setFormatter(discord_formatter)
 
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
+    discord_logger.addHandler(discord_file_handler)
+    discord_logger.addHandler(discord_console_handler)
+
+    # Reddit (praw module)
+    reddit_file_handler = logging.FileHandler(
+        filename="reddit.log",
+        encoding="utf-8",
+        mode="a"
+    )
+
+    reddit_console_handler = logging.StreamHandler()
+    reddit_console_handler.setLevel(logging.WARNING)
+
+    praw_logger = logging.getLogger("praw")
+    praw_logger.setLevel(logging.DEBUG)
+
+    praw_logger.addHandler(reddit_file_handler)
+    praw_logger.addHandler(reddit_console_handler)
+
+    prawcore_logger = logging.getLogger("prawcore")
+    prawcore_logger.setLevel(logging.DEBUG)
+
+    prawcore_logger.addHandler(reddit_file_handler)
+    prawcore_logger.addHandler(reddit_console_handler)
 
 
 def check_environment():
