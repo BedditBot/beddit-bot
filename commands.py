@@ -65,28 +65,6 @@ async def downvotes(ctx, link):
 
 
 @bot.command()
-async def upstime(ctx, link, seconds):
-    initial_post = reddit_client.submission(url=link)
-    initial_ups = initial_post.ups
-
-    sleep_time = int(seconds)
-
-    await ctx.send(f"This post has {initial_ups} upvotes right now!")
-
-    await asyncio.sleep(sleep_time)
-
-    final_post = reddit_client.submission(url=link)
-    final_ups = final_post.ups
-    ups_difference = final_ups - initial_ups
-
-    await ctx.send(
-        f"It's {seconds} seconds later, and it has "
-        f"{final_ups} upvotes right now! The difference is "
-        f"{ups_difference} upvotes!"
-    )
-
-
-@bot.command()
 async def repeat(ctx, *, phrase):
     if '@everyone' in phrase:
         await ctx.send("Haha fuck you with your everyone ping nonsense!")
@@ -127,7 +105,6 @@ async def balance(ctx, user=None):
 
 
 @bot.command()
-@commands.has_permissions(manage_messages=True)
 async def gibcash(ctx):
     user = ctx.author
 
@@ -511,12 +488,6 @@ async def bet(ctx, link, amount, time, predicted_ups):
     bank_data[str(user.id)]["balance"] += winnings
 
     store_bank_data(bank_data)
-
-
-@bot.command()
-@commands.has_permissions(manage_messages=True)
-async def role(ctx):
-    await ctx.send("You have the correct permissions!")
 
 
 # error handling for commands
