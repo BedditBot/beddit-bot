@@ -470,7 +470,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
     ups_difference = final_ups - initial_ups
 
     multiplier = prediction_multiplier + time_multiplier + accuracy_multiplier
-    winnings = amount * multiplier
+    winnings = int(amount * multiplier)
 
     accuracy = int(accuracy)
 
