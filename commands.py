@@ -143,6 +143,14 @@ async def transfer(ctx, *, args):
     sender = ctx.author
     sender_id = str(sender.id)
 
+    open_account(sender)
+    bank_data = get_bank_data()
+
+    if bank_data[sender_id]["active_bets"] > 0:
+        await ctx.send("You can't transfer money while you have active bets!")
+
+        return
+
     if not amount.isdigit():
         await ctx.send("That is not a valid money amount!")
 
