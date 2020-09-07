@@ -481,6 +481,9 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
     accuracy = int(accuracy)
 
+    open_account(user)
+    bank_data = get_bank_data()
+
     if winnings > 0:
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and it has "
