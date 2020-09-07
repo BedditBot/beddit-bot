@@ -103,6 +103,7 @@ async def balance(ctx, user=None):
 
     await ctx.send(embed=embed)
 
+
 @bot.command()
 async def bets(ctx):
     user = ctx.author
@@ -110,9 +111,13 @@ async def bets(ctx):
     open_account(user)
     bank_data = get_bank_data()
 
-    user_bets = bank_data[str(user.id)]["active_bets"]
+    user_active_bets = bank_data[str(user.id)]["active_bets"]
 
-    await ctx.send(f"You currenty have {user_bets} {'bets' if user_bets != 1 else 'bet'} running!")
+    await ctx.send(
+        f"You currently have {user_active_bets} "
+        f"{'bets' if user_active_bets != 1 else 'bet'} running!"
+    )
+
 
 @bot.command()
 async def gibcash(ctx):
@@ -530,6 +535,7 @@ async def bet_error(ctx, error):
         )
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send("You have to wait a few seconds between bets!")
+
 
 @repeat.error
 async def repeat_error(ctx, error):
