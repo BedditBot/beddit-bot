@@ -14,6 +14,16 @@ bot = config.bot
 # }
 
 
+# clears active bets on every restart (runs in main.py)
+def clear_active_bets():
+    bank_data = get_bank_data()
+
+    for user_id in bank_data:
+        bank_data[user_id]["active_bets"] = 0
+
+    store_bank_data(bank_data)
+
+
 def get_bank_data():
     with open("bank.json", "r") as file:
         bank_data = json.load(file)

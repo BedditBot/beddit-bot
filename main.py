@@ -5,6 +5,10 @@ import setup
 import events
 import commands
 
+from custom import clear_active_bets
+
+clear_active_bets()
+
 
 def run_bot():
     from config import bot, D_TOKEN
