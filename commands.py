@@ -401,14 +401,16 @@ async def bet(ctx, link, amount, time, predicted_ups):
     final_post = reddit_client.submission(url=link)
     final_ups = final_post.ups
 
-    # both in %
+    # in %
     try:
-        percent_error = 100 * abs(predicted_ups - final_ups) / abs(final_ups)
+        if predicted_ups > final_ups:
+            accuracy = abs(final_ups / predicted_ups) * 100
+        else:
+            accuracy = abs(predicted_ups / final_ups) * 100
     except ZeroDivisionError:
         await ctx.send("Oops! Something went wrong.")
 
         return
-    accuracy = 100 - percent_error
 
     # determines the accuracy multiplier based on
     # how accurate the prediction was
