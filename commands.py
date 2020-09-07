@@ -7,7 +7,7 @@ import random
 from discord.ext import commands
 
 import config
-from custom import *
+from custom import open_account, get_bank_data, store_bank_data, find_user
 
 bot = config.bot
 
@@ -94,22 +94,23 @@ async def upstime(ctx, link, seconds):
 
 
 @bot.command()
-async def bet(ctx, link, bet_amount, time, predicted_ups):
+async def bet(ctx, link, amount, time, predicted_ups):
     user = ctx.author
 
-    try:
-        bet_amount = int(bet_amount)
-        predicted_ups = int(predicted_ups)
-    except ValueError:
-        await ctx.send("You didn't input the correct data types!")
+    if not amount.isdigit() or not predicted_ups.isdigit():
+        await ctx.send("You didn't input valid data!")
+
+        return
+
+    amount = int(amount)
+    predicted_ups = int(predicted_ups)
 
     initial_post = reddit_client.submission(url=link)
     initial_ups = initial_post.ups
 
-    await open_account(user)
-    bank_data = await get_bank_data()
+    open_account(user)
+    bank_data = get_bank_data()
 
-    # hotfixes for everything people can abuse
     if predicted_ups <= initial_ups:
         await ctx.send(
             "Your predicted upvotes can't be lower than or equal to the "
@@ -118,28 +119,13 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
 
         return
 
-    if bet_amount < 0:
-        await ctx.send("You can't bet negative amounts!")
-
-        return
-
-    if predicted_ups < 0:
-        await ctx.send("You can't bet on negative upvotes!")
-
-        return
-
-    if bank_data[str(user.id)]["balance"] < bet_amount:
+    if bank_data[str(user.id)]["balance"] < amount:
         await ctx.send("You do not have enough chips to bet this much!")
 
         return
 
     if bank_data[str(user.id)]["active_bets"] >= 3:
         await ctx.send("You already have 3 bets running!")
-
-        return
-
-    if None in (link, bet_amount, time, predicted_ups):
-        await ctx.send("You did not fill in all the arguments!")
 
         return
 
@@ -150,37 +136,37 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
 
     bank_data[str(user.id)]["active_bets"] += 1
 
-    with open("bank.json", "w") as file:
-        json.dump(bank_data, file)
+    store_bank_data(bank_data)
 
     # gets time unit, then removes it and converts time to seconds
     if "s" in time:
-        time_in_seconds = time.replace("s", "", 1)
+        time_in_seconds = time.rstrip("s")
 
-        try:
-            time_in_seconds = int(time_in_seconds)
-        except ValueError:
+        if not time_in_seconds.isdigit():
             await ctx.send("You can't use that as time!")
 
             return
+
+        time_in_seconds = int(time_in_seconds)
+
     elif "m" in time:
-        time_in_seconds = time.replace("m", "", 1)
+        time_in_seconds = time.rstrip("m")
 
-        try:
-            time_in_seconds = int(time_in_seconds) * 60
-        except ValueError:
+        if not time_in_seconds.isdigit():
             await ctx.send("You can't use that as time!")
 
             return
+
+        time_in_seconds = int(time_in_seconds) * 60
     elif "h" in time:
-        time_in_seconds = time.replace("h", "", 1)
+        time_in_seconds = time.rstrip("h")
 
-        try:
-            time_in_seconds = int(time_in_seconds) * 3600
-        except ValueError:
+        if not time_in_seconds.isdigit():
             await ctx.send("You can't use that as time!")
 
             return
+
+        time_in_seconds = int(time_in_seconds) * 3600
     elif time.isdigit():
         await ctx.send("Please specify a time unit.")
 
@@ -195,17 +181,15 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
 
     # sends initial message with specifics
     await ctx.send(
-        f"This post has {initial_ups} upvotes right now! You bet {bet_amount} "
-        f"chips on it reaching {predicted_ups} upvotes in {time}!"
+        f"This post has {initial_ups} upvotes right now! You bet {amount} "
+        f"{'bedcoins' if amount != 1 else 'bedcoin'} on it reaching "
+        f"{predicted_ups} upvotes in {time}!"
     )
 
     # removes bet amount from bank balance
-    bank_data[str(user.id)]["balance"] -= bet_amount
+    bank_data[str(user.id)]["balance"] -= amount
 
-    with open("bank.json", "w") as file:
-        json.dump(bank_data, file)
-
-    initial_balance = bank_data[str(user.id)]["balance"]
+    store_bank_data(bank_data)
 
     # calculates the prediction multiplier based on the predicted upvotes
     predicted_ups_increase = predicted_ups - initial_ups
@@ -349,8 +333,7 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
     ups_difference = final_ups - initial_ups
 
     multiplier = prediction_multiplier + time_multiplier + accuracy_multiplier
-    winnings = bet_amount * multiplier
-    final_balance = initial_balance + winnings
+    winnings = amount * multiplier
 
     accuracy = int(accuracy)
 
@@ -378,29 +361,24 @@ async def bet(ctx, link, bet_amount, time, predicted_ups):
         )
 
     bank_data[str(user.id)]["active_bets"] -= 1
+    bank_data[str(user.id)]["balance"] += winnings
 
-    with open("bank.json", "w") as file:
-        json.dump(bank_data, file)
-
-    # makes sure user balance doesn't go negative
-    if final_balance < 0:
-        bank_data[str(user.id)]["balance"] = 0
-
-        with open("bank.json", "w") as file:
-            json.dump(bank_data, file)
-    else:
-        bank_data[str(user.id)]["balance"] += winnings
-
-        with open("bank.json", "w") as file:
-            json.dump(bank_data, file)
+    store_bank_data(bank_data)
 
 
 @bot.command(aliases=["bal"])
-async def balance(ctx):
-    user = ctx.author
+async def balance(ctx, user=None):
+    if not user:
+        user = ctx.author
+    else:
+        user = find_user(ctx, user)
+        if not user:
+            await ctx.send("This user doesn't exist!")
 
-    await open_account(user)
-    bank_data = await get_bank_data()
+            return
+
+    open_account(user)
+    bank_data = get_bank_data()
 
     user_balance = bank_data[str(user.id)]["balance"]
 
@@ -419,25 +397,30 @@ async def balance(ctx):
 async def daily(ctx):
     user = ctx.author
 
-    await open_account(user)
-    bank_data = await get_bank_data()
+    open_account(user)
+    bank_data = get_bank_data()
 
     bank_data[str(user.id)]["balance"] += 100
-    with open("bank.json", "w") as file:
-        json.dump(bank_data, file)
-    await ctx.send("You collected your daily reward of $100!")
+
+    store_bank_data(bank_data)
+
+    await ctx.send("You collected your daily reward of 100 bedcoins!")
 
 
 @bot.command()
-async def gamble(ctx, gamble_amount):
+async def gamble(ctx, amount):
     user = ctx.author
 
-    gamble_amount = int(gamble_amount)
+    if not amount.isdigit():
+        await ctx.send("You can't gamble that!")
 
-    await open_account(user)
-    bank_data = await get_bank_data()
+        return
+    amount = int(amount)
 
-    if bank_data[str(user.id)]["balance"] < gamble_amount:
+    open_account(user)
+    bank_data = get_bank_data()
+
+    if bank_data[str(user.id)]["balance"] < amount:
         await ctx.send(
             "You do not have enough money to gamble that much! "
             "YOU ARE POOR LOL!!!"
@@ -445,25 +428,18 @@ async def gamble(ctx, gamble_amount):
 
         return
 
-    if gamble_amount < 0:
-        await ctx.send("You can't gamble negative amounts!")
-
-        return
-
     outcome = random.randint(0, 1)
 
     if outcome == 0:
-        bank_data[str(user.id)]["balance"] += gamble_amount
+        bank_data[str(user.id)]["balance"] += amount
 
-        with open("bank.json", "w") as file:
-            json.dump(bank_data, file)
+        store_bank_data(bank_data)
 
         await ctx.send("Yay! You doubled your gamble amount!")
     else:
-        bank_data[str(user.id)]["balance"] -= gamble_amount
+        bank_data[str(user.id)]["balance"] -= amount
 
-        with open("bank.json", "w") as file:
-            json.dump(bank_data, file)
+        store_bank_data(bank_data)
 
         await ctx.send("HAHA YOU LOST!!! YOU IDIOT!")
 
@@ -479,14 +455,134 @@ async def role(ctx):
 async def gibcash(ctx):
     user = ctx.author
 
-    await open_account(user)
-    bank_data = await get_bank_data()
+    open_account(user)
+    bank_data = get_bank_data()
 
     bank_data[str(user.id)]["balance"] += 1000
-    with open("bank.json", "w") as file:
-        json.dump(bank_data, file)
+
+    store_bank_data(bank_data)
 
     await ctx.send("I deposited 1000 chips to your bank account!")
+
+
+@bot.command()
+async def transfer(ctx, *, args):
+    args_list = args.split()
+
+    amount = args_list[-1]
+    receiver = " ".join(args_list[:-1])
+
+    sender = ctx.author
+    sender_id = str(sender.id)
+
+    if not amount.isdigit():
+        await ctx.send("That is not a valid money amount!")
+
+        return
+    amount = int(amount)
+
+    if amount == 0:
+        await ctx.send("That is not a valid money amount!")
+
+        return
+
+    receiver = find_user(ctx, receiver)
+    if not receiver:
+        await ctx.send("This user doesn't exist!")
+
+        return
+    # def not_mention(text):
+    #     return text.replace("<@", "").replace(">", "").replace("!", "")
+    #
+    # not_mention_receiver = not_mention(receiver)
+    # if not_mention_receiver.isdigit() and len(not_mention_receiver) == 18:
+    #     receiver_id = int(not_mention_receiver)
+    #
+    #     receiver = bot.get_user(receiver_id)
+    #
+    #     if not receiver:
+    #         await ctx.send(
+    #             "The user you are trying to send money to doesn't exist."
+    #         )
+    #
+    #         return
+    # elif receiver[-5] == "#" and receiver[-4:].isdigit():
+    #     found = False
+    #
+    #     for member in ctx.guild.members:
+    #         if str(member) == receiver:
+    #             receiver = member
+    #
+    #             found = True
+    #
+    #             break
+    #
+    #     if not found:
+    #         await ctx.send(
+    #             "The user you are trying to send money to doesn't exist."
+    #         )
+    #
+    #         return
+    # else:
+    #     potential_receivers = []
+    #
+    #     for member in ctx.guild.members:
+    #         if member.name.lower() == receiver.lower():
+    #             potential_receivers.append(member)
+    #
+    #     if len(potential_receivers) == 1:
+    #         receiver = potential_receivers[0]
+    #     elif not potential_receivers:
+    #         await ctx.send(
+    #             "The user you are trying to send money to doesn't exist."
+    #         )
+    #
+    #         return
+    #     else:
+    #         potential_receivers.clear()
+    #
+    #         for member in ctx.guild.members:
+    #             if member.name == receiver:
+    #                 potential_receivers.append(member)
+    #
+    #         if len(potential_receivers) == 1:
+    #             receiver = potential_receivers[0]
+    #         elif not potential_receivers:
+    #             await ctx.send(
+    #                 "The user you are trying to send money to doesn't exist."
+    #             )
+    #
+    #             return
+    #         else:
+    #             await ctx.send(
+    #                 "Please be more specific with the receiver!"
+    #             )
+    #
+    #             return
+
+    if sender == receiver:
+        await ctx.send("You can't transfer money to yourself!")
+
+        return
+
+    receiver_id = str(receiver.id)
+
+    open_account(sender)
+    open_account(receiver)
+
+    bank_data = get_bank_data()
+
+    if amount > bank_data[sender_id]["balance"]:
+        await ctx.send("You don't have enough money for this transfer!")
+
+        return
+
+    bank_data[sender_id]["balance"] -= amount
+    bank_data[receiver_id]["balance"] += amount
+
+    store_bank_data(bank_data)
+
+    await ctx.send("Transfer successful!")
 
 
 # error handling for commands
