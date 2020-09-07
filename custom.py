@@ -14,6 +14,24 @@ bot = config.bot
 # }
 
 
+def get_bank_data():
+    with open("bank.json", "r") as file:
+        bank_data = json.load(file)
+
+    return bank_data
+
+
+def store_bank_data(bank_data):
+    for user_id in bank_data:
+        balance = bank_data[user_id]["balance"]
+
+        if balance < 0:
+            bank_data[user_id]["balance"] = 0
+
+    with open("bank.json", "w") as file:
+        json.dump(bank_data, file)
+
+
 # opens an account if the user does not have one already
 def open_account(user):
     bank_data = get_bank_data()
@@ -26,80 +44,55 @@ def open_account(user):
         "active_bets": 0
     }
 
-    with open("bank.json", "w") as file:
-        json.dump(bank_data, file)
+    store_bank_data(bank_data)
 
 
-def get_bank_data():
-    with open("bank.json", "r") as file:
-        bank_data = json.load(file)
+# argument user_attr (user attribute) is something related to the user
+# like ID, name or name with discriminator
+def find_user(ctx, user_attr):
+    user = None
 
-    return bank_data
-
-
-def store_bank_data(bank_data):
-    for account in tuple(bank_data.items()):
-        user_id = account[0]
-        values = account[1]
-
-        balance = tuple(values.items())[0][1]
-
-        if balance < 0:
-            bank_data[user_id]["balance"] = 0
-
-    with open("bank.json", "w") as file:
-        json.dump(bank_data, file)
-
-
-def find_user(ctx, user):
     def not_mention(text):
         return text.replace("<@", "").replace(">", "").replace("!", "")
 
-    not_mention_user = not_mention(user)
-    print(not_mention_user)
-    if not_mention_user.isdigit() and len(not_mention_user) == 18:
-        user_id = int(not_mention_user)
+    not_mention_user_attr = not_mention(user_attr)
 
-        user = bot.get_user(user_id)
+    # checks if user_attr is an ID
+    if not_mention_user_attr.isdigit() and len(not_mention_user_attr) == 18:
+        user = bot.get_user(int(not_mention_user_attr))
 
-        if not user:
-            return None
-    elif user[-5] == "#" and user[-4:].isdigit():
-        found = False
-
+    # checks if user_attr is a name with discriminator
+    elif user_attr[-5] == "#" and user_attr[-4:].isdigit():
         for member in ctx.guild.members:
-            if str(member) == user:
+            if str(member) == user_attr:
                 user = member
 
-                found = True
-
                 break
-
-        if not found:
-            return None
     else:
         potential_users = []
 
         for member in ctx.guild.members:
-            if member.name.lower() == user.lower():
+
+            # looks for user with the same lower case name
+            if member.name.lower() == user_attr.lower():
                 potential_users.append(member)
 
         if len(potential_users) == 1:
             user = potential_users[0]
         elif not potential_users:
-            return None
+            pass
         else:
             potential_users.clear()
 
             for member in ctx.guild.members:
-                if member.name == user:
+
+                # looks for user with the same name
+                if member.name == user_attr:
                     potential_users.append(member)
 
             if len(potential_users) == 1:
                 user = potential_users[0]
-            elif not potential_users:
-                return None
             else:
-                return None
+                pass
 
     return user
