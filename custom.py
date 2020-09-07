@@ -29,7 +29,7 @@ def store_bank_data(bank_data):
             bank_data[user_id]["balance"] = 0
 
     with open("bank.json", "w") as file:
-        json.dump(bank_data, file)
+        json.dump(bank_data, file, indent = 4)
 
 
 # opens an account if the user does not have one already
