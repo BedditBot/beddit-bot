@@ -65,20 +65,6 @@ async def downvotes(ctx, link):
 
 
 @bot.command()
-async def repeat(ctx, *, phrase):
-    if '@everyone' in phrase:
-        await ctx.send("Haha fuck you with your everyone ping nonsense!")
-    elif '@here' in phrase:
-        await ctx.send("There's nobody here I guess...")
-    elif 'discord.gg' in phrase:
-        await ctx.send("Trying to advertise another server, huh?")
-    elif '@' in phrase:
-        await ctx.send("No pinging!")
-    else:
-        await ctx.send(phrase)
-
-
-@bot.command()
 async def upstime(ctx, link, seconds):
     initial_post = reddit_client.submission(url=link)
     initial_ups = initial_post.ups
@@ -98,6 +84,165 @@ async def upstime(ctx, link, seconds):
         f"{final_ups} upvotes right now! The difference is "
         f"{ups_difference} upvotes!"
     )
+
+
+@bot.command()
+async def repeat(ctx, *, phrase):
+    if '@everyone' in phrase:
+        await ctx.send("Haha fuck you with your everyone ping nonsense!")
+    elif '@here' in phrase:
+        await ctx.send("There's nobody here I guess...")
+    elif 'discord.gg' in phrase:
+        await ctx.send("Trying to advertise another server, huh?")
+    elif '@' in phrase:
+        await ctx.send("No pinging!")
+    else:
+        await ctx.send(phrase)
+
+
+@bot.command(aliases=["bal"])
+async def balance(ctx, user=None):
+    if not user:
+        user = ctx.author
+    else:
+        user = find_user(ctx, user)
+        if not user:
+            await ctx.send("This user doesn't exist!")
+
+            return
+
+    open_account(user)
+    bank_data = get_bank_data()
+
+    user_balance = bank_data[str(user.id)]["balance"]
+
+    embed = discord.Embed(
+        title=f"{user.name}'s Beddit balance",
+        color=0x96d35f
+    )
+    embed.add_field(name="Your bedcoins:", value=user_balance)
+    embed.set_thumbnail(url="https://i.imgur.com/vrtyPEN.png")
+
+    await ctx.send(embed=embed)
+
+
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def gibcash(ctx):
+    user = ctx.author
+
+    open_account(user)
+    bank_data = get_bank_data()
+
+    bank_data[str(user.id)]["balance"] += 1000
+
+    store_bank_data(bank_data)
+
+    await ctx.send("I deposited 1000 chips to your bank account!")
+
+
+@bot.command(pass_context=True)
+@commands.cooldown(1, 60 * 60 * 24, commands.BucketType.user)
+async def daily(ctx):
+    user = ctx.author
+
+    open_account(user)
+    bank_data = get_bank_data()
+
+    bank_data[str(user.id)]["balance"] += 100
+
+    store_bank_data(bank_data)
+
+    await ctx.send("You collected your daily reward of 100 bedcoins!")
+
+
+@bot.command()
+async def transfer(ctx, *, args):
+    args_list = args.split()
+
+    amount = args_list[-1]
+    receiver = " ".join(args_list[:-1])
+
+    sender = ctx.author
+    sender_id = str(sender.id)
+
+    if not amount.isdigit():
+        await ctx.send("That is not a valid money amount!")
+
+        return
+    amount = int(amount)
+
+    if amount == 0:
+        await ctx.send("That is not a valid money amount!")
+
+        return
+
+    receiver = find_user(ctx, receiver)
+    if not receiver:
+        await ctx.send("This user doesn't exist!")
+
+        return
+
+    if sender == receiver:
+        await ctx.send("You can't transfer money to yourself!")
+
+        return
+
+    receiver_id = str(receiver.id)
+
+    open_account(sender)
+    open_account(receiver)
+
+    bank_data = get_bank_data()
+
+    if amount > bank_data[sender_id]["balance"]:
+        await ctx.send("You don't have enough money for this transfer!")
+
+        return
+
+    bank_data[sender_id]["balance"] -= amount
+    bank_data[receiver_id]["balance"] += amount
+
+    store_bank_data(bank_data)
+
+    await ctx.send("Transfer successful!")
+
+
+@bot.command()
+async def gamble(ctx, amount):
+    user = ctx.author
+
+    if not amount.isdigit():
+        await ctx.send("You can't gamble that!")
+
+        return
+    amount = int(amount)
+
+    open_account(user)
+    bank_data = get_bank_data()
+
+    if bank_data[str(user.id)]["balance"] < amount:
+        await ctx.send(
+            "You do not have enough money to gamble that much! "
+            "YOU ARE POOR LOL!!!"
+        )
+
+        return
+
+    outcome = random.randint(0, 1)
+
+    if outcome == 0:
+        bank_data[str(user.id)]["balance"] += amount
+
+        store_bank_data(bank_data)
+
+        await ctx.send("Yay! You doubled your gamble amount!")
+    else:
+        bank_data[str(user.id)]["balance"] -= amount
+
+        store_bank_data(bank_data)
+
+        await ctx.send("HAHA YOU LOST!!! YOU IDIOT!")
 
 
 @bot.command()
@@ -373,155 +518,10 @@ async def bet(ctx, link, amount, time, predicted_ups):
     store_bank_data(bank_data)
 
 
-@bot.command(aliases=["bal"])
-async def balance(ctx, user=None):
-    if not user:
-        user = ctx.author
-    else:
-        user = find_user(ctx, user)
-        if not user:
-            await ctx.send("This user doesn't exist!")
-
-            return
-
-    open_account(user)
-    bank_data = get_bank_data()
-
-    user_balance = bank_data[str(user.id)]["balance"]
-
-    embed = discord.Embed(
-        title=f"{user.name}'s Beddit balance",
-        color=0x96d35f
-    )
-    embed.add_field(name="Your bedcoins:", value=user_balance)
-    embed.set_thumbnail(url="https://i.imgur.com/vrtyPEN.png")
-
-    await ctx.send(embed=embed)
-
-
-@bot.command(pass_context=True)
-@commands.cooldown(1, 60 * 60 * 24, commands.BucketType.user)
-async def daily(ctx):
-    user = ctx.author
-
-    open_account(user)
-    bank_data = get_bank_data()
-
-    bank_data[str(user.id)]["balance"] += 100
-
-    store_bank_data(bank_data)
-
-    await ctx.send("You collected your daily reward of 100 bedcoins!")
-
-
-@bot.command()
-async def gamble(ctx, amount):
-    user = ctx.author
-
-    if not amount.isdigit():
-        await ctx.send("You can't gamble that!")
-
-        return
-    amount = int(amount)
-
-    open_account(user)
-    bank_data = get_bank_data()
-
-    if bank_data[str(user.id)]["balance"] < amount:
-        await ctx.send(
-            "You do not have enough money to gamble that much! "
-            "YOU ARE POOR LOL!!!"
-        )
-
-        return
-
-    outcome = random.randint(0, 1)
-
-    if outcome == 0:
-        bank_data[str(user.id)]["balance"] += amount
-
-        store_bank_data(bank_data)
-
-        await ctx.send("Yay! You doubled your gamble amount!")
-    else:
-        bank_data[str(user.id)]["balance"] -= amount
-
-        store_bank_data(bank_data)
-
-        await ctx.send("HAHA YOU LOST!!! YOU IDIOT!")
-
-
 @bot.command()
 @commands.has_permissions(manage_messages=True)
 async def role(ctx):
     await ctx.send("You have the correct permissions!")
-
-
-@bot.command()
-@commands.has_permissions(manage_messages=True)
-async def gibcash(ctx):
-    user = ctx.author
-
-    open_account(user)
-    bank_data = get_bank_data()
-
-    bank_data[str(user.id)]["balance"] += 1000
-
-    store_bank_data(bank_data)
-
-    await ctx.send("I deposited 1000 chips to your bank account!")
-
-
-@bot.command()
-async def transfer(ctx, *, args):
-    args_list = args.split()
-
-    amount = args_list[-1]
-    receiver = " ".join(args_list[:-1])
-
-    sender = ctx.author
-    sender_id = str(sender.id)
-
-    if not amount.isdigit():
-        await ctx.send("That is not a valid money amount!")
-
-        return
-    amount = int(amount)
-
-    if amount == 0:
-        await ctx.send("That is not a valid money amount!")
-
-        return
-
-    receiver = find_user(ctx, receiver)
-    if not receiver:
-        await ctx.send("This user doesn't exist!")
-
-        return
-
-    if sender == receiver:
-        await ctx.send("You can't transfer money to yourself!")
-
-        return
-
-    receiver_id = str(receiver.id)
-
-    open_account(sender)
-    open_account(receiver)
-
-    bank_data = get_bank_data()
-
-    if amount > bank_data[sender_id]["balance"]:
-        await ctx.send("You don't have enough money for this transfer!")
-
-        return
-
-    bank_data[sender_id]["balance"] -= amount
-    bank_data[receiver_id]["balance"] += amount
-
-    store_bank_data(bank_data)
-
-    await ctx.send("Transfer successful!")
 
 
 # error handling for commands
