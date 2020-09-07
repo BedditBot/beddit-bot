@@ -85,7 +85,7 @@ async def balance(ctx, user=None):
     else:
         user = find_user(ctx, user)
         if not user:
-            await ctx.send("This user doesn't exist!")
+            await ctx.send("This user wasn't found!")
 
             return
 
@@ -115,7 +115,7 @@ async def gibcash(ctx):
 
     store_bank_data(bank_data)
 
-    await ctx.send("I deposited 1000 chips to your bank account!")
+    await ctx.send("I deposited 1000 bedcoins to your bank account!")
 
 
 @bot.command(pass_context=True)
@@ -167,7 +167,7 @@ async def transfer(ctx, *, args):
 
     receiver = find_user(ctx, receiver)
     if not receiver:
-        await ctx.send("This user doesn't exist!")
+        await ctx.send("This user wasn't found!")
 
         return
 
@@ -507,8 +507,15 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
 
 @bot.command()
-async def bets(ctx):
-    user = ctx.author
+async def bets(ctx, user=None):
+    if not user:
+        user = ctx.author
+    else:
+        user = find_user(ctx, user)
+        if not user:
+            await ctx.send("This user wasn't found!")
+
+            return
 
     open_account(user)
     bank_data = get_bank_data()
@@ -516,7 +523,7 @@ async def bets(ctx):
     user_active_bets = bank_data[str(user.id)]["active_bets"]
 
     await ctx.send(
-        f"You currently have {user_active_bets} "
+        f"**{str(user)}** currently has {user_active_bets} "
         f"{'bets' if user_active_bets != 1 else 'bet'} running!"
     )
 
