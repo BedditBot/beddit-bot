@@ -105,21 +105,6 @@ async def balance(ctx, user=None):
 
 
 @bot.command()
-async def bets(ctx):
-    user = ctx.author
-
-    open_account(user)
-    bank_data = get_bank_data()
-
-    user_active_bets = bank_data[str(user.id)]["active_bets"]
-
-    await ctx.send(
-        f"You currently have {user_active_bets} "
-        f"{'bets' if user_active_bets != 1 else 'bet'} running!"
-    )
-
-
-@bot.command()
 async def gibcash(ctx):
     user = ctx.author
 
@@ -504,6 +489,21 @@ async def bet(ctx, link, amount, time, predicted_ups):
     bank_data[str(user.id)]["balance"] += winnings
 
     store_bank_data(bank_data)
+
+
+@bot.command()
+async def bets(ctx):
+    user = ctx.author
+
+    open_account(user)
+    bank_data = get_bank_data()
+
+    user_active_bets = bank_data[str(user.id)]["active_bets"]
+
+    await ctx.send(
+        f"You currently have {user_active_bets} "
+        f"{'bets' if user_active_bets != 1 else 'bet'} running!"
+    )
 
 
 # error handling for commands
