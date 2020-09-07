@@ -20,6 +20,13 @@ reddit_client = praw.Reddit(
 )
 
 
+@bot.command(aliases=["latency"])
+async def ping(ctx):
+    latency = round(bot.latency, 3) * 1000  # in ms to 3 d.p.
+
+    await ctx.send(f"Pong! ({latency}ms)")
+
+
 # closes the bot (only bot owners)
 @bot.command(hidden=True)
 async def cease(ctx):
