@@ -265,8 +265,8 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
     if predicted_ups <= initial_ups:
         await ctx.send(
-            "Your predicted upvotes can't be lower than or equal to the "
-            "current amount of upvotes!"
+            "Your predicted upvotes can't be lower than or equal to "
+            "the current amount of upvotes!"
         )
 
         return
@@ -278,11 +278,6 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
     if bank_data[str(user.id)]["active_bets"] >= 3:
         await ctx.send("You already have 3 bets running!")
-
-        return
-
-    if "@" in time:
-        await ctx.send("You can't ping people in your arguments!")
 
         return
 
@@ -327,9 +322,6 @@ async def bet(ctx, link, amount, time, predicted_ups):
         await ctx.send("You can't use that as time!")
 
         return
-
-    if time_in_seconds < 0:
-        await ctx.send("You can't input negative time!")
 
     # sends initial message with specifics
     await ctx.send(
