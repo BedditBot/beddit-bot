@@ -233,6 +233,7 @@ async def gamble(ctx, amount):
 
 
 @bot.command()
+@commands.cooldown(1, 5, commands.BucketType.user)
 async def bet(ctx, link, amount, time, predicted_ups):
     user = ctx.author
 
@@ -527,7 +528,8 @@ async def bet_error(ctx, error):
             "[Reddit post link] [bet amount] [time (in s/m/h)] [predicted "
             "upvotes on that post after that time]* to bet."
         )
-
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send("You have to wait a few seconds between bets!")
 
 @repeat.error
 async def repeat_error(ctx, error):
