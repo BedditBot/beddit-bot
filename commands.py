@@ -103,6 +103,16 @@ async def balance(ctx, user=None):
 
     await ctx.send(embed=embed)
 
+@bot.command()
+async def bets(ctx):
+    user = ctx.author
+
+    open_account(user)
+    bank_data = get_bank_data()
+
+    user_bets = bank_data[str(user.id)]["active_bets"]
+
+    await ctx.send(f"You currenty have {user_bets} {'bets' if user_bets != 1 else 'bet'} running!")
 
 @bot.command()
 async def gibcash(ctx):
