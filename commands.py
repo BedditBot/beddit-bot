@@ -194,7 +194,7 @@ async def transfer(ctx, *, args):
     store_bank_data(bank_data)
 
     await ctx.send(
-        f"Transfer successful! (Tax Rate: {round(TRANSFER_TAX_RATE) * 100}%)"
+        f"Transfer successful! (Tax Rate: {int(TRANSFER_TAX_RATE * 100)}%)"
     )
 
 
