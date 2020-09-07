@@ -523,7 +523,8 @@ async def bets(ctx, user=None):
     user_active_bets = bank_data[str(user.id)]["active_bets"]
 
     await ctx.send(
-        f"**{str(user)}** currently has {user_active_bets} "
+        f"{'You' if user == ctx.author else f'**{str(user)}**'} currently "
+        f"{'have' if user == ctx.author else 'has'} {user_active_bets} "
         f"{'bets' if user_active_bets != 1 else 'bet'} running!"
     )
 
