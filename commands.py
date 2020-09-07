@@ -133,6 +133,9 @@ async def daily(ctx):
     await ctx.send("You collected your daily reward of 100 bedcoins!")
 
 
+TRANSFER_TAX_RATE = 0.05  # 5%
+
+
 @bot.command()
 async def transfer(ctx, *, args):
     args_list = args.split()
@@ -186,11 +189,13 @@ async def transfer(ctx, *, args):
         return
 
     bank_data[sender_id]["balance"] -= amount
-    bank_data[receiver_id]["balance"] += amount
+    bank_data[receiver_id]["balance"] += amount - TRANSFER_TAX_RATE * amount
 
     store_bank_data(bank_data)
 
-    await ctx.send("Transfer successful!")
+    await ctx.send(
+        f"Transfer successful! (Tax Rate: {round(TRANSFER_TAX_RATE) * 100}%)"
+    )
 
 
 @bot.command()
