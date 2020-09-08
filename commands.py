@@ -105,6 +105,7 @@ async def balance_(ctx, user=None):
 
 
 @bot.command()
+@commands.cooldown(1, 5, commands.BucketType.user)
 async def gibcash(ctx):
     user = ctx.author
 
@@ -598,6 +599,18 @@ async def daily_error(ctx, error):
         await ctx.send("You already claimed your daily reward today!")
 
 
+@repeat.error
+async def repeat_error(ctx, error):
+    if isinstance(error, commands.CommandError):
+        await ctx.send("You must specify what to repeat!")
+
+
+@balancetop.error
+async def balancetop_error(ctx, error):
+    if isinstance(error, commands.CommandError):
+        await ctx.send("That's not a valid argument!")
+
+
 @bet.error
 async def bet_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
@@ -610,13 +623,7 @@ async def bet_error(ctx, error):
         await ctx.send("You have to wait a few seconds between bets!")
 
 
-@repeat.error
-async def repeat_error(ctx, error):
-    if isinstance(error, commands.CommandError):
-        await ctx.send("You must specify what to repeat!")
-
-
-@balancetop.error
-async def balancetop_error(ctx, error):
-    if isinstance(error, commands.CommandError):
-        await ctx.send("That's not a valid argument!")
+@gibcash.error
+async def gibcash_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send("You have to wait a few seconds!")
