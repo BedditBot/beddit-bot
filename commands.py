@@ -248,6 +248,12 @@ async def bet(ctx, link, amount, time, predicted_ups):
     predicted_ups = int(predicted_ups)
 
     initial_post = reddit_client.submission(url=link)
+
+    if initial_post.archived or initial_post.locked or initial_post.over_18:
+        await ctx.send("You can't bet on that post!")
+
+        return
+
     initial_ups = initial_post.ups
 
     open_account(user)
