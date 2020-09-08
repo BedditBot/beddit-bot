@@ -249,8 +249,12 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
     initial_post = reddit_client.submission(url=link)
 
-    if initial_post.archived or initial_post.locked or initial_post.over_18:
+    if initial_post.archived or initial_post.locked:
         await ctx.send("You can't bet on that post!")
+
+        return
+    elif not ctx.channel.is_nsfw() and initial_post.nsfw:
+        await ctx.send("You can't bet on that post here!")
 
         return
 
