@@ -189,7 +189,9 @@ async def transfer(ctx, *, args):
         return
 
     bank_data[sender_id]["balance"] -= amount
-    bank_data[receiver_id]["balance"] += amount - TRANSFER_TAX_RATE * amount
+    bank_data[receiver_id]["balance"] += int(
+        amount - TRANSFER_TAX_RATE * amount
+    )
 
     store_bank_data(bank_data)
 
