@@ -26,31 +26,6 @@ async def ping(ctx):
 
     await ctx.send(f"Pong! ({latency}ms)")
 
-@bot.command(aliases=["baltop"])
-async def balancetop(ctx,x = 5):
-    users = get_bank_data()
-    leader_board = {}
-    total = []
-    for user in users:
-        name = int(user)
-        total_amount = users[user]["balance"]
-        leader_board[total_amount] = name
-        total.append(total_amount)
-    
-    total = sorted(total,reverse=True)
-
-    em = discord.Embed(title = "Richest people on Beddit:", description = "Not on the list? Go bet on some posts!", color=0x96d35f)
-    index = 1
-    for amt in total:
-        id_ = leader_board[amt]
-        mem = bot.get_user(id_)
-        name = mem.name
-        em.add_field(name = f"{index}. {name}", value = f"{amt}", inline = False)
-        if index == x:
-            break
-        else:
-            index += 1
-    await ctx.send(embed = em)
 
 # closes the bot (only bot owners)
 @bot.command(hidden=True)
@@ -103,8 +78,8 @@ async def repeat(ctx, *, phrase):
         await ctx.send(phrase)
 
 
-@bot.command(aliases=["bal"])
-async def balance(ctx, user=None):
+@bot.command(aliases=["balance", "bal"])
+async def balance_(ctx, user=None):
     if not user:
         user = ctx.author
     else:
@@ -554,6 +529,51 @@ async def bets(ctx, user=None):
         f"{'have' if user == ctx.author else 'has'} {user_active_bets} "
         f"{'bets' if user_active_bets != 1 else 'bet'} running!"
     )
+
+
+@bot.command(aliases=["baltop"])
+async def balancetop(ctx, n=5):
+    bank_data = get_bank_data()
+
+    leaderboard = {}
+    balances = []
+
+    for user_id in bank_data:
+        int_user_id = int(user_id)
+
+        balance = bank_data[user_id]["balance"]
+
+        leaderboard[balance] = int_user_id
+        balances.append(balance)
+
+    balances = sorted(balances, reverse=True)
+
+    embed = discord.Embed(
+        title="Richest people on Beddit:",
+        description="Not on the list? Go bet on some posts!",
+        color=0x96d35f
+    )
+
+    i = 1
+
+    for balance in balances:
+        user_id = leaderboard[balance]
+        user = bot.get_user(user_id)
+
+        user_name_and_tag = str(user)
+
+        embed.add_field(
+            name=f"{i}. {user_name_and_tag}",
+            value=f"{balance}",
+            inline=False
+        )
+
+        if i == n:
+            break
+        else:
+            i += 1
+
+    await ctx.send(embed=embed)
 
 
 # error handling for commands
