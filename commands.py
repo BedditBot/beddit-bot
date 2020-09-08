@@ -535,18 +535,19 @@ async def bets(ctx, user=None):
 async def balancetop(ctx, n=5):
     bank_data = get_bank_data()
 
+    # leaderboard is just sorted collection
+    collection = {}
     leaderboard = {}
-    balances = []
 
     for user_id in bank_data:
-        int_user_id = int(user_id)
-
         balance = bank_data[user_id]["balance"]
 
-        leaderboard[balance] = int_user_id
-        balances.append(balance)
+        user = bot.get_user(int(user_id))
 
-    balances = sorted(balances, reverse=True)
+        collection[user] = balance
+
+    for user in sorted(collection, key=collection.get, reverse=True):
+        leaderboard[user] = collection[user]
 
     embed = discord.Embed(
         title="Richest people on Beddit:",
@@ -556,15 +557,10 @@ async def balancetop(ctx, n=5):
 
     i = 1
 
-    for balance in balances:
-        user_id = leaderboard[balance]
-        user = bot.get_user(user_id)
-
-        user_name_and_tag = str(user)
-
+    for user in leaderboard:
         embed.add_field(
-            name=f"{i}. {user_name_and_tag}",
-            value=f"{balance}",
+            name=f"{i}. {str(user)}",
+            value=f"{leaderboard[user]}",
             inline=False
         )
 
