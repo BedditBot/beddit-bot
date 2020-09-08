@@ -26,6 +26,31 @@ async def ping(ctx):
 
     await ctx.send(f"Pong! ({latency}ms)")
 
+@bot.command(aliases=["baltop"])
+async def balancetop(ctx,x = 5):
+    users = get_bank_data()
+    leader_board = {}
+    total = []
+    for user in users:
+        name = int(user)
+        total_amount = users[user]["balance"]
+        leader_board[total_amount] = name
+        total.append(total_amount)
+    
+    total = sorted(total,reverse=True)
+
+    em = discord.Embed(title = "Richest people on Beddit:", description = "Not on the list? Go bet on some posts!", color=0x96d35f)
+    index = 1
+    for amt in total:
+        id_ = leader_board[amt]
+        mem = bot.get_user(id_)
+        name = mem.name
+        em.add_field(name = f"{index}. {name}", value = f"{amt}", inline = False)
+        if index == x:
+            break
+        else:
+            index += 1
+    await ctx.send(embed = em)
 
 # closes the bot (only bot owners)
 @bot.command(hidden=True)
@@ -566,3 +591,9 @@ async def bet_error(ctx, error):
 async def repeat_error(ctx, error):
     if isinstance(error, commands.CommandError):
         await ctx.send("You must specify what to repeat!")
+
+
+@balancetop.error
+async def balancetop_error(ctx, error):
+    if isinstance(error, commands.CommandError):
+        await ctx.send("That's not a valid argument!")
