@@ -71,8 +71,8 @@ def find_user(ctx, user_attr):
     if not_mention_user_attr.isdigit() and len(not_mention_user_attr) == 18:
         user = bot.get_user(int(not_mention_user_attr))
 
-    # checks if user_attr is a name with discriminator
-    elif user_attr[-5] == "#" and user_attr[-4:].isdigit():
+    # checks if user_attr is a name with discriminator (tag)
+    elif "#" in user_attr:
         for member in ctx.guild.members:
             if str(member) == user_attr:
                 user = member
