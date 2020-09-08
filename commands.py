@@ -92,7 +92,7 @@ async def balance_(ctx, user=None):
     open_account(user)
     bank_data = get_bank_data()
 
-    user_balance = bank_data[str(user.id)]["balance"]
+    user_balance = bank_data[user.id]["balance"]
 
     embed = discord.Embed(
         title=f"{user.name}'s Beddit balance",
@@ -111,7 +111,7 @@ async def gibcash(ctx):
     open_account(user)
     bank_data = get_bank_data()
 
-    bank_data[str(user.id)]["balance"] += 1000
+    bank_data[user.id]["balance"] += 1000
 
     store_bank_data(bank_data)
 
@@ -126,7 +126,7 @@ async def daily(ctx):
     open_account(user)
     bank_data = get_bank_data()
 
-    bank_data[str(user.id)]["balance"] += 100
+    bank_data[user.id]["balance"] += 100
 
     store_bank_data(bank_data)
 
@@ -141,15 +141,14 @@ async def transfer(ctx, *, args):
     args_list = args.split()
 
     amount = args_list[-1]
-    receiver = " ".join(args_list[:-1])
+    receiver_attr = " ".join(args_list[:-1])
 
     sender = ctx.author
-    sender_id = str(sender.id)
 
     open_account(sender)
     bank_data = get_bank_data()
 
-    if bank_data[sender_id]["active_bets"] > 0:
+    if bank_data[sender.id]["active_bets"] > 0:
         await ctx.send("You can't transfer money while you have active bets!")
 
         return
@@ -165,7 +164,7 @@ async def transfer(ctx, *, args):
 
         return
 
-    receiver = find_user(ctx, receiver)
+    receiver = find_user(ctx, receiver_attr)
     if not receiver:
         await ctx.send("This user wasn't found!")
 
@@ -176,20 +175,18 @@ async def transfer(ctx, *, args):
 
         return
 
-    receiver_id = str(receiver.id)
-
     open_account(sender)
     open_account(receiver)
 
     bank_data = get_bank_data()
 
-    if amount > bank_data[sender_id]["balance"]:
+    if amount > bank_data[sender.id]["balance"]:
         await ctx.send("You don't have enough money for this transfer!")
 
         return
 
-    bank_data[sender_id]["balance"] -= amount
-    bank_data[receiver_id]["balance"] += int(
+    bank_data[sender.id]["balance"] -= amount
+    bank_data[receiver.id]["balance"] += int(
         amount - TRANSFER_TAX_RATE * amount
     )
 
@@ -213,7 +210,7 @@ async def gamble(ctx, amount):
     open_account(user)
     bank_data = get_bank_data()
 
-    if bank_data[str(user.id)]["balance"] < amount:
+    if bank_data[user.id]["balance"] < amount:
         await ctx.send(
             "You do not have enough money to gamble that much! "
             "YOU ARE POOR LOL!!!"
@@ -224,13 +221,13 @@ async def gamble(ctx, amount):
     outcome = random.randint(0, 1)
 
     if outcome == 0:
-        bank_data[str(user.id)]["balance"] += amount
+        bank_data[user.id]["balance"] += amount
 
         store_bank_data(bank_data)
 
         await ctx.send("Yay! You doubled your gamble amount!")
     else:
-        bank_data[str(user.id)]["balance"] -= amount
+        bank_data[user.id]["balance"] -= amount
 
         store_bank_data(bank_data)
 
@@ -264,17 +261,17 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
         return
 
-    if bank_data[str(user.id)]["balance"] < amount:
+    if bank_data[user.id]["balance"] < amount:
         await ctx.send("You do not have enough chips to bet this much!")
 
         return
 
-    if bank_data[str(user.id)]["active_bets"] >= 3:
+    if bank_data[user.id]["active_bets"] >= 3:
         await ctx.send("You already have 3 bets running!")
 
         return
 
-    bank_data[str(user.id)]["active_bets"] += 1
+    bank_data[user.id]["active_bets"] += 1
 
     store_bank_data(bank_data)
 
@@ -324,7 +321,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
     )
 
     # removes bet amount from bank balance
-    bank_data[str(user.id)]["balance"] -= amount
+    bank_data[user.id]["balance"] -= amount
 
     store_bank_data(bank_data)
 
@@ -502,8 +499,8 @@ async def bet(ctx, link, amount, time, predicted_ups):
             f"{'bedcoins' if abs(winnings) != 1 else 'bedcoin'}!"
         )
 
-    bank_data[str(user.id)]["active_bets"] -= 1
-    bank_data[str(user.id)]["balance"] += winnings
+    bank_data[user.id]["active_bets"] -= 1
+    bank_data[user.id]["balance"] += winnings
 
     store_bank_data(bank_data)
 
@@ -522,7 +519,7 @@ async def bets(ctx, user=None):
     open_account(user)
     bank_data = get_bank_data()
 
-    user_active_bets = bank_data[str(user.id)]["active_bets"]
+    user_active_bets = bank_data[user.id]["active_bets"]
 
     await ctx.send(
         f"{'You' if user == ctx.author else f'**{str(user)}**'} currently "
@@ -542,7 +539,7 @@ async def balancetop(ctx, n=5):
     for user_id in bank_data:
         balance = bank_data[user_id]["balance"]
 
-        user = bot.get_user(int(user_id))
+        user = bot.get_user(user_id)
 
         collection[user] = balance
 

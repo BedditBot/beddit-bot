@@ -26,7 +26,12 @@ def clear_active_bets():
 
 def get_bank_data():
     with open("bank.json", "r") as file:
-        bank_data = json.load(file)
+        file_bank_data = json.load(file)
+
+    bank_data = {}
+
+    for user_id in file_bank_data:
+        bank_data[int(user_id)] = file_bank_data[user_id]
 
     return bank_data
 
@@ -38,18 +43,23 @@ def store_bank_data(bank_data):
         if balance < 0:
             bank_data[user_id]["balance"] = 0
 
+    file_bank_data = {}
+
+    for user_id in bank_data:
+        file_bank_data[str(user_id)] = bank_data[user_id]
+
     with open("bank.json", "w") as file:
-        json.dump(bank_data, file, indent=4)
+        json.dump(file_bank_data, file, indent=4)
 
 
 # opens an account if the user does not have one already
 def open_account(user):
     bank_data = get_bank_data()
 
-    if str(user.id) in bank_data:
+    if user.id in bank_data:
         return
 
-    bank_data[str(user.id)] = {
+    bank_data[user.id] = {
         "balance": 100,
         "active_bets": 0
     }
