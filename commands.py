@@ -577,6 +577,8 @@ async def accuracy_(ctx, user_attr=None):
 
 @bot.command(aliases=["baltop"])
 async def balancetop(ctx, n=5):
+    guild = ctx.guild
+
     bank_data = get_bank_data()
 
     # leaderboard is just sorted collection
@@ -584,16 +586,16 @@ async def balancetop(ctx, n=5):
     leaderboard = {}
 
     for user in bank_data:
-        balance = bank_data[user]["balance"]
+        if guild.get_member(user.id):
+            balance = bank_data[user]["balance"]
 
-        if ctx.guild.get_member(user_id) is not None:
-            collection[user] = balance  
+            collection[user] = balance
 
     for user in sorted(collection, key=collection.get, reverse=True):
         leaderboard[user] = collection[user]
 
     embed = discord.Embed(
-        title="Richest people on Beddit:",
+        title=f"Richest people on {str(guild)}:",
         description="Not on the list? Go bet on some posts!",
         color=0x96d35f
     )
