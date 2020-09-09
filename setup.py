@@ -126,14 +126,14 @@ def handle_files():
             pass
     except FileNotFoundError:
         with open("bank.json", "w") as file:
-            file.write("{\n}")
+            file.write("{}")
 
     try:
         with open("prefixes.json", "r"):
             pass
     except FileNotFoundError:
         with open("prefixes.json", "w") as file:
-            file.write("{\n}")
+            file.write("{}")
 
 
 logging_setup()

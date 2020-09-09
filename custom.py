@@ -5,26 +5,26 @@ import config
 bot = config.bot
 
 
-# for custom server-specific prefixes
-def get_prefix(bot_arg, message):
-    del bot_arg
-
-    with open("prefixes.json", "r") as file:
-        prefixes = json.load(file)
-
-    return prefixes[str(message.guild.id)]
-
-
 def get_prefixes():
     with open("prefixes.json", "r") as file:
-        prefixes = json.load(file)
+        file_prefixes = json.load(file)
+
+    prefixes = {}
+
+    for guild_id in file_prefixes:
+        prefixes[int(guild_id)] = file_prefixes[guild_id]
 
     return prefixes
 
 
 def store_prefixes(prefixes):
+    file_prefixes = {}
+
+    for guild_id in prefixes:
+        file_prefixes[str(guild_id)] = prefixes[guild_id]
+
     with open("prefixes.json", "w") as file:
-        json.dump(prefixes, file, indent=4)
+        json.dump(file_prefixes, file, indent=4)
 
 
 # bank format: {
@@ -53,22 +53,22 @@ def get_bank_data():
     bank_data = {}
 
     for user_id in file_bank_data:
-        bank_data[bot.get_user(int(user_id))] = file_bank_data[user_id]
+        bank_data[int(user_id)] = file_bank_data[user_id]
 
     return bank_data
 
 
 def store_bank_data(bank_data):
-    for user in bank_data:
-        balance = bank_data[user]["balance"]
+    for user_id in bank_data:
+        balance = bank_data[user_id]["balance"]
 
         if balance < 0:
-            bank_data[user]["balance"] = 0
+            bank_data[user_id]["balance"] = 0
 
     file_bank_data = {}
 
-    for user in bank_data:
-        file_bank_data[str(user.id)] = bank_data[user]
+    for user_id in bank_data:
+        file_bank_data[str(user_id)] = bank_data[user_id]
 
     with open("bank.json", "w") as file:
         json.dump(file_bank_data, file, indent=4)
@@ -78,10 +78,10 @@ def store_bank_data(bank_data):
 def open_account(user):
     bank_data = get_bank_data()
 
-    if user in bank_data:
+    if user.id in bank_data:
         return
 
-    bank_data[user] = {
+    bank_data[user.id] = {
         "balance": 100,
         "active_bets": 0,
         "total_bets": 0,

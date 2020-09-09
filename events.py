@@ -1,6 +1,5 @@
-import json
-
 import config
+from custom import get_prefixes, store_prefixes
 
 bot = config.bot
 
@@ -14,22 +13,18 @@ async def on_ready():
 
 @bot.event
 async def on_guild_join(guild):
-    with open("prefixes.json", "r") as file:
-        prefixes = json.load(file)
+    prefixes = get_prefixes()
 
     # sets default prefix ($)
-    prefixes[str(guild.id)] = "$"
+    prefixes[guild.id] = "$"
 
-    with open("prefixes.json", "w") as file:
-        json.dump(prefixes, file, indent=4)
+    store_prefixes(prefixes)
 
 
 @bot.event
 async def on_guild_remove(guild):
-    with open("prefixes.json", "r") as file:
-        prefixes = json.load(file)
+    prefixes = get_prefixes()
 
-    prefixes.pop(str(guild.id))
+    prefixes.pop(guild.id)
 
-    with open("prefixes.json", "w") as file:
-        json.dump(prefixes, file, indent=4)
+    store_prefixes(prefixes)
