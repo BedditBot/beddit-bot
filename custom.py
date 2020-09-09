@@ -18,8 +18,8 @@ bot = config.bot
 def clear_active_bets():
     bank_data = get_bank_data()
 
-    for user_id in bank_data:
-        bank_data[user_id]["active_bets"] = 0
+    for user in bank_data:
+        bank_data[user]["active_bets"] = 0
 
     store_bank_data(bank_data)
 
@@ -31,33 +31,22 @@ def get_bank_data():
     bank_data = {}
 
     for user_id in file_bank_data:
-        bank_data[int(user_id)] = file_bank_data[user_id]
-
-    for user_id in bank_data:
-        if bank_data[user_id]["mean_accuracy"] is None:
-            bank_data[user_id]["mean_accuracy"] = float("nan")
+        bank_data[bot.get_user(int(user_id))] = file_bank_data[user_id]
 
     return bank_data
 
 
 def store_bank_data(bank_data):
-    for user_id in bank_data:
-        balance = bank_data[user_id]["balance"]
+    for user in bank_data:
+        balance = bank_data[user]["balance"]
 
         if balance < 0:
-            bank_data[user_id]["balance"] = 0
-
-    for user_id in bank_data:
-        mean_accuracy = bank_data[user_id]["mean_accuracy"]
-
-        # checks if mean_accuracy is NaN
-        if mean_accuracy != mean_accuracy:
-            bank_data[user_id]["mean_accuracy"] = None
+            bank_data[user]["balance"] = 0
 
     file_bank_data = {}
 
-    for user_id in bank_data:
-        file_bank_data[str(user_id)] = bank_data[user_id]
+    for user in bank_data:
+        file_bank_data[str(user.id)] = bank_data[user]
 
     with open("bank.json", "w") as file:
         json.dump(file_bank_data, file, indent=4)
@@ -67,10 +56,10 @@ def store_bank_data(bank_data):
 def open_account(user):
     bank_data = get_bank_data()
 
-    if user.id in bank_data:
+    if user in bank_data:
         return
 
-    bank_data[user.id] = {
+    bank_data[user] = {
         "balance": 100,
         "active_bets": 0,
         "total_bets": 0,
@@ -133,10 +122,11 @@ def find_user(ctx, user_attr):
 
 # ini_amount is the initial amount of accuracies used for ini_mean
 def calculate_mean_accuracy(ini_mean, ini_amount, new_accuracy):
-    # checks if ini_mean is NaN
-    if ini_mean != ini_mean:
+    if not ini_mean:
         ini_mean = 0
 
-    fin_mean = (ini_mean * ini_amount + new_accuracy) / (ini_amount + 1)
+    fin_amount = ini_amount + 1
+
+    fin_mean = (ini_mean * ini_amount + new_accuracy) / fin_amount
 
     return round(fin_mean, 3)
