@@ -589,7 +589,8 @@ async def balancetop(ctx, n=5):
 
         user = bot.get_user(user_id)
 
-        collection[user] = balance
+        if ctx.guild.get_member(user_id) is not None:
+            collection[user] = balance  
 
     for user in sorted(collection, key=collection.get, reverse=True):
         leaderboard[user] = collection[user]
