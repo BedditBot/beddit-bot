@@ -560,19 +560,18 @@ async def accuracy_(ctx, user_attr=None):
     bank_data = get_bank_data()
 
     mean_accuracy = bank_data[user.id]["mean_accuracy"]
-    mean_accuracy_in_pct = mean_accuracy * 100
+
+    if mean_accuracy:
+        mean_accuracy_in_pct = mean_accuracy * 100
+    else:
+        mean_accuracy_in_pct = None
 
     total_bets = bank_data[user.id]["total_bets"]
 
-    is_nan = False
-
-    if mean_accuracy != mean_accuracy:
-        is_nan = True
-
     await ctx.send(
         f"**{str(user)}**'s mean accuracy: "
-        f"{f'{mean_accuracy_in_pct}%' if not is_nan else 'NaN'} "
-        f"(Total bets: {total_bets})"
+        f"{f'NaN' if not mean_accuracy_in_pct else f'{mean_accuracy_in_pct}%'}"
+        f" (Total bets: {total_bets})"
     )
 
 

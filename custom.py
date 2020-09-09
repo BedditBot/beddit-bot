@@ -33,10 +33,6 @@ def get_bank_data():
     for user_id in file_bank_data:
         bank_data[int(user_id)] = file_bank_data[user_id]
 
-    for user_id in bank_data:
-        if bank_data[user_id]["mean_accuracy"] is None:
-            bank_data[user_id]["mean_accuracy"] = float("nan")
-
     return bank_data
 
 
@@ -49,10 +45,6 @@ def store_bank_data(bank_data):
 
     for user_id in bank_data:
         mean_accuracy = bank_data[user_id]["mean_accuracy"]
-
-        # checks if mean_accuracy is NaN
-        if mean_accuracy != mean_accuracy:
-            bank_data[user_id]["mean_accuracy"] = None
 
     file_bank_data = {}
 
@@ -133,10 +125,11 @@ def find_user(ctx, user_attr):
 
 # ini_amount is the initial amount of accuracies used for ini_mean
 def calculate_mean_accuracy(ini_mean, ini_amount, new_accuracy):
-    # checks if ini_mean is NaN
-    if ini_mean != ini_mean:
+    if not ini_mean:
         ini_mean = 0
 
-    fin_mean = (ini_mean * ini_amount + new_accuracy) / (ini_amount + 1)
+    fin_amount = ini_amount + 1
+
+    fin_mean = (ini_mean * ini_amount + new_accuracy) / fin_amount
 
     return round(fin_mean, 3)
