@@ -27,6 +27,19 @@ async def ping(ctx):
 
     await ctx.send(f"Pong! ({latency}ms)")
 
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def changeprefix(ctx, prefix):
+    with open('prefixes.json', 'r') as f:
+        prefixes = json.load(f)
+    
+    prefixes[str(ctx.guild.id)] = prefix
+
+    with open('prefixes.json', 'w') as f:
+        json.dump(prefixes, f, indent=4)
+
+    await ctx.send(f"You changed the prefix to {prefix}!")
+
 
 # closes the bot (only bot owners)
 @bot.command(hidden=True)
@@ -672,3 +685,8 @@ async def bet_error(ctx, error):
 async def gibcash_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send("You have to wait a few seconds!")
+
+@changeprefix.error
+async def changeprefix_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("You must specify a prefix!")
