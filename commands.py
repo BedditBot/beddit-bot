@@ -6,8 +6,8 @@ import discord
 import random
 from discord.ext import commands
 import datetime
-import custom
 
+import custom
 from custom import *
 
 bot = custom.bot
@@ -27,12 +27,13 @@ async def ping(ctx):
 
     await ctx.send(f"Pong! ({latency}ms)")
 
+
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def changeprefix(ctx, prefix):
     with open('prefixes.json', 'r') as f:
         prefixes = json.load(f)
-    
+
     prefixes[str(ctx.guild.id)] = prefix
 
     with open('prefixes.json', 'w') as f:
@@ -264,20 +265,24 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
     initial_post = reddit_client.submission(url=link)
 
-    age = int(datetime.datetime.utcnow().timestamp()) - int(initial_post.created_utc)
+    age = int(
+        datetime.datetime.utcnow().timestamp() - initial_post.created_utc
+    )
+
     if age > 86400:
         await ctx.send("You can't bet on posts older than 24 hours!")
+
         return
 
     if initial_post.archived or initial_post.locked:
-        await ctx.send("You can't bet on archived posts!")
+        await ctx.send("You can't bet on archived or locked posts!")
 
         return
-#    elif not ctx.channel.is_nsfw() and initial_post.nsfw:
-#        await ctx.send("You can't bet on nsfw posts here!")
-#    
-#        return
 
+    # if not ctx.channel.is_nsfw() and initial_post.nsfw:
+    #     await ctx.send("You can't bet on NSFW posts here!")
+    #
+    #     return
 
     initial_ups = initial_post.ups
 
@@ -685,6 +690,7 @@ async def bet_error(ctx, error):
 async def gibcash_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send("You have to wait a few seconds!")
+
 
 @changeprefix.error
 async def changeprefix_error(ctx, error):
