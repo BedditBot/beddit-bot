@@ -1,5 +1,9 @@
 import json
 
+import config
+
+bot = config.bot
+
 
 # for custom server-specific prefixes
 def get_prefix(bot_arg, message):
@@ -9,6 +13,18 @@ def get_prefix(bot_arg, message):
         prefixes = json.load(file)
 
     return prefixes[str(message.guild.id)]
+
+
+def get_prefixes():
+    with open("prefixes.json", "r") as file:
+        prefixes = json.load(file)
+
+    return prefixes
+
+
+def store_prefixes(prefixes):
+    with open("prefixes.json", "w") as file:
+        json.dump(prefixes, file, indent=4)
 
 
 # bank format: {
