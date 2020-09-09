@@ -1,5 +1,6 @@
 # Discord
 D_TOKEN = None
+D_PREFIX = None
 
 bot = None
 
@@ -8,7 +9,7 @@ def set_bot():
     from discord.ext import commands
 
     global bot
-    bot = commands.Bot(command_prefix="&")
+    bot = commands.Bot(command_prefix="&")  # "&" is the default prefix
 
 
 set_bot()
