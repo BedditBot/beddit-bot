@@ -6,10 +6,11 @@ import discord
 import random
 from discord.ext import commands
 import datetime
+import custom
 
 from custom import *
 
-bot = config.bot
+bot = custom.bot
 
 reddit_client = praw.Reddit(
     client_id=config.R_CLIENT_ID,

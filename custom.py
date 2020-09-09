@@ -1,9 +1,16 @@
 import json
 
 import config
+import discord
+from discord.ext import commands
 
-bot = config.bot
+#stuff for custom server prefixes
+def get_prefix(bot, message):
+    with open('prefixes.json', 'r') as f:
+        prefixes = json.load(f)
+    return prefixes[str(message.guild.id)]
 
+bot = commands.Bot(command_prefix = get_prefix)
 
 # bank format: {
 #   "[user_id]": {
