@@ -6,8 +6,7 @@ import discord
 import random
 from discord.ext import commands
 
-import config
-from custom import open_account, get_bank_data, store_bank_data, find_user
+from custom import *
 
 bot = config.bot
 
@@ -79,11 +78,11 @@ async def repeat(ctx, *, phrase):
 
 
 @bot.command(aliases=["balance", "bal"])
-async def balance_(ctx, user=None):
-    if not user:
+async def balance_(ctx, user_attr=None):
+    if not user_attr:
         user = ctx.author
     else:
-        user = find_user(ctx, user)
+        user = find_user(ctx, user_attr)
         if not user:
             await ctx.send("This user wasn't found!")
 
@@ -98,7 +97,7 @@ async def balance_(ctx, user=None):
         title=f"{user.name}'s Beddit balance",
         color=0x96d35f
     )
-    embed.add_field(name="Your bedcoins:", value=user_balance)
+    embed.add_field(name="Bedcoins:", value=user_balance)
     embed.set_thumbnail(url="https://i.imgur.com/vrtyPEN.png")
 
     await ctx.send(embed=embed)
@@ -424,54 +423,57 @@ async def bet(ctx, link, amount, time, predicted_ups):
     final_post = reddit_client.submission(url=link)
     final_ups = final_post.ups
 
-    # in %
+    # pct means percent
     try:
         if predicted_ups > final_ups:
-            accuracy = abs(final_ups / predicted_ups) * 100
+            accuracy = abs(final_ups / predicted_ups)
         else:
-            accuracy = abs(predicted_ups / final_ups) * 100
+            accuracy = abs(predicted_ups / final_ups)
     except ZeroDivisionError:
         await ctx.send("Oops! Something went wrong.")
 
         return
 
+    accuracy = round(accuracy, 3)
+    accuracy_in_pct = accuracy * 100
+
     # determines the accuracy multiplier based on
     # how accurate the prediction was
-    if accuracy < 70:
-        if accuracy < 30:
-            if accuracy < 10:
-                if accuracy <= 0:
+    if accuracy_in_pct < 70:
+        if accuracy_in_pct < 30:
+            if accuracy_in_pct < 10:
+                if accuracy_in_pct <= 0:
                     accuracy_multiplier = -2
 
                     await ctx.send("Hmm... Strange times.")
                 else:
                     accuracy_multiplier = -2
             else:
-                if accuracy < 20:
+                if accuracy_in_pct < 20:
                     accuracy_multiplier = -1.5
                 else:
                     accuracy_multiplier = -1
         else:
-            if accuracy < 50:
-                if accuracy < 40:
+            if accuracy_in_pct < 50:
+                if accuracy_in_pct < 40:
                     accuracy_multiplier = -0.5
                 else:
                     accuracy_multiplier = -0.3
             else:
-                if accuracy < 60:
+                if accuracy_in_pct < 60:
                     accuracy_multiplier = 0
                 else:
                     accuracy_multiplier = 0.5
     else:
-        if accuracy < 90:
-            if accuracy < 80:
+        if accuracy_in_pct < 90:
+            if accuracy_in_pct < 80:
                 accuracy_multiplier = 1.5
             else:
                 accuracy_multiplier = 3
         else:
-            if accuracy < 95:
+            if accuracy_in_pct < 95:
                 accuracy_multiplier = 4.5
-            elif accuracy < 100:
+            elif accuracy_in_pct < 100:
                 accuracy_multiplier = 6.5
             else:
                 accuracy_multiplier = 10
@@ -482,8 +484,6 @@ async def bet(ctx, link, amount, time, predicted_ups):
     multiplier = prediction_multiplier + time_multiplier + accuracy_multiplier
     winnings = int(amount * multiplier)
 
-    accuracy = int(accuracy)
-
     open_account(user)
     bank_data = get_bank_data()
 
@@ -491,37 +491,43 @@ async def bet(ctx, link, amount, time, predicted_ups):
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and it has "
             f"{final_ups} upvotes right now! The difference is "
-            f"{ups_difference} upvotes! You were {accuracy}% accurate and "
-            f"won {winnings} {'bedcoins' if winnings != 1 else 'bedcoin'}!"
+            f"{ups_difference} upvotes! You were {accuracy_in_pct}% accurate "
+            f"and won {winnings} {'bedcoins' if winnings != 1 else 'bedcoin'}!"
         )
     elif winnings == 0:
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and it has "
             f"{final_ups} upvotes right now! The difference is "
-            f"{ups_difference} upvotes! You were {accuracy}% accurate but "
-            f"won nothing."
+            f"{ups_difference} upvotes! You were {accuracy_in_pct}% accurate "
+            f"but won nothing."
         )
     else:
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and it has "
             f"{final_ups} upvotes right now! The difference is "
-            f"{ups_difference} upvotes! You were {accuracy}% accurate and "
-            f"lost {abs(winnings)} "
+            f"{ups_difference} upvotes! You were {accuracy_in_pct}% accurate "
+            f"and lost {abs(winnings)} "
             f"{'bedcoins' if abs(winnings) != 1 else 'bedcoin'}!"
         )
 
-    bank_data[user.id]["active_bets"] -= 1
     bank_data[user.id]["balance"] += winnings
+    bank_data[user.id]["active_bets"] -= 1
+    bank_data[user.id]["mean_accuracy"] = calculate_mean_accuracy(
+        bank_data[user.id]["mean_accuracy"],
+        bank_data[user.id]["total_bets"],
+        accuracy
+    )
+    bank_data[user.id]["total_bets"] += 1
 
     store_bank_data(bank_data)
 
 
 @bot.command()
-async def bets(ctx, user=None):
-    if not user:
+async def bets(ctx, user_attr=None):
+    if not user_attr:
         user = ctx.author
     else:
-        user = find_user(ctx, user)
+        user = find_user(ctx, user_attr)
         if not user:
             await ctx.send("This user wasn't found!")
 
@@ -530,12 +536,43 @@ async def bets(ctx, user=None):
     open_account(user)
     bank_data = get_bank_data()
 
-    user_active_bets = bank_data[user.id]["active_bets"]
+    active_bets = bank_data[user.id]["active_bets"]
 
     await ctx.send(
         f"{'You' if user == ctx.author else f'**{str(user)}**'} currently "
-        f"{'have' if user == ctx.author else 'has'} {user_active_bets} "
-        f"{'bets' if user_active_bets != 1 else 'bet'} running!"
+        f"{'have' if user == ctx.author else 'has'} {active_bets} "
+        f"{'bets' if active_bets != 1 else 'bet'} running!"
+    )
+
+
+@bot.command(aliases=["accuracy"])
+async def accuracy_(ctx, user_attr=None):
+    if not user_attr:
+        user = ctx.author
+    else:
+        user = find_user(ctx, user_attr)
+        if not user:
+            await ctx.send("This user wasn't found!")
+
+            return
+
+    open_account(user)
+    bank_data = get_bank_data()
+
+    mean_accuracy = bank_data[user.id]["mean_accuracy"]
+    mean_accuracy_in_pct = mean_accuracy * 100
+
+    total_bets = bank_data[user.id]["total_bets"]
+
+    is_nan = False
+
+    if mean_accuracy != mean_accuracy:
+        is_nan = True
+
+    await ctx.send(
+        f"**{str(user)}**'s mean accuracy: "
+        f"{f'{mean_accuracy_in_pct}%' if not is_nan else 'NaN'} "
+        f"(Total bets: {total_bets})"
     )
 
 
