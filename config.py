@@ -1,5 +1,3 @@
-from custom import get_prefix
-
 # Discord
 D_TOKEN = None
 

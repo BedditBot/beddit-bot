@@ -629,7 +629,7 @@ async def balancetop(ctx, n=5):
     await ctx.send(embed=embed)
 
 
-@bot.command()
+@bot.command(aliases=["prefix"])
 @commands.has_permissions(administrator=True)
 async def changeprefix(ctx, prefix):
     with open('prefixes.json', 'r') as file:
