@@ -1,5 +1,4 @@
 import os
-
 import logging
 
 import config
@@ -70,9 +69,6 @@ def handle_constants():
             token_input = input(
                 "Input Discord bot token: "
             ).strip(" ")
-            prefix_input = input(
-                "Input Discord bot command prefix: "
-            )
             client_id_input = input(
                 "Input Reddit client ID: "
             ).strip(" ")
@@ -93,7 +89,6 @@ def handle_constants():
             with open(".env", "w") as file:
                 file.write(
                     f"D_TOKEN={token_input}\n"
-                    f"D_PREFIX=\"{prefix_input}\"\n"
                     f"R_CLIENT_ID={client_id_input}\n"
                     f"R_CLIENT_SECRET={client_secret_input}\n"
                     f"R_USERNAME={username_input}\n"
@@ -102,7 +97,6 @@ def handle_constants():
                 )
 
             del token_input
-            del prefix_input
             del client_id_input
             del client_secret_input
             del username_input
@@ -119,10 +113,6 @@ def handle_constants():
         load_dotenv()
 
     config.D_TOKEN = os.environ["D_TOKEN"]
-    try:
-        config.D_PREFIX = os.environ["D_PREFIX"]
-    except KeyError:
-        pass
     config.R_CLIENT_ID = os.environ["R_CLIENT_ID"]
     config.R_CLIENT_SECRET = os.environ["R_CLIENT_SECRET"]
     config.R_USERNAME = os.environ["R_USERNAME"]
@@ -138,13 +128,13 @@ def handle_files():
         with open("bank.json", "w") as file:
             file.write("{\n}")
 
-def handle_files2():
     try:
         with open("prefixes.json", "r"):
             pass
     except FileNotFoundError:
         with open("prefixes.json", "w") as file:
             file.write("{\n}")
+
 
 logging_setup()
 
@@ -154,5 +144,3 @@ check_environment()
 handle_constants()
 
 handle_files()
-
-handle_files2()

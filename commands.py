@@ -7,10 +7,10 @@ import random
 from discord.ext import commands
 import datetime
 
-import custom
+import config
 from custom import *
 
-bot = custom.bot
+bot = config.bot
 
 reddit_client = praw.Reddit(
     client_id=config.R_CLIENT_ID,
@@ -26,20 +26,6 @@ async def ping(ctx):
     latency = round(bot.latency, 3) * 1000  # in ms to 3 d.p.
 
     await ctx.send(f"Pong! ({latency}ms)")
-
-
-@bot.command()
-@commands.has_permissions(administrator=True)
-async def changeprefix(ctx, prefix):
-    with open('prefixes.json', 'r') as f:
-        prefixes = json.load(f)
-
-    prefixes[str(ctx.guild.id)] = prefix
-
-    with open('prefixes.json', 'w') as f:
-        json.dump(prefixes, f, indent=4)
-
-    await ctx.send(f"You changed the prefix to {prefix}!")
 
 
 # closes the bot (only bot owners)
@@ -641,6 +627,20 @@ async def balancetop(ctx, n=5):
             i += 1
 
     await ctx.send(embed=embed)
+
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def changeprefix(ctx, prefix):
+    with open('prefixes.json', 'r') as file:
+        prefixes = json.load(file)
+
+    prefixes[str(ctx.guild.id)] = prefix
+
+    with open('prefixes.json', 'w') as file:
+        json.dump(prefixes, file, indent=4)
+
+    await ctx.send(f"You have changed the prefix to '{prefix}'!")
 
 
 # error handling for commands

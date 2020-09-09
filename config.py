@@ -1,6 +1,20 @@
+from custom import get_prefix
+
 # Discord
 D_TOKEN = None
-D_PREFIX = None
+
+bot = None
+
+
+def set_bot():
+    from discord.ext import commands
+    from custom import get_prefix
+
+    global bot
+    bot = commands.Bot(command_prefix=get_prefix)
+
+
+set_bot()
 
 # Reddit
 R_CLIENT_ID = None

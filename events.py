@@ -1,8 +1,8 @@
-import config
-import custom
 import json
 
-bot = custom.bot
+import config
+
+bot = config.bot
 
 
 @bot.event
@@ -14,20 +14,22 @@ async def on_ready():
 
 @bot.event
 async def on_guild_join(guild):
-    with open('prefixes.json', 'r') as f:
-        prefixes = json.load(f)
-    
-    prefixes[str(guild.id)] = '$'
+    with open("prefixes.json", "r") as file:
+        prefixes = json.load(file)
 
-    with open('prefixes.json', 'w') as f:
-        json.dump(prefixes, f, indent=4)
+    # sets default prefix ($)
+    prefixes[str(guild.id)] = "$"
+
+    with open("prefixes.json", "w") as file:
+        json.dump(prefixes, file, indent=4)
+
 
 @bot.event
 async def on_guild_remove(guild):
-    with open('prefixes.json', 'r') as f:
-        prefixes = json.load(f)    
-    
+    with open("prefixes.json", "r") as file:
+        prefixes = json.load(file)
+
     prefixes.pop(str(guild.id))
-    
-    with open('prefixes.json', 'w') as f:
-        json.dump(prefixes, f, indent=4)    
+
+    with open("prefixes.json", "w") as file:
+        json.dump(prefixes, file, indent=4)

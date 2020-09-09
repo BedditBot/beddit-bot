@@ -4,15 +4,12 @@
 import setup
 import events
 import commands
-import custom
 
 from custom import clear_active_bets
 
-bot = custom.bot
-
 
 def run_bot():
-    from config import D_TOKEN
+    from config import bot, D_TOKEN
 
     bot.run(D_TOKEN)
 
