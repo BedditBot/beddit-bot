@@ -5,6 +5,7 @@ import asyncio
 import discord
 import random
 from discord.ext import commands
+import datetime
 
 from custom import *
 
@@ -249,14 +250,20 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
     initial_post = reddit_client.submission(url=link)
 
+    age = int(datetime.datetime.utcnow().timestamp()) - int(initial_post.created_utc)
+    if age > 86400:
+        await ctx.send("You can't bet on posts older than 24 hours!")
+        return
+
     if initial_post.archived or initial_post.locked:
-        await ctx.send("You can't bet on that post!")
+        await ctx.send("You can't bet on archived posts!")
 
         return
-    elif not ctx.channel.is_nsfw() and initial_post.nsfw:
-        await ctx.send("You can't bet on that post here!")
+#    elif not ctx.channel.is_nsfw() and initial_post.nsfw:
+#        await ctx.send("You can't bet on nsfw posts here!")
+#    
+#        return
 
-        return
 
     initial_ups = initial_post.ups
 
