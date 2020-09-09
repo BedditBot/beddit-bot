@@ -91,7 +91,7 @@ async def balance_(ctx, user_attr=None):
     open_account(user)
     bank_data = get_bank_data()
 
-    user_balance = bank_data[user.id]["balance"]
+    user_balance = bank_data[user]["balance"]
 
     embed = discord.Embed(
         title=f"{user.name}'s Beddit balance",
@@ -111,7 +111,7 @@ async def gibcash(ctx):
     open_account(user)
     bank_data = get_bank_data()
 
-    bank_data[user.id]["balance"] += 1000
+    bank_data[user]["balance"] += 1000
 
     store_bank_data(bank_data)
 
@@ -126,7 +126,7 @@ async def daily(ctx):
     open_account(user)
     bank_data = get_bank_data()
 
-    bank_data[user.id]["balance"] += 100
+    bank_data[user]["balance"] += 100
 
     store_bank_data(bank_data)
 
@@ -148,7 +148,7 @@ async def transfer(ctx, *, args):
     open_account(sender)
     bank_data = get_bank_data()
 
-    if bank_data[sender.id]["active_bets"] > 0:
+    if bank_data[sender]["active_bets"] > 0:
         await ctx.send("You can't transfer money while you have active bets!")
 
         return
@@ -180,13 +180,13 @@ async def transfer(ctx, *, args):
 
     bank_data = get_bank_data()
 
-    if amount > bank_data[sender.id]["balance"]:
+    if amount > bank_data[sender]["balance"]:
         await ctx.send("You don't have enough money for this transfer!")
 
         return
 
-    bank_data[sender.id]["balance"] -= amount
-    bank_data[receiver.id]["balance"] += int(
+    bank_data[sender]["balance"] -= amount
+    bank_data[receiver]["balance"] += int(
         amount - TRANSFER_TAX_RATE * amount
     )
 
@@ -210,7 +210,7 @@ async def gamble(ctx, amount):
     open_account(user)
     bank_data = get_bank_data()
 
-    if bank_data[user.id]["balance"] < amount:
+    if bank_data[user]["balance"] < amount:
         await ctx.send(
             "You do not have enough money to gamble that much! "
             "YOU ARE POOR LOL!!!"
@@ -221,13 +221,13 @@ async def gamble(ctx, amount):
     outcome = random.randint(0, 1)
 
     if outcome == 0:
-        bank_data[user.id]["balance"] += amount
+        bank_data[user]["balance"] += amount
 
         store_bank_data(bank_data)
 
         await ctx.send("Yay! You doubled your gamble amount!")
     else:
-        bank_data[user.id]["balance"] -= amount
+        bank_data[user]["balance"] -= amount
 
         store_bank_data(bank_data)
 
@@ -271,17 +271,17 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
         return
 
-    if bank_data[user.id]["balance"] < amount:
+    if bank_data[user]["balance"] < amount:
         await ctx.send("You do not have enough chips to bet this much!")
 
         return
 
-    if bank_data[user.id]["active_bets"] >= 3:
+    if bank_data[user]["active_bets"] >= 3:
         await ctx.send("You already have 3 bets running!")
 
         return
 
-    bank_data[user.id]["active_bets"] += 1
+    bank_data[user]["active_bets"] += 1
 
     store_bank_data(bank_data)
 
@@ -331,7 +331,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
     )
 
     # removes bet amount from bank balance
-    bank_data[user.id]["balance"] -= amount
+    bank_data[user]["balance"] -= amount
 
     store_bank_data(bank_data)
 
@@ -510,14 +510,14 @@ async def bet(ctx, link, amount, time, predicted_ups):
             f"{'bedcoins' if abs(winnings) != 1 else 'bedcoin'}!"
         )
 
-    bank_data[user.id]["balance"] += winnings
-    bank_data[user.id]["active_bets"] -= 1
-    bank_data[user.id]["mean_accuracy"] = calculate_mean_accuracy(
-        bank_data[user.id]["mean_accuracy"],
-        bank_data[user.id]["total_bets"],
+    bank_data[user]["balance"] += winnings
+    bank_data[user]["active_bets"] -= 1
+    bank_data[user]["mean_accuracy"] = calculate_mean_accuracy(
+        bank_data[user]["mean_accuracy"],
+        bank_data[user]["total_bets"],
         accuracy
     )
-    bank_data[user.id]["total_bets"] += 1
+    bank_data[user]["total_bets"] += 1
 
     store_bank_data(bank_data)
 
@@ -536,7 +536,7 @@ async def bets(ctx, user_attr=None):
     open_account(user)
     bank_data = get_bank_data()
 
-    active_bets = bank_data[user.id]["active_bets"]
+    active_bets = bank_data[user]["active_bets"]
 
     await ctx.send(
         f"{'You' if user == ctx.author else f'**{str(user)}**'} currently "
@@ -559,14 +559,14 @@ async def accuracy_(ctx, user_attr=None):
     open_account(user)
     bank_data = get_bank_data()
 
-    mean_accuracy = bank_data[user.id]["mean_accuracy"]
+    mean_accuracy = bank_data[user]["mean_accuracy"]
 
     if mean_accuracy:
         mean_accuracy_in_pct = mean_accuracy * 100
     else:
         mean_accuracy_in_pct = None
 
-    total_bets = bank_data[user.id]["total_bets"]
+    total_bets = bank_data[user]["total_bets"]
 
     await ctx.send(
         f"**{str(user)}**'s mean accuracy: "
@@ -583,10 +583,8 @@ async def balancetop(ctx, n=5):
     collection = {}
     leaderboard = {}
 
-    for user_id in bank_data:
-        balance = bank_data[user_id]["balance"]
-
-        user = bot.get_user(user_id)
+    for user in bank_data:
+        balance = bank_data[user]["balance"]
 
         collection[user] = balance
 
