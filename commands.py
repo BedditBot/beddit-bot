@@ -66,11 +66,7 @@ async def downvotes(ctx, link):
 
 @bot.command()
 async def repeat(ctx, *, phrase):
-    if '@everyone' in phrase:
-        await ctx.send("Haha fuck you with your everyone ping nonsense!")
-    elif '@here' in phrase:
-        await ctx.send("There's nobody here I guess...")
-    elif 'discord.gg' in phrase:
+    if 'discord.gg' in phrase:
         await ctx.send("Trying to advertise another server, huh?")
     elif '@' in phrase:
         await ctx.send("No pinging!")
@@ -95,11 +91,11 @@ async def balance_(ctx, user_attr=None):
     user_balance = bank_data[user.id]["balance"]
 
     embed = discord.Embed(
-        title=f"{user.name}'s Beddit balance",
-        color=0x96d35f
+        title=f"{str(user)}'s Balance",
+        color=0xffd700  # gold
     )
     embed.add_field(name="Gold:", value=user_balance)
-    embed.set_thumbnail(url="https://i.imgur.com/vrtyPEN.png")
+    embed.set_thumbnail(url="https://i.imgur.com/9aAfwcJ.png")
 
     await ctx.send(embed=embed)
 
