@@ -203,16 +203,27 @@ async def transfer(ctx, *, args):
 async def gamble(ctx, amount):
     user = ctx.author
 
-    if not amount.isdigit():
+    if not amount.rstrip("%").isdigit():
         await ctx.send("You can't gamble that!")
 
         return
-    amount = int(amount)
 
     open_account(user)
     bank_data = get_bank_data()
 
-    if bank_data[user.id]["balance"] < amount:
+    balance = bank_data[user.id]["balance"]
+
+    if "%" in amount:
+        if not 0 < float(amount.rstrip("%")) <= 100:
+            await ctx.send("You can't gamble that!")
+
+            return
+
+        amount = int(float(amount.rstrip("%")) * balance / 100)
+    else:
+        amount = int(amount)
+
+    if balance < amount:
         await ctx.send(
             "You do not have enough Gold to gamble that much! "
             "YOU ARE POOR LOL!!!"
@@ -241,14 +252,27 @@ async def gamble(ctx, amount):
 async def bet(ctx, link, amount, time, predicted_ups):
     user = ctx.author
 
-    if not amount.isdigit() or not predicted_ups.isdigit():
-        await ctx.send("You didn't input valid data!")
+    if not amount.rstrip("%").isdigit() or not predicted_ups.isdigit():
+        await ctx.send("You can't bet that!")
 
         return
 
-    amount = int(amount)
-    predicted_ups = int(predicted_ups)
+    open_account(user)
+    bank_data = get_bank_data()
 
+    if "%" in amount:
+        if not 0 < float(amount.rstrip("%")) <= 100:
+            await ctx.send("You can't bet that!")
+
+            return
+
+        amount = int(
+            float(amount.rstrip("%")) * bank_data[user.id]["balance"] / 100
+        )
+    else:
+        amount = int(amount)
+
+    predicted_ups = int(predicted_ups)
     initial_post = reddit_client.submission(url=link)
 
     age = int(
@@ -271,9 +295,6 @@ async def bet(ctx, link, amount, time, predicted_ups):
     #     return
 
     initial_ups = initial_post.ups
-
-    open_account(user)
-    bank_data = get_bank_data()
 
     if predicted_ups <= initial_ups:
         await ctx.send(
@@ -491,34 +512,26 @@ async def bet(ctx, link, amount, time, predicted_ups):
                 accuracy_multiplier = 3
 
     # final calculations to determine payout
-    ups_difference = final_ups - initial_ups
-
     multiplier = prediction_multiplier + time_multiplier + accuracy_multiplier
     winnings = int(amount * multiplier)
-
-    open_account(user)
-    bank_data = get_bank_data()
 
     if winnings > 0:
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and it has "
-            f"{final_ups} upvotes right now! The difference is "
-            f"{ups_difference} upvotes! You were {accuracy_in_pct}% accurate "
-            f"and won {winnings} Gold!"
+            f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
+            f"accurate and won {winnings} Gold!"
         )
     elif winnings == 0:
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and it has "
-            f"{final_ups} upvotes right now! The difference is "
-            f"{ups_difference} upvotes! You were {accuracy_in_pct}% accurate "
-            f"but won nothing."
+            f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
+            f"accurate but won nothing."
         )
     else:
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and it has "
-            f"{final_ups} upvotes right now! The difference is "
-            f"{ups_difference} upvotes! You were {accuracy_in_pct}% accurate "
-            f"and lost {abs(winnings)} Gold!"
+            f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
+            f"accurate and lost {abs(winnings)} Gold!"
         )
 
     bank_data[user.id]["balance"] += winnings
@@ -576,6 +589,8 @@ async def stats(ctx, user_attr=None):
     embed = discord.Embed(
         title=f"{str(user)}'s Stats",
         color=0x4000ff  # ultramarine
+    ).set_thumbnail(
+        url="https://imgur.com/UpdCchY.png"
     ).add_field(
         name="Mean accuracy:",
         value=f"{mean_accuracy * 100}%" if mean_accuracy else "NaN",
