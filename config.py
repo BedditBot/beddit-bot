@@ -1,5 +1,3 @@
-import json
-
 # Discord
 D_TOKEN = None
 
@@ -11,10 +9,11 @@ def set_bot():
 
     # for custom server-specific prefixes
     def get_prefix(_, message):
-        with open("prefixes.json", "r") as file:
-            file_prefixes_data = json.load(file)
+        from custom import get_prefixes_data
 
-        return file_prefixes_data[str(message.guild.id)]
+        prefixes_data = get_prefixes_data()
+
+        return prefixes_data[message.guild.id]
 
     global bot
     bot = commands.Bot(command_prefix=get_prefix)
