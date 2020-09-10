@@ -93,9 +93,14 @@ async def balance_(ctx, user_attr=None):
     embed = discord.Embed(
         title=f"{str(user)}'s Balance",
         color=0xffd700  # gold
+    ).add_field(
+        name="Gold:",
+        value=user_balance
+    ).set_thumbnail(
+        url="https://i.imgur.com/9aAfwcJ.png"
+    ).set_footer(
+        text="Thumbnail by MsSpyte"
     )
-    embed.add_field(name="Gold:", value=user_balance)
-    embed.set_thumbnail(url="https://i.imgur.com/9aAfwcJ.png")
 
     await ctx.send(embed=embed)
 
@@ -682,7 +687,8 @@ async def accuracytop(ctx, size=7):
 
         embed.add_field(
             name=f"{determine_medal(i)} {str(user)}",
-            value=f"{leaderboard[user_id] * 100}%",
+            value=f"{leaderboard[user_id] * 100}% "
+                  f"(Total bets: {bank_data[user_id]['total_bets']})",
             inline=False
         )
 
