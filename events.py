@@ -1,11 +1,14 @@
-import config
-from custom import get_prefixes, store_prefixes
+from custom import *
 
 bot = config.bot
 
 
 @bot.event
 async def on_ready():
+    ensure_prefixes_integrity()
+
+    clear_active_bets()
+
     latency = round(bot.latency, 3) * 1000  # in ms to 3 d.p.
 
     print(f"Connected successfully as {bot.user} ({latency}ms).")
@@ -13,18 +16,9 @@ async def on_ready():
 
 @bot.event
 async def on_guild_join(guild):
-    prefixes = get_prefixes()
-
-    # sets default prefix ($)
-    prefixes[guild.id] = "$"
-
-    store_prefixes(prefixes)
+    set_guild_prefixes(guild)
 
 
 @bot.event
 async def on_guild_remove(guild):
-    prefixes = get_prefixes()
-
-    prefixes.pop(guild.id)
-
-    store_prefixes(prefixes)
+    remove_guild_prefixes(guild)

@@ -27,6 +27,36 @@ def store_prefixes(prefixes):
         json.dump(file_prefixes, file, indent=4)
 
 
+def set_guild_prefixes(guild, prefixes=None):
+    prefixes_data = get_prefixes()
+
+    if not prefixes:
+        # sets default prefix ($)
+        prefixes_data[guild.id] = "$"
+    else:
+        prefixes_data[guild.id] = prefixes
+
+    store_prefixes(prefixes_data)
+
+
+def remove_guild_prefixes(guild):
+    prefixes = get_prefixes()
+
+    prefixes.pop(guild.id)
+
+    store_prefixes(prefixes)
+
+
+def ensure_prefixes_integrity():
+    guilds = bot.guilds
+
+    prefixes = get_prefixes()
+
+    for guild in guilds:
+        if guild.id not in prefixes:
+            set_guild_prefixes(guild)
+
+
 # bank format: {
 #   "[user_id]": {
 #       "balance": [number of bedcoins],

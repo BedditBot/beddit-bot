@@ -632,16 +632,16 @@ async def balancetop(ctx, n=5):
 
 @bot.command(aliases=["prefix"])
 @commands.has_permissions(administrator=True)
-async def changeprefix(ctx, prefix):
-    with open('prefixes.json', 'r') as file:
-        prefixes = json.load(file)
+async def changeprefix(ctx, *, args):
+    prefixes = list(set(args.split()))
 
-    prefixes[str(ctx.guild.id)] = prefix
+    set_guild_prefixes(ctx.guild, prefixes)
 
-    with open('prefixes.json', 'w') as file:
-        json.dump(prefixes, file, indent=4)
-
-    await ctx.send(f"You have changed the prefix to '{prefix}'!")
+    await ctx.send(
+        f"You have changed the server "
+        f"{'prefix' if len(prefixes) == 1 else 'prefixes'} to "
+        f"'{', '.join(prefixes)}'!"
+    )
 
 
 # error handling for commands

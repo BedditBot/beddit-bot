@@ -5,15 +5,24 @@ import setup
 import events
 import commands
 
-from custom import clear_active_bets
-
 
 def run_bot():
     from config import bot, D_TOKEN
+
+    def modify_allowed_mentions():
+        import discord
+
+        nonlocal bot
+
+        bot.allowed_mentions = discord.AllowedMentions(
+            everyone=False,
+            users=True,
+            roles=False
+        )
+
+    modify_allowed_mentions()
 
     bot.run(D_TOKEN)
 
 
 run_bot()
-
-clear_active_bets()
