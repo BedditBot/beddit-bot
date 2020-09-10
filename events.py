@@ -5,7 +5,7 @@ bot = config.bot
 
 @bot.event
 async def on_ready():
-    ensure_prefixes_integrity()
+    await ensure_prefixes_integrity()
 
     clear_active_bets()
 

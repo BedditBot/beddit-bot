@@ -11,21 +11,10 @@ def set_bot():
 
     # for custom server-specific prefixes
     def get_prefix(_, message):
-        guild = message.guild
-
         with open("prefixes.json", "r") as file:
-            file_prefixes = json.load(file)
+            file_prefixes_data = json.load(file)
 
-        prefixes = {}
-
-        for guild_id in file_prefixes:
-            prefixes[int(guild_id)] = file_prefixes[guild_id]
-
-        if guild.id not in prefixes:
-            # sets default prefix ($)
-            prefixes[guild.id] = "$"
-
-        return prefixes[guild.id]
+        return file_prefixes_data[str(message.guild.id)]
 
     global bot
     bot = commands.Bot(command_prefix=get_prefix)

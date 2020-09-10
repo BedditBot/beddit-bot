@@ -98,7 +98,7 @@ async def balance_(ctx, user_attr=None):
         title=f"{user.name}'s Beddit balance",
         color=0x96d35f
     )
-    embed.add_field(name="Bedcoins:", value=user_balance)
+    embed.add_field(name="Gold:", value=user_balance)
     embed.set_thumbnail(url="https://i.imgur.com/vrtyPEN.png")
 
     await ctx.send(embed=embed)
@@ -116,7 +116,7 @@ async def gibcash(ctx):
 
     store_bank_data(bank_data)
 
-    await ctx.send("I deposited 1000 bedcoins to your bank account!")
+    await ctx.send("I deposited 1000 Gold to your bank account!")
 
 
 @bot.command(pass_context=True)
@@ -131,7 +131,7 @@ async def daily(ctx):
 
     store_bank_data(bank_data)
 
-    await ctx.send("You collected your daily reward of 100 bedcoins!")
+    await ctx.send("You collected your daily reward of 100 Gold!")
 
 
 TRANSFER_TAX_RATE = 0.05  # 5%
@@ -150,18 +150,18 @@ async def transfer(ctx, *, args):
     bank_data = get_bank_data()
 
     if bank_data[sender.id]["active_bets"] > 0:
-        await ctx.send("You can't transfer money while you have active bets!")
+        await ctx.send("You can't transfer Gold while you have active bets!")
 
         return
 
     if not amount.isdigit():
-        await ctx.send("That is not a valid money amount!")
+        await ctx.send("That is not a valid Gold amount!")
 
         return
     amount = int(amount)
 
     if amount == 0:
-        await ctx.send("That is not a valid money amount!")
+        await ctx.send("That is not a valid Gold amount!")
 
         return
 
@@ -172,7 +172,7 @@ async def transfer(ctx, *, args):
         return
 
     if sender == receiver:
-        await ctx.send("You can't transfer money to yourself!")
+        await ctx.send("You can't transfer Gold to yourself!")
 
         return
 
@@ -182,7 +182,7 @@ async def transfer(ctx, *, args):
     bank_data = get_bank_data()
 
     if amount > bank_data[sender.id]["balance"]:
-        await ctx.send("You don't have enough money for this transfer!")
+        await ctx.send("You don't have enough Gold for this transfer!")
 
         return
 
@@ -213,7 +213,7 @@ async def gamble(ctx, amount):
 
     if bank_data[user.id]["balance"] < amount:
         await ctx.send(
-            "You do not have enough money to gamble that much! "
+            "You do not have enough Gold to gamble that much! "
             "YOU ARE POOR LOL!!!"
         )
 
@@ -337,7 +337,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
     # sends initial message with specifics
     await ctx.send(
         f"This post has {initial_ups} upvotes right now! You bet {amount} "
-        f"{'bedcoins' if amount != 1 else 'bedcoin'} on it reaching "
+        f"Gold on it reaching "
         f"{predicted_ups} upvotes in {time}!"
     )
 
@@ -503,7 +503,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
             f"Hello {user.mention}! It's {time} later, and it has "
             f"{final_ups} upvotes right now! The difference is "
             f"{ups_difference} upvotes! You were {accuracy_in_pct}% accurate "
-            f"and won {winnings} {'bedcoins' if winnings != 1 else 'bedcoin'}!"
+            f"and won {winnings} Gold!"
         )
     elif winnings == 0:
         await ctx.send(
@@ -517,8 +517,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
             f"Hello {user.mention}! It's {time} later, and it has "
             f"{final_ups} upvotes right now! The difference is "
             f"{ups_difference} upvotes! You were {accuracy_in_pct}% accurate "
-            f"and lost {abs(winnings)} "
-            f"{'bedcoins' if abs(winnings) != 1 else 'bedcoin'}!"
+            f"and lost {abs(winnings)} Gold!"
         )
 
     bank_data[user.id]["balance"] += winnings
@@ -632,7 +631,7 @@ async def balancetop(ctx, n=5):
 
 @bot.command(aliases=["prefix", "prefixes"])
 async def prefix_(ctx):
-    prefixes_data = get_prefixes()
+    prefixes_data = get_prefixes_data()
 
     prefixes = prefixes_data[ctx.guild.id]
 

@@ -5,70 +5,71 @@ import config
 bot = config.bot
 
 
-def get_prefixes():
+def get_prefixes_data():
     with open("prefixes.json", "r") as file:
-        file_prefixes = json.load(file)
+        file_prefixes_data = json.load(file)
 
-    prefixes = {}
+    prefixes_data = {}
 
-    for guild_id in file_prefixes:
-        prefixes[int(guild_id)] = file_prefixes[guild_id]
+    for guild_id in file_prefixes_data:
+        prefixes_data[int(guild_id)] = file_prefixes_data[guild_id]
 
-    return prefixes
+    return prefixes_data
 
 
-def store_prefixes(prefixes):
-    file_prefixes = {}
+def store_prefixes_data(prefixes_data):
+    file_prefixes_data = {}
 
-    for guild_id in prefixes:
-        file_prefixes[str(guild_id)] = prefixes[guild_id]
+    for guild_id in prefixes_data:
+        file_prefixes_data[str(guild_id)] = prefixes_data[guild_id]
 
     with open("prefixes.json", "w") as file:
-        json.dump(file_prefixes, file, indent=4)
+        json.dump(file_prefixes_data, file, indent=4)
 
 
 async def set_guild_prefixes(guild, prefixes=None):
-    prefixes_data = get_prefixes()
+    prefixes_data = get_prefixes_data()
 
     if not prefixes:
         # sets default prefix ($)
-        prefixes_data[guild.id] = "$"
-    else:
-        prefixes_data[guild.id] = prefixes
+        prefixes = "$"
+
+    prefixes_data[guild.id] = prefixes
 
     bot_user = bot.user
     bot_member = guild.get_member(bot.user.id)
 
-    await bot_member.edit(
-        nick=f"{bot_user.name} | {prefixes[0]}"
-    )
+    await bot_member.edit(nick=f"{bot_user.name} | {prefixes[0]}")
 
-    store_prefixes(prefixes_data)
+    store_prefixes_data(prefixes_data)
 
 
 def remove_guild_prefixes(guild):
-    prefixes = get_prefixes()
+    prefixes_data = get_prefixes_data()
 
-    prefixes.pop(guild.id)
+    prefixes_data.pop(guild.id)
 
-    store_prefixes(prefixes)
+    store_prefixes_data(prefixes_data)
 
 
-def ensure_prefixes_integrity():
+async def ensure_prefixes_integrity():
     guilds = bot.guilds
 
-    prefixes = get_prefixes()
+    prefixes_data = get_prefixes_data()
 
     for guild in guilds:
-        if guild.id not in prefixes:
-            set_guild_prefixes(guild)
+        if guild.id not in prefixes_data:
+            await set_guild_prefixes(guild)
 
 
-# bank format: {
-#   "[user_id]": {
-#       "balance": [number of bedcoins],
-#       "active_bets": [number of active bets]
-#   },
+# bank format:
+# {
+#     "[user_id]": {
+#         "balance": [number of Gold],
+#         "active_bets": [number of active bets],
+#         "total_bets": [number of total bets],
+#         "mean_accuracy": [mean accuracy]
+#     },
 #   ...
 # }
 
