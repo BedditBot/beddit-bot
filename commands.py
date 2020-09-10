@@ -353,56 +353,56 @@ async def bet(ctx, link, amount, time, predicted_ups):
         if predicted_ups_increase < 5000:
             if predicted_ups_increase < 1000:
                 if predicted_ups_increase < 500:
-                    prediction_multiplier = -1
+                    prediction_multiplier = -5
                 else:
-                    prediction_multiplier = -0.5
+                    prediction_multiplier = -2
             else:
                 if predicted_ups_increase < 2500:
-                    prediction_multiplier = 0
+                    prediction_multiplier = -0.5
                 else:
-                    prediction_multiplier = 0.5
+                    prediction_multiplier = 0
         else:
             if predicted_ups_increase < 20000:
                 if predicted_ups_increase < 10000:
-                    prediction_multiplier = 1
+                    prediction_multiplier = 0.2
                 else:
-                    prediction_multiplier = 1.5
+                    prediction_multiplier = 0.3
             else:
                 if predicted_ups_increase < 30000:
-                    prediction_multiplier = 2
+                    prediction_multiplier = 0.4
                 else:
-                    prediction_multiplier = 2.5
+                    prediction_multiplier = 0.5
     else:
         if predicted_ups_increase < 80000:
             if predicted_ups_increase < 60000:
                 if predicted_ups_increase < 50000:
-                    prediction_multiplier = 3
+                    prediction_multiplier = 0.6
                 else:
-                    prediction_multiplier = 3.5
+                    prediction_multiplier = 0.8
             else:
                 if predicted_ups_increase < 70000:
-                    prediction_multiplier = 4
+                    prediction_multiplier = 1
                 else:
-                    prediction_multiplier = 5
+                    prediction_multiplier = 1.8
         else:
             if predicted_ups_increase < 90000:
-                prediction_multiplier = 6
+                prediction_multiplier = 2.5
             else:
-                prediction_multiplier = 7.5
+                prediction_multiplier = 3
 
     # calculates the time multiplier based on the chosen time
     if time_in_seconds < 21600:
         if time_in_seconds < 7200:
             if time_in_seconds < 300:
                 if time_in_seconds < 60:
-                    time_multiplier = -10
-                else:
                     time_multiplier = -4
+                else:
+                    time_multiplier = -3
             else:
                 if time_in_seconds < 3600:
-                    time_multiplier = -2
+                    time_multiplier = -1.5
                 else:
-                    time_multiplier = 0
+                    time_multiplier = -0.5
         else:
             if time_in_seconds < 14400:
                 if time_in_seconds < 10800:
@@ -413,20 +413,20 @@ async def bet(ctx, link, amount, time, predicted_ups):
                 if time_in_seconds < 18000:
                     time_multiplier = 1.5
                 else:
-                    time_multiplier = 2.3
+                    time_multiplier = 2
     else:
         if time_in_seconds < 28800:
             if time_in_seconds < 25200:
-                time_multiplier = 3.8
+                time_multiplier = 2.6
             else:
-                time_multiplier = 4.5
+                time_multiplier = 3
         else:
             if time_in_seconds < 32400:
                 time_multiplier = 6
             elif time_in_seconds < 36000:
-                time_multiplier = 7.5
+                time_multiplier = 3.5
             else:
-                time_multiplier = 10
+                time_multiplier = 4
 
     # waits until the chosen time runs out, then calculates the accuracy
     await asyncio.sleep(time_in_seconds)
@@ -454,14 +454,14 @@ async def bet(ctx, link, amount, time, predicted_ups):
         if accuracy_in_pct < 30:
             if accuracy_in_pct < 10:
                 if accuracy_in_pct <= 0:
-                    accuracy_multiplier = -2
+                    accuracy_multiplier = -6
 
                     await ctx.send("Hmm... Strange times.")
                 else:
-                    accuracy_multiplier = -2
+                    accuracy_multiplier = -4
             else:
                 if accuracy_in_pct < 20:
-                    accuracy_multiplier = -1.5
+                    accuracy_multiplier = -2
                 else:
                     accuracy_multiplier = -1
         else:
@@ -474,20 +474,20 @@ async def bet(ctx, link, amount, time, predicted_ups):
                 if accuracy_in_pct < 60:
                     accuracy_multiplier = 0
                 else:
-                    accuracy_multiplier = 0.5
+                    accuracy_multiplier = 0.3
     else:
         if accuracy_in_pct < 90:
             if accuracy_in_pct < 80:
-                accuracy_multiplier = 1.5
+                accuracy_multiplier = 0.6
             else:
-                accuracy_multiplier = 3
+                accuracy_multiplier = 1.2
         else:
             if accuracy_in_pct < 95:
-                accuracy_multiplier = 4.5
+                accuracy_multiplier = 1.5
             elif accuracy_in_pct < 100:
-                accuracy_multiplier = 6.5
+                accuracy_multiplier = 2
             else:
-                accuracy_multiplier = 10
+                accuracy_multiplier = 3
 
     # final calculations to determine payout
     ups_difference = final_ups - initial_ups
