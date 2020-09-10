@@ -640,7 +640,6 @@ async def balancetop(ctx, size=7):
         title=f"Gold Balance Leaderboard of {str(guild)}",
         description="*Not on this leaderboard? Go bet on some posts!*",
         color=0xffd700  # gold
-
     )
 
     # for medal emotes
