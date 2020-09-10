@@ -586,7 +586,7 @@ async def accuracy_(ctx, user_attr=None):
 
 
 @bot.command(aliases=["baltop"])
-async def balancetop(ctx, n=5):
+async def balancetop(ctx, size=7):
     guild = ctx.guild
 
     bank_data = get_bank_data()
@@ -605,10 +605,22 @@ async def balancetop(ctx, n=5):
         leaderboard[user_id] = collection[user_id]
 
     embed = discord.Embed(
-        title=f"Richest people on {str(guild)}:",
-        description="Not on the list? Go bet on some posts!",
-        color=0x96d35f
+        title=f"Gold Balance Leaderboard of {str(guild)}",
+        description="*Not on this leaderboard? Go bet on some posts!*",
+        color=0xffd700  # gold
+
     )
+
+    # for medal emotes
+    def determine_medal(ranking):
+        if ranking == 1:
+            return ":first_place:"
+        elif ranking == 2:
+            return ":second_place:"
+        elif ranking == 3:
+            return ":third_place:"
+        else:
+            return ":medal:"
 
     i = 1
 
@@ -616,12 +628,69 @@ async def balancetop(ctx, n=5):
         user = bot.get_user(user_id)
 
         embed.add_field(
-            name=f"{i}. {str(user)}",
-            value=f"{leaderboard[user_id]}",
+            name=f"{determine_medal(i)} {str(user)}",
+            value=f"{leaderboard[user_id]} Gold",
             inline=False
         )
 
-        if i == n:
+        if i == size:
+            break
+        else:
+            i += 1
+
+    await ctx.send(embed=embed)
+
+
+@bot.command(aliases=["acctop"])
+async def accuracytop(ctx, size=7):
+    guild = ctx.guild
+
+    bank_data = get_bank_data()
+
+    # leaderboard is just sorted collection
+    collection = {}
+    leaderboard = {}
+
+    for user_id in bank_data:
+        if guild.get_member(user_id):
+            mean_accuracy = bank_data[user_id]["mean_accuracy"]
+
+            if mean_accuracy:
+                collection[user_id] = mean_accuracy
+
+    for user_id in sorted(collection, key=collection.get, reverse=True):
+        leaderboard[user_id] = collection[user_id]
+
+    embed = discord.Embed(
+        title=f"Mean Accuracy Leaderboard of {str(guild)}",
+        description="*Not on this leaderboard? Go bet on some posts!*",
+        color=0x4000ff  # ultramarine
+
+    )
+
+    # for medal emotes
+    def determine_medal(ranking):
+        if ranking == 1:
+            return ":first_place:"
+        elif ranking == 2:
+            return ":second_place:"
+        elif ranking == 3:
+            return ":third_place:"
+        else:
+            return ":medal:"
+
+    i = 1
+
+    for user_id in leaderboard:
+        user = bot.get_user(user_id)
+
+        embed.add_field(
+            name=f"{determine_medal(i)} {str(user)}",
+            value=f"{leaderboard[user_id] * 100}%",
+            inline=False
+        )
+
+        if i == size:
             break
         else:
             i += 1
