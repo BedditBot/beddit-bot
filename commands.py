@@ -556,8 +556,8 @@ async def bets(ctx, user_attr=None):
     )
 
 
-@bot.command(aliases=["accuracy"])
-async def accuracy_(ctx, user_attr=None):
+@bot.command(aliases=["statistics"])
+async def stats(ctx, user_attr=None):
     if not user_attr:
         user = ctx.author
     else:
@@ -571,19 +571,35 @@ async def accuracy_(ctx, user_attr=None):
     bank_data = get_bank_data()
 
     mean_accuracy = bank_data[user.id]["mean_accuracy"]
-
-    if mean_accuracy:
-        mean_accuracy_in_pct = mean_accuracy * 100
-    else:
-        mean_accuracy_in_pct = None
-
     total_bets = bank_data[user.id]["total_bets"]
 
-    await ctx.send(
-        f"**{str(user)}**'s mean accuracy: "
-        f"{f'NaN' if not mean_accuracy_in_pct else f'{mean_accuracy_in_pct}%'}"
-        f" (Total bets: {total_bets})"
+    embed = discord.Embed(
+        title=f"{str(user)}'s Stats",
+        color=0x4000ff  # ultramarine
+    ).add_field(
+        name="Mean accuracy:",
+        value=f"{mean_accuracy * 100}%" if mean_accuracy else "NaN",
+        inline=False
+    ).add_field(
+        name="Total bets:",
+        value=total_bets,
+        inline=False
     )
+
+    await ctx.send(embed=embed)
+
+    # if mean_accuracy:
+    #     mean_accuracy_in_pct = mean_accuracy * 100
+    # else:
+    #     mean_accuracy_in_pct = None
+    #
+    # total_bets = bank_data[user.id]["total_bets"]
+    #
+    # await ctx.send(
+    #     f"**{str(user)}**'s mean accuracy: "
+    #     f"{f'NaN' if not mean_accuracy_in_pct else f'{mean_accuracy_in_pct}%'}"
+    #     f" (Total bets: {total_bets})"
+    # )
 
 
 @bot.command(aliases=["baltop"])
