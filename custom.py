@@ -27,7 +27,7 @@ def store_prefixes(prefixes):
         json.dump(file_prefixes, file, indent=4)
 
 
-def set_guild_prefixes(guild, prefixes=None):
+async def set_guild_prefixes(guild, prefixes=None):
     prefixes_data = get_prefixes()
 
     if not prefixes:
@@ -35,6 +35,13 @@ def set_guild_prefixes(guild, prefixes=None):
         prefixes_data[guild.id] = "$"
     else:
         prefixes_data[guild.id] = prefixes
+
+    bot_user = bot.user
+    bot_member = guild.get_member(bot.user.id)
+
+    await bot_member.edit(
+        nick=f"{bot_user.name} | {prefixes[0]}"
+    )
 
     store_prefixes(prefixes_data)
 

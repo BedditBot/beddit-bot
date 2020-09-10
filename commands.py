@@ -659,7 +659,7 @@ async def changeprefix(ctx, *, args):
 
                         return
 
-    set_guild_prefixes(ctx.guild, prefixes)
+    await set_guild_prefixes(ctx.guild, prefixes)
 
     await ctx.send(
         f"You have changed the server "

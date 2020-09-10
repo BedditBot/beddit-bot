@@ -16,7 +16,7 @@ async def on_ready():
 
 @bot.event
 async def on_guild_join(guild):
-    set_guild_prefixes(guild)
+    await set_guild_prefixes(guild)
 
 
 @bot.event
