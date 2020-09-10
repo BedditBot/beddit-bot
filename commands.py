@@ -630,10 +630,29 @@ async def balancetop(ctx, n=5):
     await ctx.send(embed=embed)
 
 
-@bot.command(aliases=["prefix"])
+@bot.command(
+    aliases=["prefix",
+             "setprefix",
+             "changeprefixes",
+             "prefixes",
+             "setprefixes"
+             ]
+)
 @commands.has_permissions(administrator=True)
 async def changeprefix(ctx, *, args):
-    prefixes = list(set(args.split()))
+    prefixes = list(dict.fromkeys(args.split()))  # removes duplicates
+
+    if len(prefixes) > 1:
+        for prefix in prefixes:
+            for char in prefix:
+                for other_prefix in [
+                    other_prefix for other_prefix in prefixes
+                    if other_prefix != prefix
+                ]:
+                    if char in other_prefix:
+                        await ctx.send("You can't use that as prefix!")
+
+                        return
 
     set_guild_prefixes(ctx.guild, prefixes)
 
