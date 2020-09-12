@@ -98,8 +98,6 @@ async def balance_(ctx, user_attr=None):
         value=user_balance
     ).set_thumbnail(
         url="https://i.imgur.com/9aAfwcJ.png"
-    ).set_footer(
-        text="Thumbnail by MsSpyte"
     )
 
     await ctx.send(embed=embed)
