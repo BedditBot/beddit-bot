@@ -1,3 +1,8 @@
+# database
+DATABASE_URL = None
+
+connection = None
+
 # Discord
 D_TOKEN = None
 
@@ -9,11 +14,11 @@ def set_bot():
 
     # for custom server-specific prefixes
     def get_prefix(_, message):
-        from custom import get_prefixes_data
+        from custom import get_guild_prefixes
 
-        prefixes_data = get_prefixes_data()
+        guild_prefixes = get_guild_prefixes(message.guild)
 
-        return prefixes_data[message.guild.id]
+        return guild_prefixes["prefixes"]
 
     global bot
     bot = commands.Bot(command_prefix=get_prefix)

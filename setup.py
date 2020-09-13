@@ -1,5 +1,6 @@
 import os
 import logging
+import psycopg2
 
 import config
 
@@ -118,22 +119,25 @@ def handle_constants():
     config.R_USERNAME = os.environ["R_USERNAME"]
     config.R_PASSWORD = os.environ["R_PASSWORD"]
     config.R_USER_AGENT = os.environ["R_USER_AGENT"]
+    if on_heroku:
+        config.DATABASE_URL = os.environ["DATABASE_URL"]
 
 
-def handle_files():
-    try:
-        with open("bank.json", "r"):
-            pass
-    except FileNotFoundError:
-        with open("bank.json", "w") as file:
-            file.write("{}")
-
-    try:
-        with open("prefixes.json", "r"):
-            pass
-    except FileNotFoundError:
-        with open("prefixes.json", "w") as file:
-            file.write("{}")
+def database_setup():
+    if on_heroku:
+        config.connection = psycopg2.connect(
+            config.DATABASE_URL,
+            sllmode="require"
+        )
+    else:
+        # manually input arguments
+        config.connection = psycopg2.connect(
+            user="postgres",
+            password="applesAm1RightChat?",
+            host="localhost",
+            port="5432",
+            database="beddit_bot"
+        )
 
 
 logging_setup()
@@ -143,4 +147,4 @@ check_environment()
 
 handle_constants()
 
-handle_files()
+database_setup()

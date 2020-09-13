@@ -33,6 +33,8 @@ async def cease(ctx):
     if not await bot.is_owner(ctx.author):
         return
 
+    disconnect_database()
+
     await ctx.send("Farewell...")
     print("Done.")
 
@@ -85,17 +87,16 @@ async def balance_(ctx, user_attr=None):
 
             return
 
-    open_account(user)
-    bank_data = get_bank_data()
+    user_account = get_user_account(user)
 
-    user_balance = bank_data[user.id]["balance"]
+    balance = user_account["balance"]
 
     embed = discord.Embed(
         title=f"{str(user)}'s Balance",
         color=0xffd700  # gold
     ).add_field(
         name="Gold:",
-        value=user_balance
+        value=balance
     ).set_thumbnail(
         url="https://i.imgur.com/9aAfwcJ.png"
     )
@@ -106,14 +107,11 @@ async def balance_(ctx, user_attr=None):
 @bot.command()
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def gibcash(ctx):
-    user = ctx.author
+    user_account = get_user_account(ctx.author)
 
-    open_account(user)
-    bank_data = get_bank_data()
+    user_account["balance"] += 1000
 
-    bank_data[user.id]["balance"] += 1000
-
-    store_bank_data(bank_data)
+    store_user_account(user_account)
 
     await ctx.send("I deposited 1000 Gold to your bank account!")
 
@@ -121,14 +119,11 @@ async def gibcash(ctx):
 @bot.command(pass_context=True)
 @commands.cooldown(1, 60 * 60 * 24, commands.BucketType.user)
 async def daily(ctx):
-    user = ctx.author
+    user_account = get_user_account(ctx.author)
 
-    open_account(user)
-    bank_data = get_bank_data()
+    user_account["balance"] += 100
 
-    bank_data[user.id]["balance"] += 100
-
-    store_bank_data(bank_data)
+    store_user_account(user_account)
 
     await ctx.send("You collected your daily reward of 100 Gold!")
 
@@ -145,10 +140,9 @@ async def transfer(ctx, *, args):
 
     sender = ctx.author
 
-    open_account(sender)
-    bank_data = get_bank_data()
+    sender_account = get_user_account(sender)
 
-    if bank_data[sender.id]["active_bets"] > 0:
+    if sender_account["active_bets"] > 0:
         await ctx.send("You can't transfer Gold while you have active bets!")
 
         return
@@ -175,22 +169,20 @@ async def transfer(ctx, *, args):
 
         return
 
-    open_account(sender)
-    open_account(receiver)
-
-    bank_data = get_bank_data()
-
-    if amount > bank_data[sender.id]["balance"]:
+    if amount > sender_account["balance"]:
         await ctx.send("You don't have enough Gold for this transfer!")
 
         return
 
-    bank_data[sender.id]["balance"] -= amount
-    bank_data[receiver.id]["balance"] += int(
+    receiver_account = get_user_account(receiver)
+
+    sender_account["balance"] -= amount
+    receiver_account["balance"] += int(
         amount - TRANSFER_TAX_RATE * amount
     )
 
-    store_bank_data(bank_data)
+    store_user_account(sender_account)
+    store_user_account(receiver_account)
 
     await ctx.send(
         f"Transfer successful! (Tax Rate: {int(TRANSFER_TAX_RATE * 100)}%)"
@@ -199,17 +191,14 @@ async def transfer(ctx, *, args):
 
 @bot.command()
 async def gamble(ctx, amount):
-    user = ctx.author
-
     if not amount.rstrip("%").isdigit():
         await ctx.send("You can't gamble that!")
 
         return
 
-    open_account(user)
-    bank_data = get_bank_data()
+    user_account = get_user_account(ctx.author)
 
-    balance = bank_data[user.id]["balance"]
+    balance = user_account["balance"]
 
     if "%" in amount:
         if not 0 < float(amount.rstrip("%")) <= 100:
@@ -232,15 +221,15 @@ async def gamble(ctx, amount):
     outcome = random.randint(0, 1)
 
     if outcome == 0:
-        bank_data[user.id]["balance"] += amount
+        user_account["balance"] += amount
 
-        store_bank_data(bank_data)
+        store_user_account(user_account)
 
         await ctx.send("Yay! You doubled your gamble amount!")
     else:
-        bank_data[user.id]["balance"] -= amount
+        user_account["balance"] -= amount
 
-        store_bank_data(bank_data)
+        store_user_account(user_account)
 
         await ctx.send("HAHA YOU LOST!!! YOU IDIOT!")
 
@@ -255,8 +244,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
         return
 
-    open_account(user)
-    bank_data = get_bank_data()
+    user_account = get_user_account(user)
 
     if "%" in amount:
         if not 0 < float(amount.rstrip("%")) <= 100:
@@ -265,7 +253,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
             return
 
         amount = int(
-            float(amount.rstrip("%")) * bank_data[user.id]["balance"] / 100
+            float(amount.rstrip("%")) * user_account["balance"] / 100
         )
     else:
         amount = int(amount)
@@ -302,19 +290,15 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
         return
 
-    if bank_data[user.id]["balance"] < amount:
+    if user_account["balance"] < amount:
         await ctx.send("You do not have enough chips to bet this much!")
 
         return
 
-    if bank_data[user.id]["active_bets"] >= 3:
+    if user_account["active_bets"] >= 3:
         await ctx.send("You already have 3 bets running!")
 
         return
-
-    bank_data[user.id]["active_bets"] += 1
-
-    store_bank_data(bank_data)
 
     # gets time unit, then removes it and converts time to seconds
     if "s" in time:
@@ -360,11 +344,6 @@ async def bet(ctx, link, amount, time, predicted_ups):
         f"Gold on it reaching "
         f"{predicted_ups} upvotes in {time}!"
     )
-
-    # removes bet amount from bank balance
-    bank_data[user.id]["balance"] -= amount
-
-    store_bank_data(bank_data)
 
     # calculates the prediction multiplier based on the predicted upvotes
     predicted_ups_increase = predicted_ups - initial_ups
@@ -447,6 +426,11 @@ async def bet(ctx, link, amount, time, predicted_ups):
                 time_multiplier = 3.5
             else:
                 time_multiplier = 4
+
+    user_account["active_bets"] += 1
+    user_account["balance"] -= amount
+
+    store_user_account(user_account)
 
     # waits until the chosen time runs out, then calculates the accuracy
     await asyncio.sleep(time_in_seconds)
@@ -532,16 +516,18 @@ async def bet(ctx, link, amount, time, predicted_ups):
             f"accurate and lost {abs(winnings)} Gold!"
         )
 
-    bank_data[user.id]["balance"] += winnings
-    bank_data[user.id]["active_bets"] -= 1
-    bank_data[user.id]["mean_accuracy"] = calculate_mean_accuracy(
-        bank_data[user.id]["mean_accuracy"],
-        bank_data[user.id]["total_bets"],
+    user_account = get_user_account(user)
+
+    user_account["balance"] += winnings
+    user_account["active_bets"] -= 1
+    user_account["mean_accuracy"] = calculate_mean_accuracy(
+        user_account["mean_accuracy"],
+        user_account["total_bets"],
         accuracy
     )
-    bank_data[user.id]["total_bets"] += 1
+    user_account["total_bets"] += 1
 
-    store_bank_data(bank_data)
+    store_user_account(user_account)
 
 
 @bot.command()
@@ -555,10 +541,9 @@ async def bets(ctx, user_attr=None):
 
             return
 
-    open_account(user)
-    bank_data = get_bank_data()
+    user_account = get_user_account(user)
 
-    active_bets = bank_data[user.id]["active_bets"]
+    active_bets = user_account["active_bets"]
 
     await ctx.send(
         f"{'You' if user == ctx.author else f'**{str(user)}**'} currently "
@@ -578,11 +563,10 @@ async def stats(ctx, user_attr=None):
 
             return
 
-    open_account(user)
-    bank_data = get_bank_data()
+    user_account = get_user_account(user)
 
-    mean_accuracy = bank_data[user.id]["mean_accuracy"]
-    total_bets = bank_data[user.id]["total_bets"]
+    mean_accuracy = user_account["mean_accuracy"]
+    total_bets = user_account["total_bets"]
 
     embed = discord.Embed(
         title=f"{str(user)}'s Stats",
@@ -601,35 +585,28 @@ async def stats(ctx, user_attr=None):
 
     await ctx.send(embed=embed)
 
-    # if mean_accuracy:
-    #     mean_accuracy_in_pct = mean_accuracy * 100
-    # else:
-    #     mean_accuracy_in_pct = None
-    #
-    # total_bets = bank_data[user.id]["total_bets"]
-    #
-    # await ctx.send(
-    #     f"**{str(user)}**'s mean accuracy: "
-    #     f"{f'NaN' if not mean_accuracy_in_pct else f'{mean_accuracy_in_pct}%'}"
-    #     f" (Total bets: {total_bets})"
-    # )
-
 
 @bot.command(aliases=["baltop"])
 async def balancetop(ctx, size=7):
     guild = ctx.guild
 
-    bank_data = get_bank_data()
+    user_accounts = []
+
+    for member in guild.members:
+        user = bot.get_user(member.id)
+
+        user_account = get_user_account(user)
+
+        user_accounts.append(user_account)
 
     # leaderboard is just sorted collection
     collection = {}
     leaderboard = {}
 
-    for user_id in bank_data:
-        if guild.get_member(user_id):
-            balance = bank_data[user_id]["balance"]
+    for user_account in user_accounts:
+        balance = user_account["balance"]
 
-            collection[user_id] = balance
+        collection[user_account["user_id"]] = balance
 
     for user_id in sorted(collection, key=collection.get, reverse=True):
         leaderboard[user_id] = collection[user_id]
@@ -674,18 +651,23 @@ async def balancetop(ctx, size=7):
 async def accuracytop(ctx, size=7):
     guild = ctx.guild
 
-    bank_data = get_bank_data()
+    user_accounts = []
+
+    for member in guild.members:
+        user = bot.get_user(member.id)
+
+        user_account = get_user_account(user)
+
+        user_accounts.append(user_account)
 
     # leaderboard is just sorted collection
     collection = {}
     leaderboard = {}
 
-    for user_id in bank_data:
-        if guild.get_member(user_id):
-            mean_accuracy = bank_data[user_id]["mean_accuracy"]
+    for user_account in user_accounts:
+        mean_accuracy = user_account["mean_accuracy"]
 
-            if mean_accuracy:
-                collection[user_id] = mean_accuracy
+        collection[user_account["user_id"]] = mean_accuracy
 
     for user_id in sorted(collection, key=collection.get, reverse=True):
         leaderboard[user_id] = collection[user_id]
@@ -713,10 +695,12 @@ async def accuracytop(ctx, size=7):
     for user_id in leaderboard:
         user = bot.get_user(user_id)
 
+        user_account = get_user_account(user)
+
         embed.add_field(
             name=f"{determine_medal(i)} {str(user)}",
             value=f"{leaderboard[user_id] * 100}% "
-                  f"(Total bets: {bank_data[user_id]['total_bets']})",
+                  f"(Total bets: {user_account['total_bets']})",
             inline=False
         )
 
@@ -730,9 +714,9 @@ async def accuracytop(ctx, size=7):
 
 @bot.command(aliases=["prefix", "prefixes"])
 async def prefix_(ctx):
-    prefixes_data = get_prefixes_data()
+    guild_prefixes = get_guild_prefixes(ctx.guild)
 
-    prefixes = prefixes_data[ctx.guild.id]
+    prefixes = guild_prefixes["prefixes"]
 
     await ctx.send(
         f"The server {'prefix is' if len(prefixes) == 1 else 'prefixes are'} "
@@ -740,7 +724,7 @@ async def prefix_(ctx):
     )
 
 
-@bot.command(aliases=["setprefix"])
+@bot.command(aliases=["setprefix", "changeprefixes", "setprefixes"])
 @commands.has_permissions(administrator=True)
 async def changeprefix(ctx, *, args):
     prefixes = list(dict.fromkeys(args.split()))  # removes duplicates
