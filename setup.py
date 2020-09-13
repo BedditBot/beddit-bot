@@ -127,7 +127,7 @@ def database_setup():
     if on_heroku:
         config.connection = psycopg2.connect(
             config.DATABASE_URL,
-            sllmode="require"
+            sslmode="require"
         )
     else:
         # manually input arguments
