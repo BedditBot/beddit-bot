@@ -132,11 +132,11 @@ def database_setup():
     else:
         # manually input arguments
         config.connection = psycopg2.connect(
-            user="postgres",
-            password="applesAm1RightChat?",
-            host="localhost",
-            port="5432",
-            database="beddit_bot"
+            user=None,
+            password=None,
+            host=None,
+            port=None,
+            database=None
         )
 
 
