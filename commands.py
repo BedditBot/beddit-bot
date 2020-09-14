@@ -595,9 +595,10 @@ async def balancetop(ctx, size=7):
     for member in guild.members:
         user = bot.get_user(member.id)
 
-        user_account = get_user_account(user)
+        if check_user_account(user):
+            user_account = get_user_account(user)
 
-        user_accounts.append(user_account)
+            user_accounts.append(user_account)
 
     # leaderboard is just sorted collection
     collection = {}
@@ -656,9 +657,10 @@ async def accuracytop(ctx, size=7):
     for member in guild.members:
         user = bot.get_user(member.id)
 
-        user_account = get_user_account(user)
+        if check_user_account(user):
+            user_account = get_user_account(user)
 
-        user_accounts.append(user_account)
+            user_accounts.append(user_account)
 
     # leaderboard is just sorted collection
     collection = {}
@@ -667,7 +669,8 @@ async def accuracytop(ctx, size=7):
     for user_account in user_accounts:
         mean_accuracy = user_account["mean_accuracy"]
 
-        collection[user_account["user_id"]] = mean_accuracy
+        if mean_accuracy:
+            collection[user_account["user_id"]] = mean_accuracy
 
     for user_id in sorted(collection, key=collection.get, reverse=True):
         leaderboard[user_id] = collection[user_id]
@@ -785,7 +788,8 @@ async def balancetop_error(ctx, error):
 async def bet_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(
-            f"You must specify arguments! Use: *{bot.command_prefix}bet "
+            f"You must specify arguments! Use: "
+            f"*{bot.command_prefix(bot, ctx.message)[0]}bet "
             "[Reddit post link] [bet amount] [time (in s/m/h)] [predicted "
             "upvotes on that post after that time]* to bet."
         )

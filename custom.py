@@ -75,6 +75,22 @@ def open_user_account(user):
     cursor.close()
 
 
+# checks if an account already exists for a user
+def check_user_account(user):
+    cursor = connection.cursor()
+
+    cursor.execute(
+        "SELECT * FROM bank WHERE user_id=%(user_id)s;",
+        {"user_id": user.id}
+    )
+
+    user_account = cursor.fetchone()
+
+    cursor.close()
+
+    return bool(user_account)
+
+
 # clears active bets on every restart (runs in main.py)
 def clear_active_bets():
     cursor = connection.cursor()
