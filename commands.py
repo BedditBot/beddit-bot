@@ -226,7 +226,7 @@ async def gibcash(ctx):
 
     store_user_account(user_account)
 
-    await ctx.send("I deposited 1000 Gold to your bank account!")
+    await ctx.send("I deposited 1000 Gold<:Gold:753697942220832879> to your bank account!")
 
 
 @bot.command(pass_context=True)
@@ -238,7 +238,7 @@ async def daily(ctx):
 
     store_user_account(user_account)
 
-    await ctx.send("You collected your daily reward of 100 Gold!")
+    await ctx.send("You collected your daily reward of 100 Gold<:Gold:753697942220832879>!")
 
 
 TRANSFER_TAX_RATE = 0.05  # 5%
@@ -454,7 +454,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
     # sends initial message with specifics
     await ctx.send(
         f"This post has {initial_ups} upvotes right now! You bet {amount} "
-        f"Gold on it reaching "
+        f"Gold<:Gold:753697942220832879> on it reaching "
         f"{predicted_ups} upvotes in {time}!"
     )
 
@@ -614,7 +614,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and it has "
             f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
-            f"accurate and won {winnings} Gold!"
+            f"accurate and won {winnings} Gold<:Gold:753697942220832879>!"
         )
     elif winnings == 0:
         await ctx.send(
@@ -626,7 +626,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and it has "
             f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
-            f"accurate and lost {abs(winnings)} Gold!"
+            f"accurate and lost {abs(winnings)} Gold<:Gold:753697942220832879>!"
         )
 
     user_account = get_user_account(user)
