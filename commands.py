@@ -67,7 +67,7 @@ async def help(ctx):
     )
     embed1.add_field(
         name="Bet",
-        value="Used to bet on Reddit posts. *(Use as [Reddit post link] [bet amount] [time (in s/m/h)] [predicted upvotes on that post after that time]*",
+        value="Used to bet on Reddit posts. *(Use as [Reddit post link] [bet amount] [time (in s/m/h)] [predicted upvotes on that post after that time])*",
         inline=False
     )
     embed1.add_field(
@@ -77,7 +77,7 @@ async def help(ctx):
     )
     embed1.add_field(
         name="Changeprefix",
-        value="Used to change the Bot's prefix..",
+        value="Used to change the Bot's prefix.",
         inline=False
     )
     embed1.add_field(
