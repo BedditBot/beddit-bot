@@ -225,7 +225,7 @@ def find_user(ctx, user_attr):
     not_mention_user_attr = not_mention(user_attr)
 
     # checks if user_attr is an ID
-    if not_mention_user_attr.isdigit() and len(not_mention_user_attr) == 18:
+    if not_mention_user_attr.isdigit() and len(not_mention_user_attr) in (17, 18):
         user = bot.get_user(int(not_mention_user_attr))
 
     # checks if user_attr is a name with discriminator (tag)
