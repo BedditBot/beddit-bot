@@ -41,114 +41,111 @@ async def cease(ctx):
     await bot.close()
     sys.exit()
 
-bot.remove_command('help')
 
-@bot.command()
-async def help(ctx):
-    embed1 = discord.Embed(
-        title=f"List of Beddit commands!",
+bot.remove_command("help")
+
+
+@bot.command(aliases=["help"])
+async def help_(ctx):
+    first_page = discord.Embed(
+        title=f"Beddit Bot commands",
         description=f"*Showing page 1 of 2, use reactions to switch pages.*",
-        color=0xffd700  # gold
-    )
-    embed1.add_field(
-        name="Accuracytop",
-        value="Used to show the players with the highest accuracy on this server.",
+        color=0x009e60  # shamrock green
+    ).add_field(
+        name="ping",
+        value="Used for getting the bot's ping.",
+        inline=False
+    ).add_field(
+        name="prefixes",
+        value="Used for getting the bot's server prefixes.",
+        inline=False
+    ).add_field(
+        name="setprefixes",
+        value="Used for changing the bot's server prefixes. "
+              "(Only works if the user has the Administrator permission.)",
+        inline=False
+    ).add_field(
+        name="help",
+        value="Used for getting this message.",
+        inline=False
+    ).add_field(
+        name="balance",
+        value="Used for getting the Gold balance of a user.",
+        inline=False
+    ).add_field(
+        name="transfer",
+        value="Used for transferring Gold to another user.",
+        inline=False
+    ).add_field(
+        name="daily",
+        value="Used for collecting your daily reward.",
         inline=False
     )
-    embed1.add_field(
-        name="Balance",
-        value="Used to show how much gold you have, or how much gold someone else has.",
-        inline=False
-    )
-    embed1.add_field(
-        name="Balancetop",
-        value="Used to show the players with the highest balance on this server.",
-        inline=False
-    )
-    embed1.add_field(
-        name="Bet",
-        value="Used to bet on Reddit posts. *(Use as [Reddit post link] [bet amount] [time (in s/m/h)] [predicted upvotes on that post after that time])*",
-        inline=False
-    )
-    embed1.add_field(
-        name="Bets",
-        value="Used to show how many bets you have running.",
-        inline=False
-    )
-    embed1.add_field(
-        name="Changeprefix",
-        value="Used to change the Bot's prefix.",
-        inline=False
-    )
-    embed1.add_field(
-        name="Daily",
-        value="Used to collect your daily reward.",
-        inline=False
-    )
-    embed1.add_field(
-        name="Downvotes",
-        value="Used to show many downvotes a Reddit post has.",
-        inline=False
-    )
-    embed2 = discord.Embed(
-        title=f"List of Beddit commands!",
+
+    second_page = discord.Embed(
+        title=f"Beddit Bot commands",
         description=f"*Showing page 2 of 2, use reactions to switch pages.*",
-        color=0xffd700  # gold
-    )
-    embed2.add_field(
-        name="Gamble",
-        value="Used to gamble your money with 50-50ish chances.",
+        color=0x009e60  # shamrock green
+    ).add_field(
+        name="stats",
+        value="Used for getting your betting statistics.",
+        inline=False
+    ).add_field(
+        name="upvotes",
+        value="Used for getting the amount of upvotes a Reddit post has.",
+        inline=False
+    ).add_field(
+        name="downvotes",
+        value="Used for getting the amount of downvotes a Reddit post has.",
+        inline=False
+    ).add_field(
+        name="gamble",
+        value="Used for gambling your Gold (50% win rate).",
+        inline=False
+    ).add_field(
+        name="bet",
+        value="Used to bet on Reddit posts. *(Use as [Reddit post URL] "
+              "[bet amount (in Gold)] [time (in s/m/h)] "
+              "[predicted upvotes on that post after that time])*",
+        inline=False
+    ).add_field(
+        name="bets",
+        value="Used for getting the active bets of a user.",
+        inline=False
+    ).add_field(
+        name="balancetop",
+        value="Used for getting the Gold balance leaderboard for this server.",
+        inline=False
+    ).add_field(
+        name="accuracytop",
+        value="Used for getting the accuracy leaderboard for this server.",
         inline=False
     )
-    embed2.add_field(
-        name="Help",
-        value="Used to show this message.",
-        inline=False
-    )
-    embed2.add_field(
-        name="Ping",
-        value="Used to show the bot's ping.",
-        inline=False
-    )
-    embed2.add_field(
-        name="Prefix",
-        value="Used to show the bot's prefix.",
-        inline=False
-    )
-    embed2.add_field(
-        name="Stats",
-        value="Used to show your Beddit statistics.",
-        inline=False
-    )
-    embed2.add_field(
-        name="Transfer",
-        value="Used to transfer gold to another player.",
-        inline=False
-    )
-    embed2.add_field(
-        name="Upvotes",
-        value="Used to show how many upvotes a Reddit post has.",
-        inline=False
-    )
-    page = 1
-    help_message = await ctx.send(embed=embed1)
+
+    help_message = await ctx.send(embed=first_page)
+
     await help_message.add_reaction("◀️")
     await help_message.add_reaction("▶️")
 
-    def check(reaction, user):
-        return user == ctx.author and str(reaction.emoji) in ["◀️", "▶️"]
+    def check(reaction_in, user_in):
+        return user_in == ctx.author and str(reaction_in.emoji) in ("◀️", "▶️")
 
     while True:
         try:
-            reaction, user = await bot.wait_for("reaction_add", timeout=60, check=check)
+            reaction, user = await bot.wait_for(
+                "reaction_add",
+                check=check,
+                timeout=60
+            )
+
             if str(reaction.emoji) == "▶️":
-                await help_message.edit(embed=embed2)
+                await help_message.edit(embed=second_page)
+
                 await help_message.remove_reaction(reaction, user)
-                page += 1
-            if str(reaction.emoji) == "◀️":
-                await help_message.edit(embed=embed1)
+            elif str(reaction.emoji) == "◀️":
+                await help_message.edit(embed=first_page)
+
                 await help_message.remove_reaction(reaction, user)
-                page -= 1
             else:
                 await help_message.remove_reaction(reaction, user)
         except asyncio.TimeoutError:
