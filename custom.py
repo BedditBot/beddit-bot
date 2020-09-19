@@ -35,6 +35,9 @@ def get_user_account(user):
 
 
 def store_user_account(user_account):
+    if user_account["balance"] < 0:
+        user_account["balance"] = 0
+
     cursor = connection.cursor()
 
     cursor.execute(
