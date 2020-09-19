@@ -47,8 +47,8 @@ bot.remove_command("help")
 
 @bot.command(aliases=["help"])
 async def help_(ctx):
-    first_page = discord.Embed(
-        title=f"Beddit Bot commands",
+    first_page_embed = discord.Embed(
+        title=f"Commands",
         description=f"*Showing page 1 of 2, use reactions to switch pages.*",
         color=0x009e60  # shamrock green
     ).add_field(
@@ -84,8 +84,8 @@ async def help_(ctx):
         inline=False
     )
 
-    second_page = discord.Embed(
-        title=f"Beddit Bot commands",
+    second_page_embed = discord.Embed(
+        title=f"Commands",
         description=f"*Showing page 2 of 2, use reactions to switch pages.*",
         color=0x009e60  # shamrock green
     ).add_field(
@@ -127,7 +127,7 @@ async def help_(ctx):
         inline=False
     )
 
-    help_message = await ctx.send(embed=first_page)
+    help_message = await ctx.send(embed=first_page_embed)
 
     await help_message.add_reaction("◀️")
     await help_message.add_reaction("▶️")
@@ -144,17 +144,48 @@ async def help_(ctx):
             )
 
             if str(reaction.emoji) == "▶️":
-                await help_message.edit(embed=second_page)
+                await help_message.edit(embed=second_page_embed)
 
                 await help_message.remove_reaction(reaction, user)
             elif str(reaction.emoji) == "◀️":
-                await help_message.edit(embed=first_page)
+                await help_message.edit(embed=first_page_embed)
 
                 await help_message.remove_reaction(reaction, user)
             else:
                 await help_message.remove_reaction(reaction, user)
         except asyncio.TimeoutError:
             break
+
+
+@bot.command(aliases=["information"])
+async def info(ctx):
+    developers = []
+
+    app_info = await bot.application_info()
+
+    for owner in app_info.team.members:
+        developers.append(str(owner))
+
+    developers_string = "\n".join(developers)
+
+    embed = discord.Embed(
+        title="Information",
+        color=0xff2400
+    ).add_field(
+        name="GitHub repository",
+        value="https://github.com/BedditBot/bot",
+        inline=False
+    ).add_field(
+        name="Discord server",
+        value="https://discord.gg/HjT3YpU",
+        inline=False
+    ).add_field(
+        name="Developers",
+        value=developers_string,
+        inline=False
+    )
+
+    await ctx.send(embed=embed)
 
 
 @bot.command()

@@ -13,7 +13,7 @@ def logging_setup():
     discord_file_handler = logging.FileHandler(
         filename="discord.log",
         encoding="utf-8",
-        mode="a"
+        mode="w"
     )
 
     discord_console_handler = logging.StreamHandler()
@@ -32,7 +32,7 @@ def logging_setup():
     reddit_file_handler = logging.FileHandler(
         filename="reddit.log",
         encoding="utf-8",
-        mode="a"
+        mode="w"
     )
 
     reddit_console_handler = logging.StreamHandler()
