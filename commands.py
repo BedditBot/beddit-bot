@@ -70,11 +70,13 @@ async def help_(ctx):
         inline=False
     ).add_field(
         name="balance",
-        value="Used for getting the Gold balance of a user.",
+        value="Used for getting the Gold<:MessageGold:755792715257479229> "
+              "balance of a user.",
         inline=False
     ).add_field(
         name="transfer",
-        value="Used for transferring Gold to another user.",
+        value="Used for transferring Gold<:MessageGold:755792715257479229> "
+              "to another user (with a 5% tax).",
         inline=False
     ).add_field(
         name="daily",
@@ -100,12 +102,14 @@ async def help_(ctx):
         inline=False
     ).add_field(
         name="gamble",
-        value="Used for gambling your Gold (50% win rate).",
+        value="Used for gambling your Gold<:MessageGold:755792715257479229> "
+              "(50% win rate).",
         inline=False
     ).add_field(
         name="bet",
         value="Used to bet on Reddit posts. *(Use as [Reddit post URL] "
-              "[bet amount (in Gold)] [time (in s/m/h)] "
+              "[bet amount (in Gold<:MessageGold:755792715257479229>)] "
+              "[time (in s/m/h)] "
               "[predicted upvotes on that post after that time])*",
         inline=False
     ).add_field(
@@ -114,7 +118,8 @@ async def help_(ctx):
         inline=False
     ).add_field(
         name="balancetop",
-        value="Used for getting the Gold balance leaderboard for this server.",
+        value="Used for getting the Gold<:MessageGold:755792715257479229> "
+              "balance leaderboard for this server.",
         inline=False
     ).add_field(
         name="accuracytop",
@@ -223,7 +228,10 @@ async def gibcash(ctx):
 
     store_user_account(user_account)
 
-    await ctx.send("I deposited 1000 Gold<:MessageGold:755792715257479229> to your bank account!")
+    await ctx.send(
+        "I deposited 1000 Gold<:MessageGold:755792715257479229> "
+        "to your bank account!"
+    )
 
 
 @bot.command(pass_context=True)
@@ -235,7 +243,10 @@ async def daily(ctx):
 
     store_user_account(user_account)
 
-    await ctx.send("You collected your daily reward of 100 Gold<:MessageGold:755792715257479229>!")
+    await ctx.send(
+        "You collected your daily reward of 100 "
+        "Gold<:MessageGold:755792715257479229>!"
+    )
 
 
 TRANSFER_TAX_RATE = 0.05  # 5%
@@ -253,18 +264,26 @@ async def transfer(ctx, *, args):
     sender_account = get_user_account(sender)
 
     if sender_account["active_bets"] > 0:
-        await ctx.send("You can't transfer Gold while you have active bets!")
+        await ctx.send(
+            "You can't transfer Gold<:MessageGold:755792715257479229> "
+            "while you have active bets!"
+        )
 
         return
 
     if not amount.isdigit():
-        await ctx.send("That is not a valid Gold amount!")
+        await ctx.send(
+            "That is not a valid "
+            "Gold<:MessageGold:755792715257479229> amount!"
+        )
 
         return
     amount = int(amount)
 
     if amount == 0:
-        await ctx.send("That is not a valid Gold amount!")
+        await ctx.send(
+            "That is not a valid Gold<:MessageGold:755792715257479229> amount!"
+        )
 
         return
 
@@ -275,12 +294,18 @@ async def transfer(ctx, *, args):
         return
 
     if sender == receiver:
-        await ctx.send("You can't transfer Gold to yourself!")
+        await ctx.send(
+            "You can't transfer Gold<:MessageGold:755792715257479229> "
+            "to yourself!"
+        )
 
         return
 
     if amount > sender_account["balance"]:
-        await ctx.send("You don't have enough Gold for this transfer!")
+        await ctx.send(
+            "You don't have enough Gold<:MessageGold:755792715257479229> "
+            "for this transfer!"
+        )
 
         return
 
@@ -322,8 +347,8 @@ async def gamble(ctx, amount):
 
     if balance < amount:
         await ctx.send(
-            "You do not have enough Gold to gamble that much! "
-            "YOU ARE POOR LOL!!!"
+            "You do not have enough Gold<:MessageGold:755792715257479229> "
+            "to gamble that much! "
         )
 
         return
@@ -611,7 +636,8 @@ async def bet(ctx, link, amount, time, predicted_ups):
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and it has "
             f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
-            f"accurate and won {winnings} Gold<:MessageGold:755792715257479229>!"
+            f"accurate and won {winnings} "
+            f"Gold<:MessageGold:755792715257479229>!"
         )
     elif winnings == 0:
         await ctx.send(
@@ -623,7 +649,8 @@ async def bet(ctx, link, amount, time, predicted_ups):
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and it has "
             f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
-            f"accurate and lost {abs(winnings)} Gold<:MessageGold:755792715257479229>!"
+            f"accurate and lost {abs(winnings)} "
+            f"Gold<:MessageGold:755792715257479229>!"
         )
 
     user_account = get_user_account(user)
@@ -746,7 +773,8 @@ async def balancetop(ctx, size=7):
 
         embed.add_field(
             name=f"{determine_medal(i)} {str(user)}",
-            value=f"{leaderboard[user_id]} Gold",
+            value=f"{leaderboard[user_id]} "
+                  f"Gold<:MessageGold:755792715257479229>",
             inline=False
         )
 
