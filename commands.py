@@ -6,6 +6,7 @@ import discord
 import random
 from discord.ext import commands
 import datetime
+import math
 
 from custom import *
 
@@ -166,6 +167,7 @@ async def info(ctx):
     for owner in app_info.team.members:
         developers.append(str(owner))
 
+    developers.sort()
     developers_string = "\n".join(developers)
 
     embed = discord.Embed(
@@ -178,6 +180,10 @@ async def info(ctx):
     ).add_field(
         name="Discord server",
         value="https://discord.gg/HjT3YpU",
+        inline=False
+    ).add_field(
+        name="Bot invite",
+        value="https://invite.bedditbot.com",
         inline=False
     ).add_field(
         name="Developers",
@@ -252,16 +258,28 @@ async def balance_(ctx, user_attr=None):
 
 @bot.command()
 @commands.cooldown(1, 5, commands.BucketType.user)
-async def gibcash(ctx):
-    user_account = get_user_account(ctx.author)
+async def gibcash(ctx, user_attr=None):
+    if not await bot.is_owner(ctx.author):
+        return
+
+    if not user_attr:
+        user = ctx.author
+    else:
+        user = find_user(ctx, user_attr)
+        if not user:
+            await ctx.send("This user wasn't found!")
+
+            return
+
+    user_account = get_user_account(user)
 
     user_account["balance"] += 1000
 
     store_user_account(user_account)
 
     await ctx.send(
-        "I deposited 1000 Gold<:MessageGold:755792715257479229> "
-        "to your bank account!"
+        f"I deposited 1000 Gold<:MessageGold:755792715257479229> "
+        f"to {user.name}'s bank account!"
     )
 
 
@@ -448,10 +466,10 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
     initial_ups = initial_post.ups
 
-    if predicted_ups <= initial_ups:
+    if predicted_ups <= initial_ups + 1:
         await ctx.send(
             "Your predicted upvotes can't be lower than or equal to "
-            "the current amount of upvotes!"
+            "the current amount of upvotes (plus 1)!"
         )
 
         return
@@ -504,94 +522,14 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
         return
 
+    predicted_ups_difference = predicted_ups - initial_ups
+
     # sends initial message with specifics
     await ctx.send(
         f"This post has {initial_ups} upvotes right now! You bet {amount} "
         f"Gold<:MessageGold:755792715257479229> on it reaching "
         f"{predicted_ups} upvotes in {time}!"
     )
-
-    # calculates the prediction multiplier based on the predicted upvotes
-    predicted_ups_increase = predicted_ups - initial_ups
-
-    if predicted_ups_increase < 40000:
-        if predicted_ups_increase < 5000:
-            if predicted_ups_increase < 1000:
-                if predicted_ups_increase < 500:
-                    prediction_multiplier = -5
-                else:
-                    prediction_multiplier = -2
-            else:
-                if predicted_ups_increase < 2500:
-                    prediction_multiplier = -0.5
-                else:
-                    prediction_multiplier = 0
-        else:
-            if predicted_ups_increase < 20000:
-                if predicted_ups_increase < 10000:
-                    prediction_multiplier = 0.2
-                else:
-                    prediction_multiplier = 0.3
-            else:
-                if predicted_ups_increase < 30000:
-                    prediction_multiplier = 0.4
-                else:
-                    prediction_multiplier = 0.5
-    else:
-        if predicted_ups_increase < 80000:
-            if predicted_ups_increase < 60000:
-                if predicted_ups_increase < 50000:
-                    prediction_multiplier = 0.6
-                else:
-                    prediction_multiplier = 0.8
-            else:
-                if predicted_ups_increase < 70000:
-                    prediction_multiplier = 1
-                else:
-                    prediction_multiplier = 1.8
-        else:
-            if predicted_ups_increase < 90000:
-                prediction_multiplier = 2.5
-            else:
-                prediction_multiplier = 3
-
-    # calculates the time multiplier based on the chosen time
-    if time_in_seconds < 21600:
-        if time_in_seconds < 7200:
-            if time_in_seconds < 300:
-                if time_in_seconds < 60:
-                    time_multiplier = -4
-                else:
-                    time_multiplier = -3
-            else:
-                if time_in_seconds < 3600:
-                    time_multiplier = -1.5
-                else:
-                    time_multiplier = -0.5
-        else:
-            if time_in_seconds < 14400:
-                if time_in_seconds < 10800:
-                    time_multiplier = 0.5
-                else:
-                    time_multiplier = 1
-            else:
-                if time_in_seconds < 18000:
-                    time_multiplier = 1.5
-                else:
-                    time_multiplier = 2
-    else:
-        if time_in_seconds < 28800:
-            if time_in_seconds < 25200:
-                time_multiplier = 2.6
-            else:
-                time_multiplier = 3
-        else:
-            if time_in_seconds < 32400:
-                time_multiplier = 6
-            elif time_in_seconds < 36000:
-                time_multiplier = 3.5
-            else:
-                time_multiplier = 4
 
     user_account["active_bets"] += 1
     user_account["balance"] -= amount
@@ -618,71 +556,12 @@ async def bet(ctx, link, amount, time, predicted_ups):
     accuracy = round(accuracy, 3)
     accuracy_in_pct = accuracy * 100
 
-    # determines the accuracy multiplier based on
-    # how accurate the prediction was
-    if accuracy_in_pct < 70:
-        if accuracy_in_pct < 30:
-            if accuracy_in_pct < 10:
-                if accuracy_in_pct <= 0:
-                    accuracy_multiplier = -6
+    # multiplier formula
+    multiplier = (375 / 338) * (accuracy - 0.4) ** 3 * time_in_seconds ** \
+                 (2 / 7) * math.log(predicted_ups_difference, 15)
 
-                    await ctx.send("Hmm... Strange times.")
-                else:
-                    accuracy_multiplier = -4
-            else:
-                if accuracy_in_pct < 20:
-                    accuracy_multiplier = -2
-                else:
-                    accuracy_multiplier = -1
-        else:
-            if accuracy_in_pct < 50:
-                if accuracy_in_pct < 40:
-                    accuracy_multiplier = -0.5
-                else:
-                    accuracy_multiplier = -0.3
-            else:
-                if accuracy_in_pct < 60:
-                    accuracy_multiplier = 0
-                else:
-                    accuracy_multiplier = 0.3
-    else:
-        if accuracy_in_pct < 90:
-            if accuracy_in_pct < 80:
-                accuracy_multiplier = 0.6
-            else:
-                accuracy_multiplier = 1.2
-        else:
-            if accuracy_in_pct < 95:
-                accuracy_multiplier = 1.5
-            elif accuracy_in_pct < 100:
-                accuracy_multiplier = 2
-            else:
-                accuracy_multiplier = 3
-
-    # final calculations to determine payout
-    multiplier = prediction_multiplier + time_multiplier + accuracy_multiplier
     winnings = int(amount * multiplier)
-
-    if winnings > 0:
-        await ctx.send(
-            f"Hello {user.mention}! It's {time} later, and it has "
-            f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
-            f"accurate and won {winnings} "
-            f"Gold<:MessageGold:755792715257479229>!"
-        )
-    elif winnings == 0:
-        await ctx.send(
-            f"Hello {user.mention}! It's {time} later, and it has "
-            f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
-            f"accurate but won nothing."
-        )
-    else:
-        await ctx.send(
-            f"Hello {user.mention}! It's {time} later, and it has "
-            f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
-            f"accurate and lost {abs(winnings)} "
-            f"Gold<:MessageGold:755792715257479229>!"
-        )
+    true_winnings = winnings - amount
 
     user_account = get_user_account(user)
 
@@ -696,6 +575,27 @@ async def bet(ctx, link, amount, time, predicted_ups):
     user_account["total_bets"] += 1
 
     store_user_account(user_account)
+
+    if true_winnings > 0:
+        await ctx.send(
+            f"Hello {user.mention}! It's {time} later, and the post has "
+            f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
+            f"accurate and won {true_winnings} "
+            f"Gold<:MessageGold:755792715257479229>!"
+        )
+    elif true_winnings == 0:
+        await ctx.send(
+            f"Hello {user.mention}! It's {time} later, and the post has "
+            f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
+            f"accurate but won nothing."
+        )
+    else:
+        await ctx.send(
+            f"Hello {user.mention}! It's {time} later, and the post has "
+            f"{final_ups} upvotes right now! You were {accuracy_in_pct}% "
+            f"accurate and lost {abs(true_winnings)} "
+            f"Gold<:MessageGold:755792715257479229>!"
+        )
 
 
 @bot.command()
