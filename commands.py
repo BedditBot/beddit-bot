@@ -537,7 +537,10 @@ async def bet(ctx, link, amount, time, predicted_ups):
     store_user_account(user_account)
 
     # waits until the chosen time runs out, then calculates the accuracy
-    await asyncio.sleep(time_in_seconds)
+    try:
+        await asyncio.sleep(time_in_seconds)
+    except Exception as error:
+        await ctx.send(error)
 
     final_post = reddit_client.submission(url=link)
     final_ups = final_post.ups
