@@ -103,8 +103,8 @@ async def help_(ctx):
         inline=False
     ).add_field(
         name="gamble",
-        value="Used for gambling your Gold<:MessageGold:755792715257479229> "
-              "(50% win rate).",
+        value="Used to gamble 50 Gold<:MessageGold:755792715257479229>. "
+              "(Try it out and hope for the jackpot!).",
         inline=False
     ).add_field(
         name="bet",
@@ -175,7 +175,7 @@ async def info(ctx):
         color=0xff2400
     ).add_field(
         name="GitHub repository",
-        value="https://github.com/BedditBot/bot",
+        value="http://github.bedditbot.eu",
         inline=False
     ).add_field(
         name="Discord server",
@@ -183,7 +183,7 @@ async def info(ctx):
         inline=False
     ).add_field(
         name="Bot invite",
-        value="https://invite.bedditbot.com",
+        value="http://invite.bedditbot.eu",
         inline=False
     ).add_field(
         name="Developers",
