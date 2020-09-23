@@ -374,48 +374,47 @@ async def transfer(ctx, *, args):
 
 
 @bot.command()
-async def gamble(ctx, amount):
-    if not amount.rstrip("%").isdigit():
-        await ctx.send("You can't gamble that!")
-
-        return
-
+async def gamble(ctx):
     user_account = get_user_account(ctx.author)
+    global random
 
     balance = user_account["balance"]
 
-    if "%" in amount:
-        if not 0 < float(amount.rstrip("%")) <= 100:
-            await ctx.send("You can't gamble that!")
-
-            return
-
-        amount = int(float(amount.rstrip("%")) * balance / 100)
-    else:
-        amount = int(amount)
-
-    if balance < amount:
+    if balance < 50:
         await ctx.send(
-            "You do not have enough Gold<:MessageGold:755792715257479229> "
-            "to gamble that much! "
+            "You do not have 50 Gold<:MessageGold:755792715257479229> "
+            "to gamble! "
         )
 
         return
 
-    outcome = random.randint(0, 1)
+    outcome = random.randint(0, 100)
 
-    if outcome == 0:
-        user_account["balance"] += amount
+    if outcome <= 25:
+        winnings = random.randint(1, 25)
+
+    if 26 <= outcome <= 75:
+        winnings = random.randint(25, 50)
+
+    if 76 <= outcome <= 99:
+        winnings = random.randint(50, 100)
+
+    if outcome == 100:
+        user_account["balance"] += 450
+
+        await ctx.send(f"You gambled 50 Gold<:MessageGold:755792715257479229> and won the JACKPOT of 500 Gold<:MessageGold:755792715257479229>!!!")
 
         store_user_account(user_account)
 
-        await ctx.send("Yay! You doubled your gamble amount!")
-    else:
-        user_account["balance"] -= amount
+        return
 
-        store_user_account(user_account)
+    real_winnings = -50 + winnings
 
-        await ctx.send("HAHA YOU LOST!!! YOU IDIOT!")
+    user_account["balance"] += real_winnings
+        
+    await ctx.send(f"You gambled 50 Gold<:MessageGold:755792715257479229> and won {winnings} Gold<:MessageGold:755792715257479229>!")    
+
+    store_user_account(user_account)
 
 
 @bot.command()
