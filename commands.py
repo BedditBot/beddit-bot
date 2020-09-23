@@ -218,16 +218,6 @@ async def downvotes(ctx, link):
     await ctx.send(f"This post has {downs} downvotes!")
 
 
-@bot.command()
-async def repeat(ctx, *, phrase):
-    if 'discord.gg' in phrase:
-        await ctx.send("Trying to advertise another server, huh?")
-    elif '@' in phrase:
-        await ctx.send("No pinging!")
-    else:
-        await ctx.send(phrase)
-
-
 @bot.command(aliases=["balance", "bal"])
 async def balance_(ctx, user_attr=None):
     if not user_attr:
@@ -374,6 +364,7 @@ async def transfer(ctx, *, args):
 
 
 @bot.command()
+@commands.cooldown(1, 1, commands.BucketType.user)
 async def gamble(ctx):
     user_account = get_user_account(ctx.author)
     global random
@@ -842,13 +833,6 @@ async def daily_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send("You already claimed your daily reward today!")
 
-
-@repeat.error
-async def repeat_error(ctx, error):
-    if isinstance(error, commands.CommandError):
-        await ctx.send("You must specify what to repeat!")
-
-
 @balancetop.error
 async def balancetop_error(ctx, error):
     if isinstance(error, commands.CommandError):
@@ -878,3 +862,9 @@ async def gibcash_error(ctx, error):
 async def changeprefix_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("You must specify a prefix!")
+
+
+@gamble.error
+async def gamble_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send("You can't gamble this quickly!")
