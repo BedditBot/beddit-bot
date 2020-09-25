@@ -31,6 +31,9 @@ def get_user_account(user):
 
     user_account = dict(zip(keys, values))
 
+    if user_account["mean_accuracy"]:
+        user_account["mean_accuracy"] = float(user_account["mean_accuracy"])
+
     return user_account
 
 
