@@ -367,7 +367,6 @@ async def transfer(ctx, *, args):
 @commands.cooldown(1, 1, commands.BucketType.user)
 async def gamble(ctx):
     user_account = get_user_account(ctx.author)
-    global random
 
     balance = user_account["balance"]
 
@@ -379,33 +378,28 @@ async def gamble(ctx):
 
         return
 
-    outcome = random.randint(0, 100)
+    outcome = random.randint(1, 100)
 
     if outcome <= 25:
         winnings = random.randint(1, 25)
-
-    if 26 <= outcome <= 75:
+    elif outcome <= 75:
         winnings = random.randint(25, 50)
-
-    if 76 <= outcome <= 99:
+    elif outcome <= 99:
         winnings = random.randint(50, 100)
+    else:
+        winnings = 500
 
-    if outcome == 100:
-        user_account["balance"] += 450
+    true_winnings = winnings - 50
 
-        await ctx.send(f"You gambled 50 Gold<:MessageGold:755792715257479229> and won the JACKPOT of 500 Gold<:MessageGold:755792715257479229>!!!")
-
-        store_user_account(user_account)
-
-        return
-
-    real_winnings = -50 + winnings
-
-    user_account["balance"] += real_winnings
-        
-    await ctx.send(f"You gambled 50 Gold<:MessageGold:755792715257479229> and won {winnings} Gold<:MessageGold:755792715257479229>!")    
+    user_account["balance"] += true_winnings
 
     store_user_account(user_account)
+
+    await ctx.send(
+        f"You gambled 50 Gold<:MessageGold:755792715257479229> and won "
+        f"{winnings if winnings != 500 else 'the JACKPOT of 500'} "
+        f"Gold<:MessageGold:755792715257479229>!"
+    )
 
 
 @bot.command()
@@ -636,7 +630,7 @@ async def stats(ctx, user_attr=None):
         url="https://imgur.com/UpdCchY.png"
     ).add_field(
         name="Mean accuracy:",
-        value=f"{mean_accuracy * 100}%" if mean_accuracy else "NaN",
+        value=f"{round(mean_accuracy * 100, 1)}%" if mean_accuracy else "NaN",
         inline=False
     ).add_field(
         name="Total bets:",
@@ -764,7 +758,7 @@ async def accuracytop(ctx, size=7):
 
         embed.add_field(
             name=f"{determine_medal(i)} {str(user)}",
-            value=f"{leaderboard[user_id] * 100}% "
+            value=f"{round(leaderboard[user_id] * 100, 1)}% "
                   f"(Total bets: {user_account['total_bets']})",
             inline=False
         )
@@ -832,6 +826,7 @@ async def downvotes_error(ctx, error):
 async def daily_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send("You already claimed your daily reward today!")
+
 
 @balancetop.error
 async def balancetop_error(ctx, error):
