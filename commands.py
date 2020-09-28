@@ -246,12 +246,10 @@ async def balance_(ctx, user_attr=None):
     await ctx.send(embed=embed)
 
 
-@bot.command()
-async def gibcash(ctx, amount=None, user_attr=None):
+@bot.command(aliases=["aedit"])
+async def accountedit(ctx, user_attr, field, value):
     if not await bot.is_owner(ctx.author):
         return
-
-    amount = int(amount)
 
     if not user_attr:
         user = ctx.author
@@ -264,17 +262,27 @@ async def gibcash(ctx, amount=None, user_attr=None):
 
     user_account = get_user_account(user)
 
-    user_account["balance"] += amount
+    if field not in user_account:
+        await ctx.send("Field not found.")
 
-    if user_account["balance"] >= 2147483647:
-        await ctx.send("Hey dumb dev! Why would you try to break the bot?!")
         return
+
+    if not value.replace(".", "").isdigit():
+        await ctx.send("Invalid amount.")
+
+        return
+
+    if "." in value:
+        value = round(float(value), 3)
+    else:
+        value = int(value)
+
+    user_account[field] = value
 
     store_user_account(user_account)
 
     await ctx.send(
-        f"I deposited {amount} Gold<:MessageGold:755792715257479229> "
-        f"to {user.name}'s bank account!"
+        f"Edited {str(user)}'s bank account {field} field to {value}!"
     )
 
 
@@ -286,8 +294,12 @@ async def daily(ctx):
     user_account["balance"] += 100
 
     if user_account["balance"] >= 2147483647:
-        await ctx.send("My god, you have this much money and still want that tiny daily reward? Pathetic.")
-        return    
+        await ctx.send(
+            "My god, you have this much money and still want "
+            "that tiny daily reward? Pathetic."
+        )
+
+        return
 
     store_user_account(user_account)
 
@@ -326,6 +338,7 @@ async def transfer(ctx, *, args):
         )
 
         return
+
     amount = int(amount)
 
     if amount == 0:
@@ -336,6 +349,7 @@ async def transfer(ctx, *, args):
         return
 
     receiver = find_user(ctx, receiver_attr)
+
     if not receiver:
         await ctx.send("This user wasn't found!")
 
@@ -359,13 +373,23 @@ async def transfer(ctx, *, args):
 
     receiver_account = get_user_account(receiver)
 
+    if receiver_account["active_bets"] > 0:
+        await ctx.send(
+            "You can't transfer Gold<:MessageGold:755792715257479229> "
+            "to that user while they have active bets!"
+        )
+
+        return
+
     sender_account["balance"] -= amount
-    receiver_account["balance"] += int(
-        amount - TRANSFER_TAX_RATE * amount
-    )
+    receiver_account["balance"] += int(amount - TRANSFER_TAX_RATE * amount)
 
     if receiver_account["balance"] >= 2147483647:
-        await ctx.send("Hello! You can't send this, you will break into our mainframe and destroy our matrix!")
+        await ctx.send(
+            "Hello! You can't send this, you "
+            "will break into our mainframe and destroy our matrix!"
+        )
+
         return
 
     store_user_account(sender_account)
@@ -405,8 +429,13 @@ async def gamble(ctx):
     true_winnings = winnings - 50
 
     user_account["balance"] += true_winnings
+
     if user_account["balance"] >= 2147483647:
-        await ctx.send("Hi! Great job! You have hit the limits of time and space! (Or possibly our programming...)")
+        await ctx.send(
+            "Hi! Great job! You have hit the limits of time and space! "
+            "(Or possibly our programming...)"
+        )
+
         return
 
     store_user_account(user_account)
@@ -566,12 +595,19 @@ async def bet(ctx, link, amount, time, predicted_ups):
     user_account = get_user_account(user)
 
     user_account["balance"] += winnings
+
     if user_account["balance"] >= 2147483647:
-        await ctx.send(f"Hello {user.mention}! Great job! You have hit the limits of time and space! (Or possibly our programming...)")
+        await ctx.send(
+            f"Hello {user.mention}! Great job! You have hit the limits of "
+            f"time and space! (Or possibly our programming...)"
+        )
+
         user_account["balance"] -= winnings
         user_account["active_bets"] -= 1
         user_account["balance"] += amount
+
         store_user_account(user_account)
+
         return
 
     user_account["active_bets"] -= 1
@@ -866,12 +902,6 @@ async def bet_error(ctx, error):
         )
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send("You have to wait a few seconds between bets!")
-
-
-@gibcash.error
-async def gibcash_error(ctx, error):
-    if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send("You have to wait a few seconds!")
 
 
 @changeprefix.error
