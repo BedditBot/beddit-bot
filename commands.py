@@ -267,13 +267,15 @@ async def accountedit(ctx, user_attr, field, value):
 
         return
 
-    if not value.replace(".", "").isdigit():
-        await ctx.send("Invalid amount.")
+    if not value.replace(".", "").isdigit() and value != "None":
+        await ctx.send("Invalid value.")
 
         return
 
     if "." in value:
         value = round(float(value), 3)
+    elif value == "None":
+        value = None
     else:
         value = int(value)
 
