@@ -247,10 +247,11 @@ async def balance_(ctx, user_attr=None):
 
 
 @bot.command()
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def gibcash(ctx, user_attr=None):
+async def gibcash(ctx, amount=None, user_attr=None):
     if not await bot.is_owner(ctx.author):
         return
+
+    amount = int(amount)
 
     if not user_attr:
         user = ctx.author
@@ -263,12 +264,16 @@ async def gibcash(ctx, user_attr=None):
 
     user_account = get_user_account(user)
 
-    user_account["balance"] += 1000
+    user_account["balance"] += amount
+
+    if user_account["balance"] >= 2147483647:
+        await ctx.send("Hey dumb dev! Why would you try to break the bot?!")
+        return
 
     store_user_account(user_account)
 
     await ctx.send(
-        f"I deposited 1000 Gold<:MessageGold:755792715257479229> "
+        f"I deposited {amount} Gold<:MessageGold:755792715257479229> "
         f"to {user.name}'s bank account!"
     )
 
@@ -279,6 +284,10 @@ async def daily(ctx):
     user_account = get_user_account(ctx.author)
 
     user_account["balance"] += 100
+
+    if user_account["balance"] >= 2147483647:
+        await ctx.send("My god, you have this much money and still want that tiny daily reward? Pathetic.")
+        return    
 
     store_user_account(user_account)
 
@@ -355,6 +364,10 @@ async def transfer(ctx, *, args):
         amount - TRANSFER_TAX_RATE * amount
     )
 
+    if receiver_account["balance"] >= 2147483647:
+        await ctx.send("Hello! You can't send this, you will break into our mainframe and destroy our matrix!")
+        return
+
     store_user_account(sender_account)
     store_user_account(receiver_account)
 
@@ -392,6 +405,9 @@ async def gamble(ctx):
     true_winnings = winnings - 50
 
     user_account["balance"] += true_winnings
+    if user_account["balance"] >= 2147483647:
+        await ctx.send("Hi! Great job! You have hit the limits of time and space! (Or possibly our programming...)")
+        return
 
     store_user_account(user_account)
 
@@ -550,6 +566,14 @@ async def bet(ctx, link, amount, time, predicted_ups):
     user_account = get_user_account(user)
 
     user_account["balance"] += winnings
+    if user_account["balance"] >= 2147483647:
+        await ctx.send(f"Hello {user.mention}! Great job! You have hit the limits of time and space! (Or possibly our programming...)")
+        user_account["balance"] -= winnings
+        user_account["active_bets"] -= 1
+        user_account["balance"] += amount
+        store_user_account(user_account)
+        return
+
     user_account["active_bets"] -= 1
     user_account["mean_accuracy"] = calculate_mean_accuracy(
         user_account["mean_accuracy"],
