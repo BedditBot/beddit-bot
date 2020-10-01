@@ -588,14 +588,19 @@ async def bet(ctx, link, amount, time, predicted_ups):
     accuracy = round(accuracy, 3)
     accuracy_in_pct = accuracy * 100
 
+    user_account = get_user_account(user)
+
+    balance = user_account["balance"]
+
     # multiplier formula
-    multiplier = (375 / 338) * (accuracy - 0.4) ** 3 * time_in_seconds ** \
-                 (2 / 7) * math.log(predicted_ups_difference, 15)
+    multiplier = (
+            (625 / 676) * math.exp(- balance / (10_000_000 / math.log(2))) *
+            (accuracy - 0.4) ** 3 * time_in_seconds ** (2 / 7) *
+            math.log(predicted_ups_difference, 15)
+    )
 
     winnings = int(amount * multiplier)
     true_winnings = winnings - amount
-
-    user_account = get_user_account(user)
 
     user_account["balance"] += winnings
 
