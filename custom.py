@@ -281,3 +281,21 @@ def calculate_mean_accuracy(ini_mean, ini_amount, new_accuracy):
     fin_mean = (ini_mean * ini_amount + new_accuracy) / fin_amount
 
     return round(fin_mean, 3)
+
+
+def separate_digits(num):
+    num_list = list(str(num))
+    reversed_final_list = []
+
+    i = 0
+    for num in reversed(num_list):
+        if (i + 1) % 3 == 0:
+            reversed_final_list.append("{}{}".format(u'\u2009', num))
+        else:
+            reversed_final_list.append(num)
+
+        i += 1
+
+    final_list = reversed(reversed_final_list)
+
+    return "".join(final_list)
