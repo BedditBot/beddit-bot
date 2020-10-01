@@ -709,6 +709,35 @@ async def stats(ctx, user_attr=None):
     await ctx.send(embed=embed)
 
 
+@bot.command(alieases=["factors"])
+async def facs(ctx, user_attr=None):
+    if not user_attr:
+        user = ctx.author
+    else:
+        user = find_user(ctx, user_attr)
+        if not user:
+            await ctx.send("This user wasn't found!")
+
+            return
+
+    user_account = get_user_account(user)
+
+    balance = user_account["balance"]
+
+    embed = discord.Embed(
+        title=f"{str(user)}'s Factors",
+        color=0xff7518  # pumpkin
+    ).add_field(
+        name="Balance factor:",
+        value=str(
+            round(math.exp(- balance / (10_000_000 / math.log(2))) * 100, 1)
+        ),
+        inline=False
+    )
+
+    await ctx.send(embed=embed)
+
+
 @bot.command(aliases=["baltop"])
 async def balancetop(ctx, size=7):
     guild = ctx.guild
