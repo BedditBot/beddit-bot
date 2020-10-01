@@ -731,7 +731,7 @@ async def facs(ctx, user_attr=None):
         name="Balance factor:",
         value=str(
             round(math.exp(- balance / (10_000_000 / math.log(2))) * 100, 1)
-        ),
+        ) + "%",
         inline=False
     )
 
