@@ -21,7 +21,10 @@ reddit_client = praw.Reddit(
 )
 
 
-@bot.command(aliases=["latency"])
+@bot.command(
+    aliases=["latency"],
+    help="Used for getting the bot's ping."
+)
 async def ping(ctx):
     latency = round(bot.latency, 3) * 1000  # in ms to 3 d.p.
 
@@ -46,89 +49,45 @@ async def cease(ctx):
 bot.remove_command("help")
 
 
-@bot.command(aliases=["help"])
+@bot.command(
+    name="help",
+    help="Used for getting this message."
+)
 async def help_(ctx):
-    first_page_embed = discord.Embed(
-        title=f"Commands",
-        description=f"*Showing page 1 of 2, use reactions to switch pages.*",
-        color=0x009e60  # shamrock green
-    ).add_field(
-        name="ping",
-        value="Used for getting the bot's ping.",
-        inline=False
-    ).add_field(
-        name="prefixes",
-        value="Used for getting the bot's server prefixes.",
-        inline=False
-    ).add_field(
-        name="setprefixes",
-        value="Used for changing the bot's server prefixes. "
-              "(Only works if the user has the Administrator permission.)",
-        inline=False
-    ).add_field(
-        name="help",
-        value="Used for getting this message.",
-        inline=False
-    ).add_field(
-        name="balance",
-        value="Used for getting the Gold<:MessageGold:755792715257479229> "
-              "balance of a user.",
-        inline=False
-    ).add_field(
-        name="transfer",
-        value="Used for transferring Gold<:MessageGold:755792715257479229> "
-              "to another user (with a 5% tax).",
-        inline=False
-    ).add_field(
-        name="daily",
-        value="Used for collecting your daily reward.",
-        inline=False
-    )
+    commands_list = list(bot.commands)
+    commands_list.sort(key=lambda command_in: command_in.name)
 
-    second_page_embed = discord.Embed(
-        title=f"Commands",
-        description=f"*Showing page 2 of 2, use reactions to switch pages.*",
-        color=0x009e60  # shamrock green
-    ).add_field(
-        name="stats",
-        value="Used for getting your betting statistics.",
-        inline=False
-    ).add_field(
-        name="upvotes",
-        value="Used for getting the amount of upvotes a Reddit post has.",
-        inline=False
-    ).add_field(
-        name="downvotes",
-        value="Used for getting the amount of downvotes a Reddit post has.",
-        inline=False
-    ).add_field(
-        name="gamble",
-        value="Used to gamble 50 Gold<:MessageGold:755792715257479229>. "
-              "(Try it out and hope for the jackpot!).",
-        inline=False
-    ).add_field(
-        name="bet",
-        value="Used to bet on Reddit posts. *(Use as [Reddit post URL] "
-              "[bet amount (in Gold<:MessageGold:755792715257479229>)] "
-              "[time (in s/m/h)] "
-              "[predicted upvotes on that post after that time])*",
-        inline=False
-    ).add_field(
-        name="bets",
-        value="Used for getting the active bets of a user.",
-        inline=False
-    ).add_field(
-        name="balancetop",
-        value="Used for getting the Gold<:MessageGold:755792715257479229> "
-              "balance leaderboard for this server.",
-        inline=False
-    ).add_field(
-        name="accuracytop",
-        value="Used for getting the accuracy leaderboard for this server.",
-        inline=False
-    )
+    grouped_commands_list = [
+        commands_list[i:i + 10] for i in range(0, len(commands_list), 10)
+    ]
 
-    help_message = await ctx.send(embed=first_page_embed)
+    pages = []
+
+    i = 0
+    total_pages = len(grouped_commands_list)
+
+    for group in grouped_commands_list:
+        page = discord.Embed(
+            title=f"Commands",
+            description=f"*Showing page {i + 1} of {total_pages}, "
+                        f"use reactions to switch pages.*",
+            color=0x009e60  # shamrock green
+        )
+
+        for command in group:
+            page.add_field(
+                name=command.name,
+                value=command.help,
+                inline=False
+            )
+
+        pages.append(page)
+
+        i += 1
+
+    n = 0
+
+    help_message = await ctx.send(embed=pages[n])
 
     await help_message.add_reaction("◀️")
     await help_message.add_reaction("▶️")
@@ -145,11 +104,21 @@ async def help_(ctx):
             )
 
             if str(reaction.emoji) == "▶️":
-                await help_message.edit(embed=second_page_embed)
+                if n + 2 > total_pages:
+                    pass
+                else:
+                    n += 1
+
+                    await help_message.edit(embed=pages[n])
 
                 await help_message.remove_reaction(reaction, user)
             elif str(reaction.emoji) == "◀️":
-                await help_message.edit(embed=first_page_embed)
+                if n == 0:
+                    pass
+                else:
+                    n -= 1
+
+                    await help_message.edit(embed=pages[n])
 
                 await help_message.remove_reaction(reaction, user)
             else:
@@ -158,7 +127,10 @@ async def help_(ctx):
             break
 
 
-@bot.command(aliases=["information"])
+@bot.command(
+    aliases=["information"],
+    help="Used for getting information about the bot."
+)
 async def info(ctx):
     developers = []
 
@@ -194,14 +166,18 @@ async def info(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command()
+@bot.command(
+    help="Used for getting the amount of upvotes a Reddit post has."
+)
 async def upvotes(ctx, link):
     post = reddit_client.submission(url=link)
 
     await ctx.send(f"This post has {separate_digits(post.ups)} upvotes!")
 
 
-@bot.command()
+@bot.command(
+    help="Used for getting the amount of downvotes a Reddit post has."
+)
 async def downvotes(ctx, link):
     post = reddit_client.submission(url=link)
 
@@ -218,7 +194,12 @@ async def downvotes(ctx, link):
     await ctx.send(f"This post has {separate_digits(downs)} downvotes!")
 
 
-@bot.command(aliases=["balance", "bal"])
+@bot.command(
+    name="balance",
+    aliases=["bal"],
+    usgae="Used for getting the Gold<:MessageGold:755792715257479229> "
+          "balance of a user."
+)
 async def balance_(ctx, user_attr=None):
     if not user_attr:
         user = ctx.author
@@ -246,7 +227,10 @@ async def balance_(ctx, user_attr=None):
     await ctx.send(embed=embed)
 
 
-@bot.command(aliases=["aedit"])
+@bot.command(
+    aliases=["aedit"],
+    hidden=True
+)
 async def accountedit(ctx, user_attr, field, value):
     if not await bot.is_owner(ctx.author):
         return
@@ -288,7 +272,10 @@ async def accountedit(ctx, user_attr, field, value):
     )
 
 
-@bot.command(pass_context=True)
+@bot.command(
+    pass_context=True,
+    help="Used for collecting your daily reward."
+)
 @commands.cooldown(1, 60 * 60 * 24, commands.BucketType.user)
 async def daily(ctx):
     user_account = get_user_account(ctx.author)
@@ -314,7 +301,10 @@ async def daily(ctx):
 TRANSFER_TAX_RATE = 0.05  # 5%
 
 
-@bot.command()
+@bot.command(
+    help="Used for transferring Gold<:MessageGold:755792715257479229> "
+         f"to another user (with a {TRANSFER_TAX_RATE * 100}% tax)."
+)
 async def transfer(ctx, *, args):
     args_list = args.split()
 
@@ -402,7 +392,10 @@ async def transfer(ctx, *, args):
     )
 
 
-@bot.command()
+@bot.command(
+    help="Used to gamble 50 Gold<:MessageGold:755792715257479229>. "
+         "(Try it out and hope for the jackpot!)."
+)
 @commands.cooldown(1, 1, commands.BucketType.user)
 async def gamble(ctx):
     user_account = get_user_account(ctx.author)
@@ -449,7 +442,15 @@ async def gamble(ctx):
     )
 
 
-@bot.command()
+hidden_balance_tracker = dict()
+
+
+@bot.command(
+    help="Used to bet on Reddit posts. *(Use as [Reddit post URL] "
+         "[bet amount (in Gold<:MessageGold:755792715257479229>)] "
+         "[time (in s/m/h)] "
+         "[predicted upvotes on that post after that time])*"
+)
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def bet(ctx, link, amount, time, predicted_ups):
     user = ctx.author
@@ -566,6 +567,12 @@ async def bet(ctx, link, amount, time, predicted_ups):
     user_account["active_bets"] += 1
     user_account["balance"] -= amount
 
+    try:
+        hidden_balance_tracker[user.id] += amount
+    except KeyError:
+        hidden_balance_tracker[user.id] = 0
+        hidden_balance_tracker[user.id] += amount
+
     store_user_account(user_account)
 
     # waits until the chosen time runs out, then calculates the accuracy
@@ -590,12 +597,12 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
     user_account = get_user_account(user)
 
-    balance = user_account["balance"]
+    true_balance = user_account["balance"] + hidden_balance_tracker[user.id]
 
     # multiplier formula
     multiplier = (
-            (625 / 676) * math.exp(- balance / (10_000_000 / math.log(2))) *
-            (accuracy - 0.4) ** 3 * time_in_seconds ** (2 / 7) *
+            (625 / 676) * math.exp(- true_balance / (10_000_000 / math.log(2)))
+            * (accuracy - 0.4) ** 3 * time_in_seconds ** (2 / 7) *
             math.log(predicted_ups_difference, 15)
     )
 
@@ -603,6 +610,8 @@ async def bet(ctx, link, amount, time, predicted_ups):
     true_winnings = winnings - amount
 
     user_account["balance"] += winnings
+
+    hidden_balance_tracker[user.id] -= amount
 
     if user_account["balance"] >= 2147483647:
         await ctx.send(
@@ -653,7 +662,9 @@ async def bet(ctx, link, amount, time, predicted_ups):
         )
 
 
-@bot.command()
+@bot.command(
+    help="Used for getting the active bets of a user."
+)
 async def bets(ctx, user_attr=None):
     if not user_attr:
         user = ctx.author
@@ -675,7 +686,10 @@ async def bets(ctx, user_attr=None):
     )
 
 
-@bot.command(aliases=["statistics"])
+@bot.command(
+    aliases=["statistics"],
+    help="Used for getting someone's betting statistics."
+)
 async def stats(ctx, user_attr=None):
     if not user_attr:
         user = ctx.author
@@ -709,7 +723,10 @@ async def stats(ctx, user_attr=None):
     await ctx.send(embed=embed)
 
 
-@bot.command(alieases=["factors"])
+@bot.command(
+    alieases=["factors"],
+    help="Used for getting someone's bet winnings factors."
+)
 async def facs(ctx, user_attr=None):
     if not user_attr:
         user = ctx.author
@@ -722,7 +739,12 @@ async def facs(ctx, user_attr=None):
 
     user_account = get_user_account(user)
 
-    balance = user_account["balance"]
+    try:
+        hidden_balance_tracker[user.id]
+    except KeyError:
+        hidden_balance_tracker[user.id] = 0
+
+    true_balance = user_account["balance"] + hidden_balance_tracker[user.id]
 
     embed = discord.Embed(
         title=f"{str(user)}'s Factors",
@@ -730,7 +752,9 @@ async def facs(ctx, user_attr=None):
     ).add_field(
         name="Balance factor:",
         value=str(
-            round(math.exp(- balance / (10_000_000 / math.log(2))) * 100, 1)
+            round(
+                math.exp(- true_balance / (10_000_000 / math.log(2))) * 100, 1
+            )
         ) + "%",
         inline=False
     )
@@ -738,8 +762,12 @@ async def facs(ctx, user_attr=None):
     await ctx.send(embed=embed)
 
 
-@bot.command(aliases=["baltop"])
-async def balancetop(ctx, size=7):
+@bot.command(
+    aliases=["balancetop"],
+    help="Used for getting the Gold<:MessageGold:755792715257479229> "
+         "balance leaderboard for this server."
+)
+async def baltop(ctx, size=7):
     guild = ctx.guild
 
     user_accounts = []
@@ -801,8 +829,11 @@ async def balancetop(ctx, size=7):
     await ctx.send(embed=embed)
 
 
-@bot.command(aliases=["acctop"])
-async def accuracytop(ctx, size=7):
+@bot.command(
+    aliases=["accuracytop"],
+    help="Used for getting the accuracy leaderboard for this server."
+)
+async def acctop(ctx, size=7):
     guild = ctx.guild
 
     user_accounts = []
@@ -870,7 +901,11 @@ async def accuracytop(ctx, size=7):
     await ctx.send(embed=embed)
 
 
-@bot.command(aliases=["prefix", "prefixes"])
+@bot.command(
+    name="prefixes",
+    aliases=["prefix"],
+    help="Used for getting the bot's server prefixes."
+)
 async def prefix_(ctx):
     guild_prefixes = get_guild_prefixes(ctx.guild)
 
@@ -882,9 +917,14 @@ async def prefix_(ctx):
     )
 
 
-@bot.command(aliases=["setprefix", "changeprefixes", "setprefixes"])
+@bot.command(
+    name="setprefixes",
+    aliases=["changeprefix", "changeprefixes", "setprefixes, setprefix"],
+    help="Used for changing the bot's server prefixes. "
+         "(Only works if the user has the Administrator permission.)"
+)
 @commands.has_permissions(administrator=True)
-async def changeprefix(ctx, *, args):
+async def setprefix(ctx, *, args):
     prefixes = list(dict.fromkeys(args.split()))  # removes duplicates
 
     if len(prefixes) > 1:
@@ -927,8 +967,8 @@ async def daily_error(ctx, error):
         await ctx.send("You already claimed your daily reward today!")
 
 
-@balancetop.error
-async def balancetop_error(ctx, error):
+@baltop.error
+async def baltop_error(ctx, error):
     if isinstance(error, commands.CommandError):
         await ctx.send("That's not a valid argument!")
 
@@ -946,7 +986,7 @@ async def bet_error(ctx, error):
         await ctx.send("You have to wait a few seconds between bets!")
 
 
-@changeprefix.error
+@setprefix.error
 async def changeprefix_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("You must specify a prefix!")
