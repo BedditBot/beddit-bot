@@ -201,8 +201,8 @@ async def downvotes(ctx, link):
 @bot.command(
     name="balance",
     aliases=["bal"],
-    usgae="Used for getting the Gold<:MessageGold:755792715257479229> "
-          "balance of a user."
+    help="Used for getting the Gold<:MessageGold:755792715257479229> "
+         "balance of a user."
 )
 async def balance_(ctx, user_attr=None):
     if not user_attr:
@@ -398,7 +398,7 @@ async def transfer(ctx, *, args):
 
 @bot.command(
     help="Used to gamble 50 Gold<:MessageGold:755792715257479229>. "
-         "(Try it out and hope for the jackpot!)."
+         "(Try it out and hope for the jackpot!)"
 )
 @commands.cooldown(1, 1, commands.BucketType.user)
 async def gamble(ctx):
@@ -450,10 +450,10 @@ hidden_balance_tracker = dict()
 
 
 @bot.command(
-    help="Used to bet on Reddit posts. *(Use as [Reddit post URL] "
+    help="Used to bet on Reddit posts. *Use as [Reddit post URL] "
          "[bet amount (in Gold<:MessageGold:755792715257479229>)] "
          "[time (in s/m/h)] "
-         "[predicted upvotes on that post after that time])*"
+         "[predicted upvotes on that post after that time].*"
 )
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def bet(ctx, link, amount, time, predicted_ups):
