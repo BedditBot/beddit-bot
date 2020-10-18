@@ -57,6 +57,10 @@ async def help_(ctx):
     commands_list = list(bot.commands)
     commands_list.sort(key=lambda command_in: command_in.name)
 
+    for command in commands_list:
+        if command.hidden:
+            commands_list.remove(command)
+
     grouped_commands_list = [
         commands_list[i:i + 10] for i in range(0, len(commands_list), 10)
     ]
