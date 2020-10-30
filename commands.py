@@ -115,10 +115,7 @@ async def help_(ctx):
 
                     await help_message.edit(embed=pages[n])
 
-                try:
-                    await help_message.remove_reaction(reaction, user)
-                except commands.BotMissingPermissions:
-                    pass
+                await help_message.remove_reaction(reaction, user)
             elif str(reaction.emoji) == "◀️":
                 if n == 0:
                     pass
@@ -127,15 +124,9 @@ async def help_(ctx):
 
                     await help_message.edit(embed=pages[n])
 
-                try:
-                    await help_message.remove_reaction(reaction, user)
-                except commands.BotMissingPermissions:
-                    pass
+                await help_message.remove_reaction(reaction, user)
             else:
-                try:
-                    await help_message.remove_reaction(reaction, user)
-                except commands.BotMissingPermissions:
-                    pass
+                await help_message.remove_reaction(reaction, user)
         except asyncio.TimeoutError:
             break
 
