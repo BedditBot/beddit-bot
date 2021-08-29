@@ -32,7 +32,10 @@ async def ping(ctx):
 
 
 # closes the bot (only bot owners)
-@bot.command(hidden=True)
+@bot.command(
+    hidden=True,
+    help="Used for restarting the bot."
+)
 async def cease(ctx):
     if not await bot.is_owner(ctx.author):
         return
@@ -81,7 +84,7 @@ def get_help_pages(dev):
             page.add_field(
                 name=command.name,
                 value=(
-                        command.help if not command.help else "" +
+                        command.help +
                         (
                             f"\n*Usage:* `{command.usage}`" if command.usage
                             else ""
@@ -332,10 +335,11 @@ async def balance_(ctx, user_attr=None):
 
 
 @bot.command(
-    aliases=["aedit"],
+    aliases=["editaccount", "ea"],
+    help="Used for manually editing account information.",
     hidden=True
 )
-async def accountedit(ctx, user_attr, field, value):
+async def edit_account(ctx, user_attr, field, value):
     if not await bot.is_owner(ctx.author):
         return
 
@@ -1028,7 +1032,7 @@ async def prefix_(ctx):
          "(Only works if the user has the Administrator permission.)"
 )
 @commands.has_permissions(administrator=True)
-async def setprefix(ctx, *, args):
+async def set_prefix(ctx, *, args):
     prefixes = list(dict.fromkeys(args.split()))  # removes duplicates
 
     if len(prefixes) > 1:
@@ -1090,7 +1094,7 @@ async def bet_error(ctx, error):
         await ctx.send("You have to wait a few seconds between bets!")
 
 
-@setprefix.error
+@set_prefix.error
 async def changeprefix_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("You must specify a prefix!")
