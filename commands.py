@@ -298,10 +298,12 @@ async def post_information(ctx, link):
         colour=0xff4500
     ).add_field(
         name="Upvotes",
-        value=separate_digits(post.ups)
+        value=separate_digits(post.ups),
+        inline=False
     ).add_field(
         name="Downvotes",
-        value=separate_digits(downs)
+        value=separate_digits(downs),
+        inline=False
     )
 
     await ctx.send(embed=embed)
