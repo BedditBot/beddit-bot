@@ -285,7 +285,7 @@ async def post_information(ctx, link):
 
     post = discord.Embed(
         title="Post",
-        url=post.permalink,
+        url=link,
         colour=0xff4500
     ).add_field(
         name="Title",
