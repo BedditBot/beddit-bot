@@ -283,6 +283,8 @@ async def info(ctx):
 async def post_information(ctx, link):
     post = reddit_client.submission(url=link)
 
+    relative_time = datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(post.created_utc)
+
     post = discord.Embed(
         title="Post",
         url=link,
@@ -293,12 +295,12 @@ async def post_information(ctx, link):
         inline=False
     ).add_field(
         name="Datetime",
-        value=f"<t:{post.created_utc}:F>",
+        value=str(relative_time),
         inline=False
     ).add_field(
         name="Score",
         value=f"{separate_digits(post.score)} "
-              f"({post.upvote_ratio * 100}% upvotes)",
+              f"({int(post.upvote_ratio * 100)}% upvotes)",
         inline=False
     ).add_field(
         name="Comments",
