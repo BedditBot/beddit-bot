@@ -46,20 +46,18 @@ async def cease(ctx):
     sys.exit()
 
 
-bot.remove_command("help")
+def get_help_pages(dev):
+    commands_list = []
 
+    for command in bot.commands:
+        if not dev:
+            if not command.hidden:
+                commands_list.append(command)
+        else:
+            if command.hidden:
+                commands_list.append(command)
 
-@bot.command(
-    name="help",
-    help="Used for getting this message."
-)
-async def help_(ctx):
-    commands_list = list(bot.commands)
     commands_list.sort(key=lambda command_in: command_in.name)
-
-    for command in commands_list:
-        if command.hidden:
-            commands_list.remove(command)
 
     grouped_commands_list = [
         commands_list[i:i + 10] for i in range(0, len(commands_list), 10)
@@ -73,15 +71,29 @@ async def help_(ctx):
     for group in grouped_commands_list:
         page = discord.Embed(
             title=f"Commands",
-            description=f"*Showing page {i + 1} of {total_pages}, "
-                        f"use reactions to switch pages.*",
-            color=0x009e60  # shamrock green
+            color=0x9ab8d6
+        ).set_footer(
+            text=f"Showing page {i + 1} of {total_pages}, "
+                 f"use reactions to switch pages."
         )
 
         for command in group:
             page.add_field(
                 name=command.name,
-                value=command.help,
+                value=(
+                        command.help +
+                        (
+                            f"\n*Usage:* `{command.usage}`" if command.usage
+                            else ""
+                        ) +
+                        (
+                            f"\n*Alias"
+                            f"{'' if len(command.aliases) == 1 else 'es'}"
+                            f":* `{'`, `'.join(command.aliases)}`"
+                            if command.aliases
+                            else ""
+                        )
+                ),
                 inline=False
             )
 
@@ -89,15 +101,34 @@ async def help_(ctx):
 
         i += 1
 
+    return pages
+
+
+bot.remove_command("help")
+
+
+@bot.command(
+    name="help",
+    aliases=["h"],
+    help="Used for getting this message."
+)
+@commands.cooldown(1, 5, type=commands.BucketType.user)
+@commands.max_concurrency(1, per=commands.BucketType.user)
+async def help_(ctx):
+    pages = help_pages
+    total_pages = len(pages)
+
     n = 0
 
     help_message = await ctx.send(embed=pages[n])
 
-    await help_message.add_reaction("◀️")
-    await help_message.add_reaction("▶️")
+    react_emotes = ("◀️", "❌", "▶️")
+
+    for react_emote in react_emotes:
+        await help_message.add_reaction(react_emote)
 
     def check(reaction_in, user_in):
-        return user_in == ctx.author and str(reaction_in.emoji) in ("◀️", "▶️")
+        return user_in == ctx.author and str(reaction_in) in react_emotes
 
     while True:
         try:
@@ -107,7 +138,7 @@ async def help_(ctx):
                 timeout=60
             )
 
-            if str(reaction.emoji) == "▶️":
+            if str(reaction) == "▶️":
                 if n + 2 > total_pages:
                     pass
                 else:
@@ -116,7 +147,7 @@ async def help_(ctx):
                     await help_message.edit(embed=pages[n])
 
                 await help_message.remove_reaction(reaction, user)
-            elif str(reaction.emoji) == "◀️":
+            elif str(reaction) == "◀️":
                 if n == 0:
                     pass
                 else:
@@ -125,9 +156,78 @@ async def help_(ctx):
                     await help_message.edit(embed=pages[n])
 
                 await help_message.remove_reaction(reaction, user)
+            elif str(reaction) == "❌":
+                await help_message.clear_reactions()
+
+                break
             else:
                 await help_message.remove_reaction(reaction, user)
         except asyncio.TimeoutError:
+            await help_message.clear_reactions()
+
+            break
+
+
+@bot.command(
+    name="dhelp",
+    aliases=["dh"],
+    help="Used for getting this message.",
+    hidden=True
+)
+@commands.cooldown(1, 5, type=commands.BucketType.user)
+@commands.max_concurrency(1, per=commands.BucketType.user)
+async def developer_help(ctx):
+    if not await bot.is_owner(ctx.author):
+        return
+
+    pages = dev_help_pages
+    total_pages = len(pages)
+
+    n = 0
+
+    help_message = await ctx.send(embed=pages[n])
+
+    react_emotes = ("◀️", "❌", "▶️")
+
+    for react_emote in react_emotes:
+        await help_message.add_reaction(react_emote)
+
+    def check(reaction_in, user_in):
+        return user_in == ctx.author and str(reaction_in) in react_emotes
+
+    while True:
+        try:
+            reaction, user = await bot.wait_for(
+                "reaction_add",
+                check=check,
+                timeout=60
+            )
+
+            if str(reaction) == "▶️":
+                if n + 2 > total_pages:
+                    pass
+                else:
+                    n += 1
+
+                    await help_message.edit(embed=pages[n])
+
+                await help_message.remove_reaction(reaction, user)
+            elif str(reaction) == "◀️":
+                if n != 0:
+                    n -= 1
+
+                    await help_message.edit(embed=pages[n])
+
+                await help_message.remove_reaction(reaction, user)
+            elif str(reaction) == "❌":
+                await help_message.clear_reactions()
+
+                break
+            else:
+                await help_message.remove_reaction(reaction, user)
+        except asyncio.TimeoutError:
+            await help_message.clear_reactions()
+
             break
 
 
@@ -141,7 +241,7 @@ async def info(ctx):
     app_info = await bot.application_info()
 
     for owner in app_info.team.members:
-        developers.append(str(owner))
+        developers.append(f"`{str(owner)}`")
 
     developers.sort()
     developers_string = "\n".join(developers)
@@ -1000,3 +1100,7 @@ async def changeprefix_error(ctx, error):
 async def gamble_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send("You can't gamble this quickly!")
+
+
+help_pages = get_help_pages(False)
+dev_help_pages = get_help_pages(True)

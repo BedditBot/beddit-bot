@@ -13,7 +13,7 @@ def set_bot():
     import discord
     from discord.ext import commands
 
-    intents = discord.Intents().default()
+    intents = discord.Intents.default()
     intents.members = True
 
     # for custom server-specific prefixes
@@ -25,7 +25,18 @@ def set_bot():
         return guild_prefixes["prefixes"]
 
     global bot
-    bot = commands.Bot(command_prefix=get_prefix, intents=intents)
+
+    bot = commands.Bot(
+        command_prefix=get_prefix,
+        intents=intents
+    )
+
+    bot.allowed_mentions = discord.AllowedMentions(
+        everyone=False,
+        users=True,
+        roles=False,
+        replied_user=True
+    )
 
 
 set_bot()
