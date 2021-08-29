@@ -85,8 +85,8 @@ def get_help_pages(dev):
                         (
                             f"\n*Usage:* `{command.usage}`" if command.usage
                             else ""
-                        ) +
-                        (
+                        ) + (
+
                             f"\n*Alias"
                             f"{'' if len(command.aliases) == 1 else 'es'}"
                             f":* `{'`, `'.join(command.aliases)}`"
