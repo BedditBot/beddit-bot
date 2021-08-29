@@ -81,12 +81,12 @@ def get_help_pages(dev):
             page.add_field(
                 name=command.name,
                 value=(
-                        command.help +
+                        command.help if not command.help else "" +
                         (
                             f"\n*Usage:* `{command.usage}`" if command.usage
                             else ""
-                        ) + (
-
+                        ) +
+                        (
                             f"\n*Alias"
                             f"{'' if len(command.aliases) == 1 else 'es'}"
                             f":* `{'`, `'.join(command.aliases)}`"
