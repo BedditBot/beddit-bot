@@ -283,55 +283,30 @@ async def info(ctx):
 async def post_information(ctx, link):
     post = reddit_client.submission(url=link)
 
-    ratio = post.upvote_ratio
-    score = post.score
+    post = discord.Embed(
+        title="Post",
+        url=post.permalink,
+        colour=0xff4500
+    ).add_field(
+        name="Title",
+        value=post.title,
+        inline=False
+    ).add_field(
+        name="Datetime",
+        value=f"<t:{post.created_utc}:F>",
+        inline=False
+    ).add_field(
+        name="Score",
+        value=f"{separate_digits(post.score)} "
+              f"({post.upvote_ratio * 100}% upvotes)",
+        inline=False
+    ).add_field(
+        name="Comments",
+        value=separate_digits(post.num_comments),
+        inline=False
+    )
 
-    if ratio != 0.5:
-        ups = round((ratio * score) / (2 * ratio - 1))
-    else:
-        ups = round(score / 2)
-
-    downs = ups - score
-
-    print(post.permalink)
-    print(post.name)
-    print(f"<t:{post.created_utc}:F>")
-    print(separate_digits(score))
-    print(f"{separate_digits(post.ups)} ({ratio * 100}%)")
-    print(separate_digits(downs))
-    print(separate_digits(post.num_comments))
-
-    # post = discord.Embed(
-    #     title="Post",
-    #     url=post.permalink,
-    #     colour=0xff4500
-    # ).add_field(
-    #     name="Name",
-    #     value=post.fullname,
-    #     inline=False
-    # ).add_field(
-    #     name="Datetime",
-    #     value=f"<t:{post.created_utc}:F>",
-    #     inline=False
-    # ).add_field(
-    #     name="Score",
-    #     value=separate_digits(score),
-    #     inline=False
-    # ).add_field(
-    #     name="Upvotes",
-    #     value=f"{separate_digits(post.ups)} ({ratio * 100}%)",
-    #     inline=False
-    # ).add_field(
-    #     name="Downvotes",
-    #     value=separate_digits(downs),
-    #     inline=False
-    # ).add_field(
-    #     name="Comments",
-    #     value=separate_digits(post.num_comments),
-    #     inline=False
-    # )
-    #
-    # await ctx.send(embed=post)
+    await ctx.send(embed=post)
 
     await ctx.send("test")
 
