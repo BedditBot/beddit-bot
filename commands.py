@@ -324,6 +324,8 @@ async def post_information(ctx, link):
 
     await ctx.send(embed=embed)
 
+    await ctx.send("test")
+
 
 @bot.command(
     name="balance",
