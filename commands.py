@@ -17,7 +17,8 @@ reddit_client = praw.Reddit(
     client_secret=config.R_CLIENT_SECRET,
     username=config.R_USERNAME,
     password=config.R_PASSWORD,
-    user_agent=config.R_USER_AGENT
+    user_agent=config.R_USER_AGENT,
+    check_for_async=False
 )
 
 
@@ -292,37 +293,37 @@ async def post_information(ctx, link):
 
     downs = ups - score
 
-    embed = discord.Embed(
-        title="Post",
-        url=post.permalink,
-        colour=0xff4500
-    ).add_field(
-        name="Name",
-        value=post.fullname,
-        inline=False
-    ).add_field(
-        name="Datetime",
-        value=f"<t:{post.created_utc}:F>",
-        inline=False
-    ).add_field(
-        name="Score",
-        value=separate_digits(score),
-        inline=False
-    ).add_field(
-        name="Upvotes",
-        value=f"{separate_digits(post.ups)} ({ratio * 100}%)",
-        inline=False
-    ).add_field(
-        name="Downvotes",
-        value=separate_digits(downs),
-        inline=False
-    ).add_field(
-        name="Comments",
-        value=separate_digits(post.num_comments),
-        inline=False
-    )
-
-    await ctx.send(embed=embed)
+    # embed = discord.Embed(
+    #     title="Post",
+    #     url=post.permalink,
+    #     colour=0xff4500
+    # ).add_field(
+    #     name="Name",
+    #     value=post.fullname,
+    #     inline=False
+    # ).add_field(
+    #     name="Datetime",
+    #     value=f"<t:{post.created_utc}:F>",
+    #     inline=False
+    # ).add_field(
+    #     name="Score",
+    #     value=separate_digits(score),
+    #     inline=False
+    # ).add_field(
+    #     name="Upvotes",
+    #     value=f"{separate_digits(post.ups)} ({ratio * 100}%)",
+    #     inline=False
+    # ).add_field(
+    #     name="Downvotes",
+    #     value=separate_digits(downs),
+    #     inline=False
+    # ).add_field(
+    #     name="Comments",
+    #     value=separate_digits(post.num_comments),
+    #     inline=False
+    # )
+    #
+    # await ctx.send(embed=embed)
 
     await ctx.send("test")
 
