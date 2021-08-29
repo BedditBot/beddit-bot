@@ -293,7 +293,15 @@ async def post_information(ctx, link):
 
     downs = ups - score
 
-    # embed = discord.Embed(
+    print(post.permalink)
+    print(post.name)
+    print(f"<t:{post.created_utc}:F>")
+    print(separate_digits(score))
+    print(f"{separate_digits(post.ups)} ({ratio * 100}%)")
+    print(separate_digits(downs))
+    print(separate_digits(post.num_comments))
+
+    # post = discord.Embed(
     #     title="Post",
     #     url=post.permalink,
     #     colour=0xff4500
@@ -323,7 +331,7 @@ async def post_information(ctx, link):
     #     inline=False
     # )
     #
-    # await ctx.send(embed=embed)
+    # await ctx.send(embed=post)
 
     await ctx.send("test")
 
