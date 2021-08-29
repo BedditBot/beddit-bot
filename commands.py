@@ -274,18 +274,12 @@ async def info(ctx):
 
 
 @bot.command(
-    help="Used for getting the amount of upvotes a Reddit post has."
+    name="postinfo",
+    aliases=["pi", "pinfo"],
+    help="Used for getting information (number of upvotes and "
+         "downvotes) about a Reddit post."
 )
-async def upvotes(ctx, link):
-    post = reddit_client.submission(url=link)
-
-    await ctx.send(f"This post has {separate_digits(post.ups)} upvotes!")
-
-
-@bot.command(
-    help="Used for getting the amount of downvotes a Reddit post has."
-)
-async def downvotes(ctx, link):
+async def post_information(ctx, link):
     post = reddit_client.submission(url=link)
 
     ratio = post.upvote_ratio
@@ -298,7 +292,19 @@ async def downvotes(ctx, link):
 
     downs = ups - score
 
-    await ctx.send(f"This post has {separate_digits(downs)} downvotes!")
+    embed = discord.Embed(
+        title="Post",
+        url=link,
+        colour=0xff4500
+    ).add_field(
+        name="Upvotes",
+        value=separate_digits(post.ups)
+    ).add_field(
+        name="Downvotes",
+        value=separate_digits(downs)
+    )
+
+    await ctx.send(embed=embed)
 
 
 @bot.command(
@@ -1057,14 +1063,8 @@ async def set_prefix(ctx, *, args):
 
 
 # error handling for commands
-@upvotes.error
-async def upvotes_error(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("You must specify a Reddit post's URL!")
-
-
-@downvotes.error
-async def downvotes_error(ctx, error):
+@post_information.error
+async def post_information_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("You must specify a Reddit post's URL!")
 
