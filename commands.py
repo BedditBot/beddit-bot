@@ -294,15 +294,30 @@ async def post_information(ctx, link):
 
     embed = discord.Embed(
         title="Post",
-        url=link,
+        url=post.permalink,
         colour=0xff4500
     ).add_field(
+        name="Name",
+        value=post.name,
+        inline=False
+    ).add_field(
+        name="Datetime",
+        value=f"<t:{post.created_utc}:F>"
+    ).add_field(
+        name="Score",
+        value=separate_digits(score),
+        inline=False
+    ).add_field(
         name="Upvotes",
-        value=separate_digits(post.ups),
+        value=f"{separate_digits(post.ups)} ({ratio * 100}%)",
         inline=False
     ).add_field(
         name="Downvotes",
         value=separate_digits(downs),
+        inline=False
+    ).add_field(
+        name="Comments",
+        value=separate_digits(post.num_comments),
         inline=False
     )
 
