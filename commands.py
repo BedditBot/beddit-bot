@@ -1,6 +1,6 @@
 import sys
 
-import praw
+import asyncpraw
 import asyncio
 import discord
 import random
@@ -12,7 +12,7 @@ from custom import *
 
 bot = config.bot
 
-reddit_client = praw.Reddit(
+reddit_client = asyncpraw.Reddit(
     client_id=config.R_CLIENT_ID,
     client_secret=config.R_CLIENT_SECRET,
     username=config.R_USERNAME,
@@ -280,7 +280,7 @@ async def info(ctx):
          "downvotes) about a Reddit post."
 )
 async def post_information(ctx, link):
-    post = reddit_client.submission(url=link)
+    post = await reddit_client.submission(url=link)
 
     ratio = post.upvote_ratio
     score = post.score
@@ -302,7 +302,8 @@ async def post_information(ctx, link):
         inline=False
     ).add_field(
         name="Datetime",
-        value=f"<t:{post.created_utc}:F>"
+        value=f"<t:{post.created_utc}:F>",
+        inline=False
     ).add_field(
         name="Score",
         value=separate_digits(score),
@@ -606,7 +607,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
         amount = int(amount)
 
     predicted_ups = int(predicted_ups)
-    initial_post = reddit_client.submission(url=link)
+    initial_post = await reddit_client.submission(url=link)
 
     age = int(
         datetime.datetime.utcnow().timestamp() - initial_post.created_utc
@@ -709,7 +710,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
     # waits until the chosen time runs out, then calculates the accuracy
     await asyncio.sleep(time_in_seconds)
 
-    final_post = reddit_client.submission(url=link)
+    final_post = await reddit_client.submission(url=link)
     final_ups = final_post.ups
 
     # pct means percent
