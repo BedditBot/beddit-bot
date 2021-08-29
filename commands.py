@@ -298,7 +298,7 @@ async def post_information(ctx, link):
         colour=0xff4500
     ).add_field(
         name="Name",
-        value=post.name,
+        value=post.fullname,
         inline=False
     ).add_field(
         name="Datetime",
