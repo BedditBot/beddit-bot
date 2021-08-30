@@ -940,7 +940,7 @@ async def facs(ctx, user_attr=None):
     help="Used for getting the leaderboards for this server.",
     usage="leaderboard [balance/accuracy]"
 )
-async def leaderboard_(ctx, category, size=10):
+async def leaderboard_(ctx, category="balance", size=10):
     if category in ["accuracy", "acc", "a"]:
         category = "a"
     else:
