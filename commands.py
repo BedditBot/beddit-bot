@@ -386,7 +386,7 @@ async def balance_(ctx, user_attr=None):
         url="https://i.imgur.com/9aAfwcJ.png"
     ).set_footer(
         text=str(user),
-        icon_url=str(user.default_avatar_url)
+        icon_url=str(user.avatar_url)
     )
 
     await ctx.send(embed=embed)
