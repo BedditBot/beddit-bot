@@ -895,10 +895,11 @@ async def stats(ctx, user_attr=None):
 
 
 @bot.command(
-    alieases=["factors"],
+    name="factors",
+    alieases=["facs"],
     help="Used for getting someone's bet winnings factors."
 )
-async def facs(ctx, user_attr=None):
+async def factors_(ctx, user_attr=None):
     if not user_attr:
         user = ctx.author
     else:
@@ -991,7 +992,7 @@ async def leaderboard_(ctx, category="balance", size=10):
         )
     else:
         embed = discord.Embed(
-            title=f"Balance Leaderboard of {str(guild)}",
+            title=f"Gold Balance Leaderboard of {str(guild)}",
             description="*Not on this leaderboard? Go bet on some posts!*",
             color=0xffd700  # gold
         )
