@@ -1064,12 +1064,6 @@ async def prefix_(ctx):
         )
     )
 
-    # await ctx.send(
-    #     f"The server {'prefix is' if len(prefixes) == 1 else 'prefixes are'} "
-    #     f"'{'/'.join(prefixes)}'!"
-    # )
-    #
-
 
 @bot.command(
     name="setprefixes",
