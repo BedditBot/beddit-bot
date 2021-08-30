@@ -564,16 +564,13 @@ async def transfer(ctx, *, args):
 )
 @commands.cooldown(1, 1, commands.BucketType.user)
 async def gamble(ctx):
-    user_account = get_user_account(ctx.author)
+    user = ctx.athor
+
+    user_account = get_user_account(user)
 
     balance = user_account["balance"]
 
     if balance < 50:
-        await ctx.send(
-            "You do not have 50 Gold<:MessageGold:755792715257479229> "
-            "to gamble! "
-        )
-
         return
 
     outcome = random.randint(1, 100)
@@ -591,20 +588,25 @@ async def gamble(ctx):
 
     user_account["balance"] += true_winnings
 
-    if user_account["balance"] >= 2147483647:
-        await ctx.send(
-            "Hi! Great job! You have hit the limits of time and space! "
-            "(Or possibly our programming...)"
-        )
-
-        return
-
     store_user_account(user_account)
 
     await ctx.send(
         f"You gambled 50 Gold<:MessageGold:755792715257479229> and won "
         f"{winnings if winnings != 500 else 'the JACKPOT of 500'} "
         f"Gold<:MessageGold:755792715257479229>!"
+    )
+
+    await ctx.send(
+        embed=discord.Embed(
+            title="Gambling",
+            color=0x39ff14,  # neon green
+            description=f"Gambled 50 Gold<:MessageGold:755792715257479229> "
+                        f"and won {winnings} "
+                        f"Gold<:MessageGold:755792715257479229>."
+        ).set_footer(
+            text=str(user),
+            icon_url=str(user.avatar_url)
+        )
     )
 
 
