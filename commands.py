@@ -549,7 +549,7 @@ async def transfer(ctx, *, args):
             description=f"Transferred {amount} "
                         f"Gold<:MessageGold:755792715257479229> "
                         f"from `{str(sender)}` to `{str(receiver)}` "
-                        f"with a {TRANSFER_TAX_RATE * 100}% tax rate."
+                        f"with a {round(TRANSFER_TAX_RATE * 100)}% tax rate."
         ).set_footer(
             text=str(sender),
             icon_url=str(sender.avatar_url)
