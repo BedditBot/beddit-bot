@@ -298,4 +298,4 @@ def separate_digits(num):
 
     final_list = reversed(reversed_final_list)
 
-    return "".join(final_list)
+    return "".join(final_list).strip(u'\u2009')
