@@ -324,7 +324,7 @@ async def post_information(ctx, link):
             )
 
     post = discord.Embed(
-        title="Post",
+        title="Post information",
         url=link,
         colour=0xff4500  # orangered
     ).add_field(
