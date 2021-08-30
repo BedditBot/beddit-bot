@@ -323,39 +323,37 @@ async def post_information(ctx, link):
                 f"ago"
             )
 
-    post = discord.Embed(
-        title="Post information",
-        url=link,
-        colour=0xff4500  # orangered
-    ).add_field(
-        name="Title",
-        value=post.title,
-        inline=False
-    ).add_field(
-        name="Created",
-        value=express_time(timedelta),
-        inline=False
-    ).add_field(
-        name="Score",
-        value=f"{separate_digits(score)}",
-        inline=False
-    ).add_field(
-        name="Upvotes",
-        value=f"{separate_digits(upvotes)}",
-        inline=False
-    ).add_field(
-        name="Downvotes",
-        value=f"{separate_digits(downvotes)}",
-        inline=False
-    ).add_field(
-        name="Comments",
-        value=separate_digits(post.num_comments),
-        inline=False
+    await ctx.send(
+        embed=discord.Embed(
+            title="Post information",
+            url=link,
+            colour=0xff4500  # orangered
+        ).add_field(
+            name="Title",
+            value=post.title,
+            inline=False
+        ).add_field(
+            name="Created",
+            value=express_time(timedelta),
+            inline=False
+        ).add_field(
+            name="Score",
+            value=f"{separate_digits(score)}",
+            inline=False
+        ).add_field(
+            name="Upvotes",
+            value=f"{separate_digits(upvotes)}",
+            inline=False
+        ).add_field(
+            name="Downvotes",
+            value=f"{separate_digits(downvotes)}",
+            inline=False
+        ).add_field(
+            name="Comments",
+            value=separate_digits(post.num_comments),
+            inline=False
+        )
     )
-
-    await ctx.send(embed=post)
-
-    await ctx.send("test")
 
 
 @bot.command(
@@ -589,12 +587,6 @@ async def gamble(ctx):
     user_account["balance"] += true_winnings
 
     store_user_account(user_account)
-
-    await ctx.send(
-        f"You gambled 50 Gold<:MessageGold:755792715257479229> and won "
-        f"{winnings if winnings != 500 else 'the JACKPOT of 500'} "
-        f"Gold<:MessageGold:755792715257479229>!"
-    )
 
     await ctx.send(
         embed=discord.Embed(
