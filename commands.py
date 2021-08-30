@@ -1,6 +1,6 @@
 import sys
 
-import praw
+import asyncpraw
 import asyncio
 import discord
 import random
@@ -12,21 +12,24 @@ from custom import *
 
 bot = config.bot
 
-reddit_client = praw.Reddit(
+reddit_client = asyncpraw.Reddit(
     client_id=config.R_CLIENT_ID,
     client_secret=config.R_CLIENT_SECRET,
     username=config.R_USERNAME,
     password=config.R_PASSWORD,
-    user_agent=config.R_USER_AGENT,
-    check_for_async=False
+    user_agent=config.R_USER_AGENT
 )
 
 
 @bot.command(
     aliases=["latency"],
-    help="Used for getting the bot's ping."
+    help="Used for getting the bot's ping.",
+    hidden=True
 )
 async def ping(ctx):
+    if not await bot.is_owner(ctx.author):
+        return
+
     latency = round(bot.latency, 3) * 1000  # in ms to 3 d.p.
 
     await ctx.send(f"Pong! ({latency}ms)")
@@ -34,8 +37,8 @@ async def ping(ctx):
 
 # closes the bot (only bot owners)
 @bot.command(
-    hidden=True,
-    help="Used for restarting the bot."
+    help="Used for restarting the bot.",
+    hidden=True
 )
 async def cease(ctx):
     if not await bot.is_owner(ctx.author):
@@ -75,7 +78,7 @@ def get_help_pages(dev):
     for group in grouped_commands_list:
         page = discord.Embed(
             title=f"Commands",
-            color=0x9ab8d6
+            color=0xff4500  # orangered
         ).set_footer(
             text=f"Showing page {i + 1} of {total_pages}, "
                  f"use reactions to switch pages."
@@ -252,7 +255,7 @@ async def info(ctx):
 
     embed = discord.Embed(
         title="Information",
-        color=0xff2400
+        color=0xff4500  # orangered
     ).add_field(
         name="GitHub repository",
         value="http://github.bedditbot.eu",
@@ -281,14 +284,15 @@ async def info(ctx):
          "downvotes) about a Reddit post."
 )
 async def post_information(ctx, link):
-    post = reddit_client.submission(url=link)
+    post = await reddit_client.submission(url=link)
 
-    relative_time = datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(post.created_utc)
+    relative_time = datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(
+        post.created_utc)
 
     post = discord.Embed(
         title="Post",
         url=link,
-        colour=0xff4500
+        colour=0xff4500  # orangered
     ).add_field(
         name="Title",
         value=post.title,
@@ -595,7 +599,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
         amount = int(amount)
 
     predicted_ups = int(predicted_ups)
-    initial_post = reddit_client.submission(url=link)
+    initial_post = await reddit_client.submission(url=link)
 
     age = int(
         datetime.datetime.utcnow().timestamp() - initial_post.created_utc
@@ -698,7 +702,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
     # waits until the chosen time runs out, then calculates the accuracy
     await asyncio.sleep(time_in_seconds)
 
-    final_post = reddit_client.submission(url=link)
+    final_post = await reddit_client.submission(url=link)
     final_ups = final_post.ups
 
     # pct means percent
