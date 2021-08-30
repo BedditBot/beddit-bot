@@ -1057,9 +1057,18 @@ async def prefix_(ctx):
     prefixes = guild_prefixes["prefixes"]
 
     await ctx.send(
-        f"The server {'prefix is' if len(prefixes) == 1 else 'prefixes are'} "
-        f"'{', '.join(prefixes)}'!"
+        embed=discord.Embed(
+            title=f"Prefixes of {str(ctx.guild)}",
+            color=0xff4500,  # orangered
+            description=f"`{'`/`'.join(prefixes)}`"
+        )
     )
+
+    # await ctx.send(
+    #     f"The server {'prefix is' if len(prefixes) == 1 else 'prefixes are'} "
+    #     f"'{'/'.join(prefixes)}'!"
+    # )
+    #
 
 
 @bot.command(
