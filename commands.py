@@ -485,58 +485,53 @@ async def transfer(ctx, *, args):
 
     if sender_account["active_bets"] > 0:
         await ctx.send(
-            "You can't transfer Gold<:MessageGold:755792715257479229> "
-            "while you have active bets!"
+            embed=discord.Embed(
+                title="Error",
+                color=0x000000,  # black
+                description="Can't transfer Gold"
+                            "<:MessageGold:755792715257479229> "
+                            "between users with active bets."
+            ).set_footer(
+                text=str(sender),
+                icon_url=str(sender.avatar_url)
+            )
         )
 
         return
 
     if not amount.isdigit():
-        await ctx.send(
-            "That is not a valid "
-            "Gold<:MessageGold:755792715257479229> amount!"
-        )
-
         return
 
     amount = int(amount)
 
     if amount == 0:
-        await ctx.send(
-            "That is not a valid Gold<:MessageGold:755792715257479229> amount!"
-        )
-
         return
 
     receiver = find_user(ctx, receiver_attr)
 
     if not receiver:
-        await ctx.send("This user wasn't found!")
-
         return
 
     if sender == receiver:
-        await ctx.send(
-            "You can't transfer Gold<:MessageGold:755792715257479229> "
-            "to yourself!"
-        )
-
         return
 
     if amount > sender_account["balance"]:
-        await ctx.send(
-            "You don't have enough Gold<:MessageGold:755792715257479229> "
-            "for this transfer!"
-        )
-
         return
 
     receiver_account = get_user_account(receiver)
 
     if receiver_account["active_bets"] > 0:
         await ctx.send(
-            "You can't transfer Gold<:MessageGold:755792715257479229> "
-            "to that user while they have active bets!"
+            embed=discord.Embed(
+                title="Error",
+                color=0x000000,  # black
+                description="Can't transfer Gold"
+                            "<:MessageGold:755792715257479229> "
+                            "between users with active bets."
+            ).set_footer(
+                text=str(sender),
+                icon_url=str(sender.avatar_url)
+            )
         )
 
         return
@@ -544,19 +539,20 @@ async def transfer(ctx, *, args):
     sender_account["balance"] -= amount
     receiver_account["balance"] += int(amount - TRANSFER_TAX_RATE * amount)
 
-    if receiver_account["balance"] >= 2147483647:
-        await ctx.send(
-            "Hello! You can't send this, you "
-            "will break into our mainframe and destroy our matrix!"
-        )
-
-        return
-
     store_user_account(sender_account)
     store_user_account(receiver_account)
 
     await ctx.send(
-        f"Transfer successful! (Tax Rate: {int(TRANSFER_TAX_RATE * 100)}%)"
+        embed=discord.Embed(
+            title="Transfer",
+            color=0xffd700,  # gold
+            description=f"Transferred {amount} "
+                        f"Gold<:MessageGold:755792715257479229> "
+                        f"from `{str(sender)}` to `{str(receiver)}`."
+        ).set_footer(
+            text=str(sender),
+            icon_url=str(sender.avatar_url)
+        )
     )
 
 
