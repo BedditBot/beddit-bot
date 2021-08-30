@@ -286,8 +286,42 @@ async def info(ctx):
 async def post_information(ctx, link):
     post = await reddit_client.submission(url=link)
 
-    relative_time = datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(
-        post.created_utc)
+    score = post.score
+    ratio = post.upvote_ratio
+
+    upvotes = round(
+        (ratio * score) / (2 * ratio - 1)
+    )
+
+    downvotes = round(
+        (score * (1 - ratio)) / (2 * ratio - 1)
+    )
+
+    timedelta = (
+            datetime.datetime.utcnow() -
+            datetime.datetime.utcfromtimestamp(post.created_utc)
+    )
+
+    def express_time(time):
+        days = time.days
+        hours = math.floor(time.seconds / 3600)
+        minutes = math.floor(time.seconds % 3600 / 60)
+        seconds = time.seconds % 60
+
+        if days != 0:
+            return (
+                f"{days} {'days' if days != 1 else 'day'} "
+                f"{hours} {'hours' if hours != 1 else 'hour'} "
+                f"{minutes} {'minutes' if minutes != 1 else 'minute'} "
+                f"ago"
+            )
+        else:
+            return (
+                f"{hours} {'hours' if hours != 1 else 'hour'} "
+                f"{minutes} {'minutes' if minutes != 1 else 'minute'} "
+                f"{seconds} {'seconds' if seconds != 1 else 'second'} "
+                f"ago"
+            )
 
     post = discord.Embed(
         title="Post",
@@ -298,13 +332,20 @@ async def post_information(ctx, link):
         value=post.title,
         inline=False
     ).add_field(
-        name="Datetime",
-        value=str(relative_time),
+        name="Created",
+        value=express_time(timedelta),
         inline=False
     ).add_field(
         name="Score",
-        value=f"{separate_digits(post.score)} "
-              f"({int(post.upvote_ratio * 100)}% upvotes)",
+        value=f"{separate_digits(score)}",
+        inline=False
+    ).add_field(
+        name="Upvotes",
+        value=f"~{separate_digits(upvotes)}",
+        inline=False
+    ).add_field(
+        name="Downvotes",
+        value=f"~{separate_digits(downvotes)}",
         inline=False
     ).add_field(
         name="Comments",
