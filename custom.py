@@ -7,7 +7,7 @@ bot = config.bot
 connection = config.connection
 
 
-def get_user_account(user):
+async def get_user_account(user):
     cursor = connection.cursor()
 
     cursor.execute(
@@ -18,7 +18,7 @@ def get_user_account(user):
     values = cursor.fetchone()
 
     if not values:
-        open_user_account(user)
+        await open_user_account(user)
 
         cursor.execute(
             "SELECT * FROM bank WHERE user_id=%(user_id)s;",
@@ -67,7 +67,7 @@ def store_user_account(user_account):
     cursor.close()
 
 
-def open_user_account(user):
+async def open_user_account(user):
     await user.send(
         embed=discord.Embed(
             title="Warning",

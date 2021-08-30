@@ -370,7 +370,7 @@ async def balance_(ctx, user_attr=None):
         if not user:
             return
 
-    user_account = get_user_account(user)
+    user_account = await get_user_account(user)
 
     await ctx.send(
         embed=discord.Embed(
@@ -407,7 +407,7 @@ async def edit_account(ctx, user_attr, field, value):
 
             return
 
-    user_account = get_user_account(user)
+    user_account = await get_user_account(user)
 
     if field not in user_account:
         await ctx.send("Field not found.")
@@ -443,7 +443,7 @@ async def edit_account(ctx, user_attr, field, value):
 async def daily(ctx):
     user = ctx.author
 
-    user_account = get_user_account(user)
+    user_account = await get_user_account(user)
 
     user_account["balance"] += 100
 
@@ -480,7 +480,7 @@ async def transfer(ctx, *, args):
 
     sender = ctx.author
 
-    sender_account = get_user_account(sender)
+    sender_account = await get_user_account(sender)
 
     if sender_account["active_bets"] > 0:
         await ctx.send(
@@ -517,7 +517,7 @@ async def transfer(ctx, *, args):
     if amount > sender_account["balance"]:
         return
 
-    receiver_account = get_user_account(receiver)
+    receiver_account = await get_user_account(receiver)
 
     if receiver_account["active_bets"] > 0:
         await ctx.send(
@@ -564,7 +564,7 @@ async def transfer(ctx, *, args):
 async def gamble(ctx):
     user = ctx.author
 
-    user_account = get_user_account(user)
+    user_account = await get_user_account(user)
 
     balance = user_account["balance"]
 
@@ -620,7 +620,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
         return
 
-    user_account = get_user_account(user)
+    user_account = await get_user_account(user)
 
     if "%" in amount:
         if not 0 < float(amount.rstrip("%")) <= 100:
@@ -755,7 +755,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
     accuracy = round(accuracy, 3)
     accuracy_in_pct = accuracy * 100
 
-    user_account = get_user_account(user)
+    user_account = await get_user_account(user)
 
     true_balance = user_account["balance"] + hidden_balance_tracker[user.id]
 
@@ -834,7 +834,7 @@ async def bets(ctx, user_attr=None):
         if not user:
             return
 
-    user_account = get_user_account(user)
+    user_account = await get_user_account(user)
 
     active_bets = user_account["active_bets"]
 
@@ -858,7 +858,7 @@ async def stats(ctx, user_attr=None):
         if not user:
             return
 
-    user_account = get_user_account(user)
+    user_account = await get_user_account(user)
 
     mean_accuracy = user_account["mean_accuracy"]
     total_bets = user_account["total_bets"]
@@ -900,7 +900,7 @@ async def factors_(ctx, user_attr=None):
         if not user:
             return
 
-    user_account = get_user_account(user)
+    user_account = await get_user_account(user)
 
     try:
         hidden_balance_tracker[user.id]
@@ -952,7 +952,7 @@ async def leaderboard_(ctx, category="balance", size=10):
         user = bot.get_user(member.id)
 
         if check_user_account(user):
-            user_account = get_user_account(user)
+            user_account = await get_user_account(user)
 
             user_accounts.append(user_account)
 
@@ -1006,7 +1006,7 @@ async def leaderboard_(ctx, category="balance", size=10):
         for user_id in leaderboard:
             user = bot.get_user(user_id)
 
-            user_account = get_user_account(user)
+            user_account = await get_user_account(user)
 
             embed.add_field(
                 name=f"{determine_medal(i)} {str(user)}",
