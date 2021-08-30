@@ -384,7 +384,7 @@ async def balance_(ctx, user_attr=None):
         ).set_thumbnail(
             url="https://i.imgur.com/9aAfwcJ.png"
         ).set_footer(
-            text={str(user)},
+            text=str(user),
             icon_url=str(user.avatar_url)
         )
     )
@@ -460,7 +460,7 @@ async def daily(ctx):
         ).set_thumbnail(
             url="https://i.imgur.com/9aAfwcJ.png"
         ).set_footer(
-            text={str(user)},
+            text=str(user),
             icon_url=str(user.avatar_url)
         )
     )
