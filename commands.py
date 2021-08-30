@@ -2,7 +2,6 @@ import sys
 
 import asyncpraw
 import asyncio
-import discord
 import random
 from discord.ext import commands
 import datetime
