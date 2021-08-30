@@ -153,7 +153,10 @@ async def help_(ctx):
 
                     await help_message.edit(embed=pages[n])
 
-                await help_message.remove_reaction(reaction, user)
+                try:
+                    await help_message.remove_reaction(reaction, user)
+                except discord.errors.Forbidden:
+                    pass
             elif str(reaction) == "◀️":
                 if n == 0:
                     pass
@@ -162,15 +165,24 @@ async def help_(ctx):
 
                     await help_message.edit(embed=pages[n])
 
-                await help_message.remove_reaction(reaction, user)
+                try:
+                    await help_message.remove_reaction(reaction, user)
+                except discord.errors.Forbidden:
+                    pass
             elif str(reaction) == "❌":
                 await help_message.clear_reactions()
 
                 break
             else:
-                await help_message.remove_reaction(reaction, user)
+                try:
+                    await help_message.remove_reaction(reaction, user)
+                except discord.errors.Forbidden:
+                    pass
         except asyncio.TimeoutError:
-            await help_message.clear_reactions()
+            try:
+                await help_message.clear_reactions()
+            except discord.errors.Forbidden:
+                pass
 
             break
 
@@ -218,22 +230,36 @@ async def developer_help(ctx):
 
                     await help_message.edit(embed=pages[n])
 
-                await help_message.remove_reaction(reaction, user)
+                try:
+                    await help_message.remove_reaction(reaction, user)
+                except discord.errors.Forbidden:
+                    pass
             elif str(reaction) == "◀️":
-                if n != 0:
+                if n == 0:
+                    pass
+                else:
                     n -= 1
 
                     await help_message.edit(embed=pages[n])
 
-                await help_message.remove_reaction(reaction, user)
+                try:
+                    await help_message.remove_reaction(reaction, user)
+                except discord.errors.Forbidden:
+                    pass
             elif str(reaction) == "❌":
                 await help_message.clear_reactions()
 
                 break
             else:
-                await help_message.remove_reaction(reaction, user)
+                try:
+                    await help_message.remove_reaction(reaction, user)
+                except discord.errors.Forbidden:
+                    pass
         except asyncio.TimeoutError:
-            await help_message.clear_reactions()
+            try:
+                await help_message.clear_reactions()
+            except discord.errors.Forbidden:
+                pass
 
             break
 
@@ -253,28 +279,28 @@ async def info(ctx):
     developers.sort()
     developers_string = "\n".join(developers)
 
-    embed = discord.Embed(
-        title="Information",
-        color=0xff4500  # orangered
-    ).add_field(
-        name="GitHub repository",
-        value="http://github.bedditbot.eu",
-        inline=False
-    ).add_field(
-        name="Discord server",
-        value="https://discord.gg/HjT3YpU",
-        inline=False
-    ).add_field(
-        name="Bot invite",
-        value="http://invite.bedditbot.eu",
-        inline=False
-    ).add_field(
-        name="Developers",
-        value=developers_string,
-        inline=False
+    await ctx.send(
+        embed=discord.Embed(
+            title="Information",
+            color=0xff4500  # orangered
+        ).add_field(
+            name="GitHub repository",
+            value="http://github.bedditbot.eu",
+            inline=False
+        ).add_field(
+            name="Discord server",
+            value="https://discord.gg/HjT3YpU",
+            inline=False
+        ).add_field(
+            name="Bot invite",
+            value="http://invite.bedditbot.eu",
+            inline=False
+        ).add_field(
+            name="Developers",
+            value=developers_string,
+            inline=False
+        )
     )
-
-    await ctx.send(embed=embed)
 
 
 @bot.command(
