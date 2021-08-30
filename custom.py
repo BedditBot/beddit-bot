@@ -1,3 +1,5 @@
+import discord
+
 import config
 
 bot = config.bot
@@ -66,6 +68,22 @@ def store_user_account(user_account):
 
 
 def open_user_account(user):
+    await user.send(
+        embed=discord.Embed(
+            title="Warning",
+            colour=0xffffff,
+            description="Gambling addiction can develop from gambling fake "
+                        "virtual currency, like in Beddit, and negatively "
+                        "affects self-esteem, relationships, physical/mental "
+                        "health, school/work performance and social life.\n"
+                        "Beddit **does not encourage or promote** any kind of "
+                        "**gambling** with real currency, **we discourage "
+                        "it**.\nIn case you think you may have developed "
+                        "gambling addiction, please seek help from "
+                        "[professionals](https://www.ncpgambling.org/5475-2/)."
+        )
+    )
+
     cursor = connection.cursor()
 
     cursor.execute(
