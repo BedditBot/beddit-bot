@@ -564,7 +564,7 @@ async def transfer(ctx, *, args):
 )
 @commands.cooldown(1, 1, commands.BucketType.user)
 async def gamble(ctx):
-    user = ctx.athor
+    user = ctx.author
 
     user_account = get_user_account(user)
 
