@@ -370,8 +370,6 @@ async def balance_(ctx, user_attr=None):
     else:
         user = find_user(ctx, user_attr)
         if not user:
-            await ctx.send("This user wasn't found!")
-
             return
 
     user_account = get_user_account(user)
@@ -379,13 +377,16 @@ async def balance_(ctx, user_attr=None):
     balance = user_account["balance"]
 
     embed = discord.Embed(
-        title=f"{str(user)}'s Balance",
+        title="Balance",
         color=0xffd700  # gold
     ).add_field(
         name="Gold:",
         value=separate_digits(balance)
     ).set_thumbnail(
         url="https://i.imgur.com/9aAfwcJ.png"
+    ).set_footer(
+        text=str(user),
+        icon_url=str(user.default_avatar_url)
     )
 
     await ctx.send(embed=embed)
@@ -1111,50 +1112,6 @@ async def set_prefix(ctx, *, args):
         f"{'prefix' if len(prefixes) == 1 else 'prefixes'} to "
         f"'{', '.join(prefixes)}'!"
     )
-
-
-# error handling for commands
-@post_information.error
-async def post_information_error(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("You must specify a Reddit post's URL!")
-
-
-@daily.error
-async def daily_error(ctx, error):
-    if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send("You already claimed your daily reward today!")
-
-
-@baltop.error
-async def baltop_error(ctx, error):
-    if isinstance(error, commands.CommandError):
-        await ctx.send("That's not a valid argument!")
-
-
-@bet.error
-async def bet_error(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send(
-            f"You must specify arguments! Use: "
-            f"*{bot.command_prefix(bot, ctx.message)[0]}bet "
-            "[Reddit post link] [bet amount] [time (in s/m/h)] [predicted "
-            "upvotes on that post after that time]* to bet."
-        )
-    if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send("You have to wait a few seconds between bets!")
-
-
-@set_prefix.error
-async def changeprefix_error(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("You must specify a prefix!")
-
-
-@gamble.error
-async def gamble_error(ctx, error):
-    if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send("You can't gamble this quickly!")
 
 
 help_pages = get_help_pages(False)
