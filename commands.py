@@ -391,7 +391,8 @@ async def balance_(ctx, user_attr=None):
 
 
 @bot.command(
-    aliases=["editaccount", "ea"],
+    name="editaccount",
+    aliases=["ea"],
     help="Used for manually editing account information.",
     hidden=True
 )
@@ -835,9 +836,8 @@ async def bets(ctx, user_attr=None):
         user = ctx.author
     else:
         user = find_user(ctx, user_attr)
-        if not user:
-            await ctx.send("This user wasn't found!")
 
+        if not user:
             return
 
     user_account = get_user_account(user)
@@ -899,9 +899,8 @@ async def facs(ctx, user_attr=None):
         user = ctx.author
     else:
         user = find_user(ctx, user_attr)
-        if not user:
-            await ctx.send("This user wasn't found!")
 
+        if not user:
             return
 
     user_account = get_user_account(user)
@@ -913,20 +912,24 @@ async def facs(ctx, user_attr=None):
 
     true_balance = user_account["balance"] + hidden_balance_tracker[user.id]
 
-    embed = discord.Embed(
-        title=f"{str(user)}'s Factors",
-        color=0xff7518  # pumpkin
-    ).add_field(
-        name="Balance factor:",
-        value=str(
-            round(
-                math.exp(- true_balance / (10_000_000 / math.log(2))) * 100, 1
-            )
-        ) + "%",
-        inline=False
+    await ctx.send(
+        embed=discord.Embed(
+            title="Factors",
+            color=0xff7518  # pumpkin
+        ).add_field(
+            name="Balance factor",
+            value=str(
+                round(
+                    math.exp(
+                        - true_balance / (10_000_000 / math.log(2))) * 100, 1
+                )
+            ) + "%",
+            inline=False
+        ).set_footer(
+            text=str(user),
+            icon_url=str(user.avatar_url)
+        )
     )
-
-    await ctx.send(embed=embed)
 
 
 @bot.command(
