@@ -41,6 +41,9 @@ def store_user_account(user_account):
     if user_account["balance"] < 0:
         user_account["balance"] = 0
 
+    if user_account["balance"] > 2147483647:
+        user_account["balance"] = 2147483647
+
     cursor = connection.cursor()
 
     cursor.execute(

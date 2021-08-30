@@ -374,22 +374,20 @@ async def balance_(ctx, user_attr=None):
 
     user_account = get_user_account(user)
 
-    balance = user_account["balance"]
-
-    embed = discord.Embed(
-        title="Balance",
-        color=0xffd700  # gold
-    ).add_field(
-        name="Gold",
-        value=separate_digits(balance)
-    ).set_thumbnail(
-        url="https://i.imgur.com/9aAfwcJ.png"
-    ).set_footer(
-        text={str(user)},
-        icon_url=str(user.avatar_url)
+    await ctx.send(
+        embed=discord.Embed(
+            title="Balance",
+            color=0xffd700  # gold
+        ).add_field(
+            name="Gold",
+            value=separate_digits(user_account["balance"])
+        ).set_thumbnail(
+            url="https://i.imgur.com/9aAfwcJ.png"
+        ).set_footer(
+            text={str(user)},
+            icon_url=str(user.avatar_url)
+        )
     )
-
-    await ctx.send(embed=embed)
 
 
 @bot.command(
@@ -444,23 +442,27 @@ async def edit_account(ctx, user_attr, field, value):
 )
 @commands.cooldown(1, 60 * 60 * 24, commands.BucketType.user)
 async def daily(ctx):
-    user_account = get_user_account(ctx.author)
+    user = ctx.author
+
+    user_account = get_user_account(user)
 
     user_account["balance"] += 100
-
-    if user_account["balance"] >= 2147483647:
-        await ctx.send(
-            "My god, you have this much money and still want "
-            "that tiny daily reward? Pathetic."
-        )
-
-        return
 
     store_user_account(user_account)
 
     await ctx.send(
-        "You collected your daily reward of 100 "
-        "Gold<:MessageGold:755792715257479229>!"
+        embed=discord.Embed(
+            title="Balance",
+            color=0xffd700  # gold
+        ).add_field(
+            name="Gold",
+            value=f"{separate_digits(user_account['balance'])} (+100)"
+        ).set_thumbnail(
+            url="https://i.imgur.com/9aAfwcJ.png"
+        ).set_footer(
+            text={str(user)},
+            icon_url=str(user.avatar_url)
+        )
     )
 
 
