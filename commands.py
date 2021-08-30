@@ -877,7 +877,9 @@ async def stats(ctx, user_attr=None):
             url="https://imgur.com/UpdCchY.png"
         ).add_field(
             name="Mean accuracy",
-            value=f"{round(mean_accuracy * 100, 1)}%" if mean_accuracy else "NaN",
+            value=(
+                f"{round(mean_accuracy * 100, 1)}%" if mean_accuracy else "NaN"
+            ),
             inline=False
         ).add_field(
             name="Total bets",
@@ -933,11 +935,122 @@ async def facs(ctx, user_attr=None):
 
 
 @bot.command(
+    name="leaderboard",
+    aliases=["lb"],
+    help="Used for getting the leaderboards for this server."
+)
+async def leaderboard_(ctx, category, size=10):
+    if category in ["accuracy", "acc", "a"]:
+        category = "a"
+    else:
+        category = "b"
+
+    if size <= 0:
+        size = 10
+
+    guild = ctx.guild
+
+    user_accounts = []
+
+    for member in guild.members:
+        user = bot.get_user(member.id)
+
+        if check_user_account(user):
+            user_account = get_user_account(user)
+
+            user_accounts.append(user_account)
+
+    # leaderboard is just sorted collection
+    collection = {}
+    leaderboard = {}
+
+    if category == "a":
+        for user_account in user_accounts:
+            mean_accuracy = user_account["mean_accuracy"]
+
+            if mean_accuracy:
+                collection[user_account["user_id"]] = mean_accuracy
+    else:
+        for user_account in user_accounts:
+            balance = user_account["balance"]
+
+            collection[user_account["user_id"]] = balance
+
+    for user_id in sorted(collection, key=collection.get, reverse=True):
+        leaderboard[user_id] = collection[user_id]
+
+    if category == "a":
+        embed = discord.Embed(
+            title=f"Mean Accuracy Leaderboard of {str(guild)}",
+            description="*Not on this leaderboard? Go bet on some posts!*",
+            color=0x4000ff  # ultramarine
+
+        )
+    else:
+        embed = discord.Embed(
+            title=f"Balance Leaderboard of {str(guild)}",
+            description="*Not on this leaderboard? Go bet on some posts!*",
+            color=0xffd700  # gold
+        )
+
+    # for medal emotes
+    def determine_medal(ranking):
+        if ranking == 1:
+            return ":first_place:"
+        elif ranking == 2:
+            return ":second_place:"
+        elif ranking == 3:
+            return ":third_place:"
+        else:
+            return ":medal:"
+
+    i = 1
+
+    if category == "a":
+        for user_id in leaderboard:
+            user = bot.get_user(user_id)
+
+            user_account = get_user_account(user)
+
+            embed.add_field(
+                name=f"{determine_medal(i)} {str(user)}",
+                value=f"{round(leaderboard[user_id] * 100, 1)}% "
+                      f"("
+                      f"Total bets: "
+                      f"{separate_digits(user_account['total_bets'])}"
+                      f")",
+                inline=False
+            )
+
+            if i == size:
+                break
+            else:
+                i += 1
+    else:
+        for user_id in leaderboard:
+            user = bot.get_user(user_id)
+
+            embed.add_field(
+                name=f"{determine_medal(i)} {str(user)}",
+                value=f"{separate_digits(leaderboard[user_id])} "
+                      f"Gold<:MessageGold:755792715257479229>",
+                inline=False
+            )
+
+            if i == size:
+                break
+            else:
+                i += 1
+
+    await ctx.send(embed=embed)
+
+
+@bot.command(
     aliases=["balancetop"],
     help="Used for getting the Gold<:MessageGold:755792715257479229> "
          "balance leaderboard for this server."
 )
-async def baltop(ctx, size=7):
+async def baltop(ctx, size=10):
     guild = ctx.guild
 
     user_accounts = []
@@ -963,7 +1076,7 @@ async def baltop(ctx, size=7):
         leaderboard[user_id] = collection[user_id]
 
     embed = discord.Embed(
-        title=f"Gold Balance Leaderboard of {str(guild)}",
+        title=f"Balance Leaderboard of {str(guild)}",
         description="*Not on this leaderboard? Go bet on some posts!*",
         color=0xffd700  # gold
     )
@@ -1003,7 +1116,7 @@ async def baltop(ctx, size=7):
     aliases=["accuracytop"],
     help="Used for getting the accuracy leaderboard for this server."
 )
-async def acctop(ctx, size=7):
+async def acctop(ctx, size=10):
     guild = ctx.guild
 
     user_accounts = []
