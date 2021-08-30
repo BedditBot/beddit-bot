@@ -860,9 +860,8 @@ async def stats(ctx, user_attr=None):
         user = ctx.author
     else:
         user = find_user(ctx, user_attr)
-        if not user:
-            await ctx.send("This user wasn't found!")
 
+        if not user:
             return
 
     user_account = get_user_account(user)
@@ -870,22 +869,25 @@ async def stats(ctx, user_attr=None):
     mean_accuracy = user_account["mean_accuracy"]
     total_bets = user_account["total_bets"]
 
-    embed = discord.Embed(
-        title=f"{str(user)}'s Stats",
-        color=0x4000ff  # ultramarine
-    ).set_thumbnail(
-        url="https://imgur.com/UpdCchY.png"
-    ).add_field(
-        name="Mean accuracy:",
-        value=f"{round(mean_accuracy * 100, 1)}%" if mean_accuracy else "NaN",
-        inline=False
-    ).add_field(
-        name="Total bets:",
-        value=separate_digits(total_bets),
-        inline=False
+    await ctx.send(
+        embed=discord.Embed(
+            title="Statistics",
+            color=0x4000ff  # ultramarine
+        ).set_thumbnail(
+            url="https://imgur.com/UpdCchY.png"
+        ).add_field(
+            name="Mean accuracy",
+            value=f"{round(mean_accuracy * 100, 1)}%" if mean_accuracy else "NaN",
+            inline=False
+        ).add_field(
+            name="Total bets",
+            value=separate_digits(total_bets),
+            inline=False
+        ).set_footer(
+            text=str(user),
+            icon_url=str(user.avatar_url)
+        )
     )
-
-    await ctx.send(embed=embed)
 
 
 @bot.command(
