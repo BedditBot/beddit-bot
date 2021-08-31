@@ -5,7 +5,7 @@ import psycopg2
 import config
 
 
-async def logging_setup():
+def logging_setup():
     # Discord
     discord_logger = logging.getLogger("discord")
     discord_logger.setLevel(logging.DEBUG)
@@ -51,7 +51,7 @@ async def logging_setup():
     prawcore_logger.addHandler(reddit_console_handler)
 
 
-async def check_environment():
+def check_environment():
     global on_heroku
 
     if "DYNO" in os.environ:
@@ -60,7 +60,7 @@ async def check_environment():
         on_heroku = False
 
 
-async def handle_constants():
+def handle_constants():
     if not on_heroku:
         choice = input(
             "Have any constants changed or NOT been set? (y/n) - "
@@ -107,7 +107,7 @@ async def handle_constants():
             pass
         else:
             print("Invalid input, try again.")
-            await handle_constants()
+            handle_constants()
 
         from dotenv import load_dotenv
 
@@ -123,7 +123,7 @@ async def handle_constants():
         config.DATABASE_URL = os.environ["DATABASE_URL"]
 
 
-async def database_setup():
+def database_setup():
     if on_heroku:
         config.connection = psycopg2.connect(
             config.DATABASE_URL,
@@ -140,11 +140,11 @@ async def database_setup():
         )
 
 
-await logging_setup()
+logging_setup()
 
 on_heroku = None
-await check_environment()
+check_environment()
 
-await handle_constants()
+handle_constants()
 
-await database_setup()
+database_setup()
