@@ -39,7 +39,7 @@ async def get_user_account(user):
     return user_account
 
 
-def store_user_account(user_account):
+async def store_user_account(user_account):
     if user_account["balance"] < 0:
         user_account["balance"] = 0
 
@@ -103,7 +103,7 @@ async def open_user_account(user):
 
 
 # checks if an account already exists for a user
-def check_user_account(user):
+async def check_user_account(user):
     cursor = connection.cursor()
 
     cursor.execute(
@@ -119,7 +119,7 @@ def check_user_account(user):
 
 
 # clears active bets on every restart (runs in main.py)
-def clear_active_bets():
+async def clear_active_bets():
     cursor = connection.cursor()
 
     cursor.execute(
@@ -130,7 +130,7 @@ def clear_active_bets():
     cursor.close()
 
 
-def get_guild_prefixes(guild):
+async def get_guild_prefixes(guild):
     cursor = connection.cursor()
 
     cursor.execute(
@@ -141,7 +141,7 @@ def get_guild_prefixes(guild):
     values = cursor.fetchone()
 
     if not values:
-        open_guild_prefixes(guild)
+        await open_guild_prefixes(guild)
 
         cursor.execute(
             "SELECT * FROM prefixes WHERE guild_id = %(guild_id)s;",
@@ -159,7 +159,7 @@ def get_guild_prefixes(guild):
     return guild_prefixes
 
 
-def store_guild_prefixes(guild_prefixes):
+async def store_guild_prefixes(guild_prefixes):
     cursor = connection.cursor()
 
     cursor.execute(
@@ -176,7 +176,7 @@ def store_guild_prefixes(guild_prefixes):
     cursor.close()
 
 
-def open_guild_prefixes(guild):
+async def open_guild_prefixes(guild):
     cursor = connection.cursor()
 
     cursor.execute(
@@ -196,7 +196,7 @@ async def set_guild_prefixes(guild, prefixes=None):
         # sets default prefix ($)
         prefixes = ["$"]
 
-    guild_prefixes = get_guild_prefixes(guild)
+    guild_prefixes = await get_guild_prefixes(guild)
 
     guild_prefixes["prefixes"] = prefixes
 
@@ -205,10 +205,10 @@ async def set_guild_prefixes(guild, prefixes=None):
 
     await bot_member.edit(nick=f"{bot_user.name} | {prefixes[0]}")
 
-    store_guild_prefixes(guild_prefixes)
+    await store_guild_prefixes(guild_prefixes)
 
 
-def remove_guild_prefixes(guild):
+async def remove_guild_prefixes(guild):
     cursor = connection.cursor()
 
     cursor.execute(
@@ -237,13 +237,13 @@ async def ensure_prefixes_integrity():
     cursor.close()
 
 
-def disconnect_database():
+async def disconnect_database():
     connection.close()
 
 
 # argument user_attr (user attribute) is something related to the user
 # like ID, name or name with discriminator
-def find_user(ctx, user_attr):
+async def find_user(ctx, user_attr):
     user = None
 
     def not_mention(text):
@@ -293,7 +293,7 @@ def find_user(ctx, user_attr):
 
 
 # ini_amount is the initial amount of accuracies used for ini_mean
-def calculate_mean_accuracy(ini_mean, ini_amount, new_accuracy):
+async def calculate_mean_accuracy(ini_mean, ini_amount, new_accuracy):
     if not ini_mean:
         ini_mean = 0
 
@@ -304,7 +304,7 @@ def calculate_mean_accuracy(ini_mean, ini_amount, new_accuracy):
     return round(fin_mean, 3)
 
 
-def separate_digits(num):
+async def separate_digits(num):
     num_list = list(str(num))
     reversed_final_list = []
 

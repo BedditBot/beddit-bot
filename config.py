@@ -20,7 +20,7 @@ def set_bot():
     def get_prefix(_, message):
         from custom import get_guild_prefixes
 
-        guild_prefixes = get_guild_prefixes(message.guild)
+        guild_prefixes = await get_guild_prefixes(message.guild)
 
         return guild_prefixes["prefixes"]
 

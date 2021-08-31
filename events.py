@@ -7,7 +7,7 @@ bot = config.bot
 async def on_ready():
     await ensure_prefixes_integrity()
 
-    clear_active_bets()
+    await clear_active_bets()
 
     latency = round(bot.latency, 3) * 1000  # in ms to 3 d.p.
 
@@ -21,4 +21,4 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_guild_remove(guild):
-    remove_guild_prefixes(guild)
+    await remove_guild_prefixes(guild)
