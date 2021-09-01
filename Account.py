@@ -41,46 +41,33 @@ class Account:
             )
         )
 
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "INSERT INTO accounts VALUES (%(user_id)s, %(gold)s, %(platinum)s,"
-            " %(active_bets)s, %(total_bets)s, %(mean_accuracy)s);",
-            {
-                "user_id": user.id,
-                "gold": 250,
-                "platinum": 0,
-                "active_bets": 0,
-                "total_bets": 0,
-                "mean_accuracy": None
-            }
-        )
-
-        connection.commit()
-        cursor.close()
+        async with connection.transaction():
+            await connection.execute(
+                "INSERT INTO accounts VALUES ($1, $2, $3, $4, $5, $6);",
+                user.id,
+                250,
+                0,
+                0,
+                None,
+                0
+            )
 
     @staticmethod
     async def get(user):
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "SELECT * FROM accounts WHERE user_id=%(user_id)s;",
-            {"user_id": user.id}
-        )
-
-        values = cursor.fetchone()
+        async with connection.transaction():
+            values = tuple(await connection.fetchrow(
+                "SELECT * FROM accounts WHERE user_id=$1;",
+                user.id
+            ).values())
 
         if not values:
             await Account.open(user)
 
-            cursor.execute(
-                "SELECT * FROM accounts WHERE user_id=%(user_id)s;",
-                {"user_id": user.id}
-            )
-
-            values = cursor.fetchone()
-
-        cursor.close()
+            async with connection.transaction():
+                values = tuple(connection.fetchrow(
+                    "SELECT * FROM accounts WHERE user_id=$1;",
+                    user.id
+                ).values())
 
         account = Account(*values)
 
@@ -96,37 +83,25 @@ class Account:
         if self.gold > 2147483647:
             self.gold = 2147483647
 
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "UPDATE accounts "
-            "SET gold = %(gold)s, platinum = %(platinum)s, active_bets = "
-            "%(active_bets)s, total_bets = %(total_bets)s, mean_accuracy = "
-            "%(mean_accuracy)s WHERE user_id = %(user_id)s;",
-            {
-                "user_id": self.user_id,
-                "gold": self.gold,
-                "platinum": self.platinum,
-                "active_bets": self.active_bets,
-                "total_bets": self.total_bets,
-                "mean_accuracy": self.mean_accuracy
-            }
-        )
-
-        connection.commit()
-        cursor.close()
+        async with connection.transaction():
+            await connection.execute(
+                "UPDATE accounts SET gold = $2, platinum = $3, "
+                "active_bets = $4, total_bets = $5, mean_accuracy = $6 "
+                "WHERE user_id = $1;",
+                self.user_id,
+                self.gold,
+                self.platinum,
+                self.active_bets,
+                self.total_bets,
+                self.mean_accuracy
+            )
 
     @staticmethod
     async def check(user):
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "SELECT * FROM accounts WHERE user_id=%(user_id)s;",
-            {"user_id": user.id}
-        )
-
-        account_ = cursor.fetchone()
-
-        cursor.close()
+        async with connection.transaction():
+            account_ = tuple(await connection.fetchrow(
+                "SELECT * FROM accounts WHERE user_id=$1;",
+                user.id
+            ).values())
 
         return bool(account_)
