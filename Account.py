@@ -10,17 +10,17 @@ class Account:
             self,
             user_id,
             gold,
-            platinum,
             active_bets,
             total_bets,
-            mean_accuracy
+            mean_accuracy,
+            platinum
     ):
         self.user_id = user_id
         self.gold = gold
-        self.platinum = platinum
         self.active_bets = active_bets
         self.total_bets = total_bets
         self.mean_accuracy = mean_accuracy
+        self.platinum = platinum
 
     @staticmethod
     async def open(user):
