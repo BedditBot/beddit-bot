@@ -859,9 +859,11 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
 
 @bot.command(
+    name="activebets",
+    aliases=["bets"],
     help="Used for getting the active bets of a user."
 )
-async def bets(ctx, user_attr=None):
+async def active_bets_(ctx, user_attr=None):
     if not user_attr:
         user = ctx.author
     else:
@@ -875,9 +877,14 @@ async def bets(ctx, user_attr=None):
     active_bets = account.active_bets
 
     await ctx.send(
-        f"{'You' if user == ctx.author else f'**{str(user)}**'} currently "
-        f"{'have' if user == ctx.author else 'has'} {active_bets} "
-        f"{'bets' if active_bets != 1 else 'bet'} running!"
+        embed=discord.Embed(
+            title="Active bets",
+            color=0xff4500,  # orangered
+            description=active_bets
+        ).set_footer(
+            text=str(user),
+            icon_url=str(user.avatar_url)
+        )
     )
 
 
