@@ -363,19 +363,19 @@ async def post_information(ctx, link):
             inline=False
         ).add_field(
             name="Score",
-            value=await separate_digits(score),
+            value=separate_digits(score),
             inline=False
         ).add_field(
             name="Upvotes",
-            value=await separate_digits(upvotes),
+            value=separate_digits(upvotes),
             inline=False
         ).add_field(
             name="Downvotes",
-            value=await separate_digits(downvotes),
+            value=separate_digits(downvotes),
             inline=False
         ).add_field(
             name="Comments",
-            value=await separate_digits(post.num_comments),
+            value=separate_digits(post.num_comments),
             inline=False
         )
     )
@@ -403,7 +403,7 @@ async def balance_(ctx, user_attr=None):
             color=0xffd700  # gold
         ).add_field(
             name="Gold",
-            value=await separate_digits(user_account["balance"])
+            value=separate_digits(user_account["balance"])
         ).set_thumbnail(
             url="https://i.imgur.com/9aAfwcJ.png"
         ).set_footer(
@@ -480,7 +480,7 @@ async def daily(ctx):
             color=0xffd700  # gold
         ).add_field(
             name="Gold",
-            value=f"{await separate_digits(user_account['balance'])} (+100)"
+            value=(separate_digits(user_account['balance']) + " (+100)")
         ).set_thumbnail(
             url="https://i.imgur.com/9aAfwcJ.png"
         ).set_footer(
@@ -743,11 +743,11 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
     # sends initial message with specifics
     await ctx.send(
-        f"This post has {await separate_digits(initial_ups)} "
+        f"This post has {separate_digits(initial_ups)} "
         f"upvotes right now! "
-        f"You bet {await separate_digits(amount)} "
+        f"You bet {separate_digits(amount)} "
         f"Gold<:MessageGold:755792715257479229> on it reaching "
-        f"{await separate_digits(predicted_ups)} upvotes in {time}!"
+        f"{separate_digits(predicted_ups)} upvotes in {time}!"
     )
 
     user_account["active_bets"] += 1
@@ -814,7 +814,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
         return
 
     user_account["active_bets"] -= 1
-    user_account["mean_accuracy"] = await calculate_mean_accuracy(
+    user_account["mean_accuracy"] = calculate_mean_accuracy(
         user_account["mean_accuracy"],
         user_account["total_bets"],
         accuracy
@@ -826,24 +826,24 @@ async def bet(ctx, link, amount, time, predicted_ups):
     if true_winnings > 0:
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and the post has "
-            f"{await separate_digits(final_ups)} upvotes right now! "
+            f"{separate_digits(final_ups)} upvotes right now! "
             f"You were {accuracy_in_pct}% "
-            f"accurate and won {await separate_digits(true_winnings)} "
+            f"accurate and won {separate_digits(true_winnings)} "
             f"Gold<:MessageGold:755792715257479229>!"
         )
     elif true_winnings == 0:
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and the post has "
-            f"{await separate_digits(final_ups)} upvotes right now! "
+            f"{separate_digits(final_ups)} upvotes right now! "
             f"You were {accuracy_in_pct}% "
             f"accurate but won nothing."
         )
     else:
         await ctx.send(
             f"Hello {user.mention}! It's {time} later, and the post has "
-            f"{await separate_digits(final_ups)} upvotes right now! "
+            f"{separate_digits(final_ups)} upvotes right now! "
             f"You were {accuracy_in_pct}% "
-            f"accurate and lost {await separate_digits(abs(true_winnings))} "
+            f"accurate and lost {separate_digits(abs(true_winnings))} "
             f"Gold<:MessageGold:755792715257479229>!"
         )
 
@@ -903,7 +903,7 @@ async def stats(ctx, user_attr=None):
             inline=False
         ).add_field(
             name="Total bets",
-            value=await separate_digits(total_bets),
+            value=separate_digits(total_bets),
             inline=False
         ).set_footer(
             text=str(user),
@@ -1039,7 +1039,7 @@ async def leaderboard_(ctx, category="balance", size=10):
                 value=f"{round(leaderboard[user_id] * 100, 1)}% "
                       f"("
                       f"Total bets: "
-                      f"{await separate_digits(user_account['total_bets'])}"
+                      f"{separate_digits(user_account['total_bets'])}"
                       f")",
                 inline=False
             )
@@ -1054,7 +1054,7 @@ async def leaderboard_(ctx, category="balance", size=10):
 
             embed.add_field(
                 name=f"{determine_medal(i)} {str(user)}",
-                value=f"{await separate_digits(leaderboard[user_id])} "
+                value=f"{separate_digits(leaderboard[user_id])} "
                       f"Gold<:MessageGold:755792715257479229>",
                 inline=False
             )

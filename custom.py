@@ -293,7 +293,7 @@ async def find_user(ctx, user_attr):
 
 
 # ini_amount is the initial amount of accuracies used for ini_mean
-async def calculate_mean_accuracy(ini_mean, ini_amount, new_accuracy):
+def calculate_mean_accuracy(ini_mean, ini_amount, new_accuracy):
     if not ini_mean:
         ini_mean = 0
 
@@ -304,7 +304,7 @@ async def calculate_mean_accuracy(ini_mean, ini_amount, new_accuracy):
     return round(fin_mean, 3)
 
 
-async def separate_digits(num):
+def separate_digits(num):
     num_list = list(str(num))
     reversed_final_list = []
 
