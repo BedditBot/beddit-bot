@@ -405,10 +405,12 @@ async def balance_(ctx, user_attr=None):
             color=0xffd700  # gold
         ).add_field(
             name="Gold",
-            value=separate_digits(account.gold)
+            value=separate_digits(account.gold),
+            inline=False
         ).add_field(
             name="Platinum",
-            value=separate_digits(account.platinum)
+            value=separate_digits(account.platinum),
+            inline=False
         ).set_thumbnail(
             url="https://i.imgur.com/9aAfwcJ.png"
         ).set_footer(
