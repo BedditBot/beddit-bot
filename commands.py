@@ -1105,7 +1105,7 @@ async def prefix_(ctx):
 
 @bot.command(
     name="setprefixes",
-    aliases=["changeprefix", "changeprefixes", "setprefixes", "setprefix"],
+    aliases=["setprefix", "changeprefix", "changeprefixes"],
     help="Used for changing the bot's server prefixes. "
          "(Only works if the user has the Administrator permission.)"
 )
