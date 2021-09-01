@@ -363,15 +363,15 @@ async def post_information(ctx, link):
             inline=False
         ).add_field(
             name="Score",
-            value=f"{await separate_digits(score)}",
+            value=await separate_digits(score),
             inline=False
         ).add_field(
             name="Upvotes",
-            value=f"{await separate_digits(upvotes)}",
+            value=await separate_digits(upvotes),
             inline=False
         ).add_field(
             name="Downvotes",
-            value=f"{await separate_digits(downvotes)}",
+            value=await separate_digits(downvotes),
             inline=False
         ).add_field(
             name="Comments",
