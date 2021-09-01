@@ -123,7 +123,7 @@ def handle_constants():
         config.DATABASE_URL = os.environ["DATABASE_URL"]
 
 
-async def database_setup():
+def database_setup():
     if on_heroku:
         config.connection = await asyncpg.connect(
             dsn=config.DATABASE_URL,
@@ -146,3 +146,5 @@ on_heroku = None
 check_environment()
 
 handle_constants()
+
+database_setup()
