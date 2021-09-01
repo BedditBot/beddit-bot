@@ -1,6 +1,6 @@
 import os
 import logging
-import psycopg2
+import asyncpg
 
 import config
 
@@ -125,13 +125,13 @@ def handle_constants():
 
 def database_setup():
     if on_heroku:
-        config.connection = psycopg2.connect(
-            config.DATABASE_URL,
-            sslmode="require"
+        config.connection = await asyncpg.connect(
+            dsn=config.DATABASE_URL,
+            ssl="require"
         )
     else:
         # manually input arguments
-        config.connection = psycopg2.connect(
+        config.connection = await asyncpg.connect(
             user=None,
             password=None,
             host=None,
