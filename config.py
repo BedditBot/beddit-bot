@@ -11,7 +11,7 @@ D_TOKEN = None
 
 
 # for custom server-specific prefixes
-def get_prefix(_, message):
+async def get_prefix(_, message):
     from custom import get_guild_prefixes
 
     guild_prefixes = await get_guild_prefixes(message.guild)
