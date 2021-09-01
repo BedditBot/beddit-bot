@@ -1,11 +1,13 @@
 from custom import *
+from Account import Account
+from Accessory import Accessory
 
 bot = config.bot
 
 
 @bot.event
 async def on_ready():
-    await ensure_prefixes_integrity()
+    await Accessory.ensure_integrity()
 
     await clear_active_bets()
 
@@ -16,9 +18,9 @@ async def on_ready():
 
 @bot.event
 async def on_guild_join(guild):
-    await set_guild_prefixes(guild)
+    await Accessory.set_prefixes(guild)
 
 
 @bot.event
 async def on_guild_remove(guild):
-    await remove_guild_prefixes(guild)
+    await Accessory.remove(guild)

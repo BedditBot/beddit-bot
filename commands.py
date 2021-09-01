@@ -8,6 +8,8 @@ import datetime
 import math
 
 from custom import *
+from Account import Account
+from Accessory import Accessory
 
 bot = config.bot
 
@@ -395,7 +397,7 @@ async def balance_(ctx, user_attr=None):
         if not user:
             return
 
-    user_account = await get_user_account(user)
+    account = await Account.get(user)
 
     await ctx.send(
         embed=discord.Embed(
@@ -403,7 +405,10 @@ async def balance_(ctx, user_attr=None):
             color=0xffd700  # gold
         ).add_field(
             name="Gold",
-            value=separate_digits(user_account["balance"])
+            value=separate_digits(account.gold)
+        ).add_field(
+            name="Platinum",
+            value=separate_digits(account.platinum)
         ).set_thumbnail(
             url="https://i.imgur.com/9aAfwcJ.png"
         ).set_footer(
@@ -413,51 +418,51 @@ async def balance_(ctx, user_attr=None):
     )
 
 
-@bot.command(
-    name="editaccount",
-    aliases=["ea"],
-    help="Used for manually editing account information.",
-    hidden=True
-)
-async def edit_account(ctx, user_attr, field, value):
-    if not await bot.is_owner(ctx.author):
-        return
-
-    if not user_attr:
-        user = ctx.author
-    else:
-        user = await find_user(ctx, user_attr)
-        if not user:
-            await ctx.send("This user wasn't found!")
-
-            return
-
-    user_account = await get_user_account(user)
-
-    if field not in user_account:
-        await ctx.send("Field not found.")
-
-        return
-
-    if not value.replace(".", "").isdigit() and value != "None":
-        await ctx.send("Invalid value.")
-
-        return
-
-    if "." in value:
-        value = round(float(value), 3)
-    elif value == "None":
-        value = None
-    else:
-        value = int(value)
-
-    user_account[field] = value
-
-    await store_user_account(user_account)
-
-    await ctx.send(
-        f"Edited {str(user)}'s bank account {field} field to {value}!"
-    )
+# @bot.command(
+#     name="editaccount",
+#     aliases=["ea"],
+#     help="Used for manually editing account information.",
+#     hidden=True
+# )
+# async def edit_account(ctx, user_attr, field, value):
+#     if not await bot.is_owner(ctx.author):
+#         return
+#
+#     if not user_attr:
+#         user = ctx.author
+#     else:
+#         user = await find_user(ctx, user_attr)
+#         if not user:
+#             await ctx.send("This user wasn't found!")
+#
+#             return
+#
+#     account = await Account.get(user)
+#
+#     if field not in account:
+#         await ctx.send("Field not found.")
+#
+#         return
+#
+#     if not value.replace(".", "").isdigit() and value != "None":
+#         await ctx.send("Invalid value.")
+#
+#         return
+#
+#     if "." in value:
+#         value = round(float(value), 3)
+#     elif value == "None":
+#         value = None
+#     else:
+#         value = int(value)
+#
+#     account[field] = value
+#
+#     await store_user_account(account)
+#
+#     await ctx.send(
+#         f"Edited {str(user)}'s bank account {field} field to {value}!"
+#     )
 
 
 @bot.command(
@@ -468,11 +473,11 @@ async def edit_account(ctx, user_attr, field, value):
 async def daily(ctx):
     user = ctx.author
 
-    user_account = await get_user_account(user)
+    account = await Account.get(user)
 
-    user_account["balance"] += 100
+    account.gold += 100
 
-    await store_user_account(user_account)
+    await account.store()
 
     await ctx.send(
         embed=discord.Embed(
@@ -480,7 +485,10 @@ async def daily(ctx):
             color=0xffd700  # gold
         ).add_field(
             name="Gold",
-            value=(separate_digits(user_account['balance']) + " (+100)")
+            value=(separate_digits(account.gold) + " (+100)")
+        ).add_field(
+            name="Platinum",
+            value=separate_digits(account.platinum)
         ).set_thumbnail(
             url="https://i.imgur.com/9aAfwcJ.png"
         ).set_footer(
@@ -505,9 +513,9 @@ async def transfer(ctx, *, args):
 
     sender = ctx.author
 
-    sender_account = await get_user_account(sender)
+    sender_account = await Account.get(sender)
 
-    if sender_account["active_bets"] > 0:
+    if sender_account.active_bets > 0:
         await ctx.send(
             embed=discord.Embed(
                 title="Error",
@@ -539,12 +547,12 @@ async def transfer(ctx, *, args):
     if sender == receiver:
         return
 
-    if amount > sender_account["balance"]:
+    if amount > sender_account.gold:
         return
 
-    receiver_account = await get_user_account(receiver)
+    receiver_account = await Account.get(receiver)
 
-    if receiver_account["active_bets"] > 0:
+    if receiver_account.active_bets > 0:
         await ctx.send(
             embed=discord.Embed(
                 title="Error",
@@ -560,11 +568,11 @@ async def transfer(ctx, *, args):
 
         return
 
-    sender_account["balance"] -= amount
-    receiver_account["balance"] += int(amount - TRANSFER_TAX_RATE * amount)
+    sender_account.gold -= amount
+    receiver_account.gold += int(amount - TRANSFER_TAX_RATE * amount)
 
-    await store_user_account(sender_account)
-    await store_user_account(receiver_account)
+    await sender_account.store()
+    await receiver_account.store()
 
     await ctx.send(
         embed=discord.Embed(
@@ -589,11 +597,11 @@ async def transfer(ctx, *, args):
 async def gamble(ctx):
     user = ctx.author
 
-    user_account = await get_user_account(user)
+    account = await Account.get(user)
 
-    balance = user_account["balance"]
+    gold = account.gold
 
-    if balance < 50:
+    if gold < 50:
         return
 
     outcome = random.randint(1, 100)
@@ -609,9 +617,9 @@ async def gamble(ctx):
 
     true_winnings = winnings - 50
 
-    user_account["balance"] += true_winnings
+    account.gold += true_winnings
 
-    await store_user_account(user_account)
+    await account.store()
 
     await ctx.send(
         embed=discord.Embed(
@@ -645,7 +653,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
         return
 
-    user_account = await get_user_account(user)
+    account = await Account.get(user)
 
     if "%" in amount:
         if not 0 < float(amount.rstrip("%")) <= 100:
@@ -654,7 +662,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
             return
 
         amount = int(
-            float(amount.rstrip("%")) * user_account["balance"] / 100
+            float(amount.rstrip("%")) * account.gold / 100
         )
     else:
         amount = int(amount)
@@ -691,12 +699,12 @@ async def bet(ctx, link, amount, time, predicted_ups):
 
         return
 
-    if user_account["balance"] < amount:
+    if account.gold < amount:
         await ctx.send("You do not have enough chips to bet this much!")
 
         return
 
-    if user_account["active_bets"] >= 3:
+    if account.active_bets >= 3:
         await ctx.send("You already have 3 bets running!")
 
         return
@@ -750,8 +758,8 @@ async def bet(ctx, link, amount, time, predicted_ups):
         f"{separate_digits(predicted_ups)} upvotes in {time}!"
     )
 
-    user_account["active_bets"] += 1
-    user_account["balance"] -= amount
+    account.active_bets += 1
+    account.gold -= amount
 
     try:
         hidden_balance_tracker[user.id] += amount
@@ -759,7 +767,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
         hidden_balance_tracker[user.id] = 0
         hidden_balance_tracker[user.id] += amount
 
-    await store_user_account(user_account)
+    await account.store()
 
     # waits until the chosen time runs out, then calculates the accuracy
     await asyncio.sleep(time_in_seconds)
@@ -781,9 +789,9 @@ async def bet(ctx, link, amount, time, predicted_ups):
     accuracy = round(accuracy, 3)
     accuracy_in_pct = accuracy * 100
 
-    user_account = await get_user_account(user)
+    account = await Account.get(user)
 
-    true_balance = user_account["balance"] + hidden_balance_tracker[user.id]
+    true_balance = account.gold + hidden_balance_tracker[user.id]
 
     # multiplier formula
     multiplier = (
@@ -795,33 +803,33 @@ async def bet(ctx, link, amount, time, predicted_ups):
     winnings = int(amount * multiplier)
     true_winnings = winnings - amount
 
-    user_account["balance"] += winnings
+    account.gold += winnings
 
     hidden_balance_tracker[user.id] -= amount
 
-    if user_account["balance"] >= 2147483647:
+    if account.gold >= 2147483647:
         await ctx.send(
             f"Hello {user.mention}! Great job! You have hit the limits of "
             f"time and space! (Or possibly our programming...)"
         )
 
-        user_account["balance"] -= winnings
-        user_account["active_bets"] -= 1
-        user_account["balance"] += amount
+        account.gold -= winnings
+        account.active_bets -= 1
+        account.gold += amount
 
-        await store_user_account(user_account)
+        await account.store()
 
         return
 
-    user_account["active_bets"] -= 1
-    user_account["mean_accuracy"] = calculate_mean_accuracy(
-        user_account["mean_accuracy"],
-        user_account["total_bets"],
+    account.active_bets -= 1
+    account.mean_accuracy = calculate_mean_accuracy(
+        account.mean_accuracy,
+        account.total_bets,
         accuracy
     )
-    user_account["total_bets"] += 1
+    account.total_bets += 1
 
-    await store_user_account(user_account)
+    await account.store()
 
     if true_winnings > 0:
         await ctx.send(
@@ -860,9 +868,9 @@ async def bets(ctx, user_attr=None):
         if not user:
             return
 
-    user_account = await get_user_account(user)
+    account = await Account.get(user)
 
-    active_bets = user_account["active_bets"]
+    active_bets = account.active_bets
 
     await ctx.send(
         f"{'You' if user == ctx.author else f'**{str(user)}**'} currently "
@@ -884,10 +892,10 @@ async def stats(ctx, user_attr=None):
         if not user:
             return
 
-    user_account = await get_user_account(user)
+    account = await Account.get(user)
 
-    mean_accuracy = user_account["mean_accuracy"]
-    total_bets = user_account["total_bets"]
+    mean_accuracy = account.mean_accuracy
+    total_bets = account.total_bets
 
     await ctx.send(
         embed=discord.Embed(
@@ -926,21 +934,21 @@ async def factors_(ctx, user_attr=None):
         if not user:
             return
 
-    user_account = await get_user_account(user)
+    account = await Account.get(user)
 
     try:
         hidden_balance_tracker[user.id]
     except KeyError:
         hidden_balance_tracker[user.id] = 0
 
-    true_balance = user_account["balance"] + hidden_balance_tracker[user.id]
+    true_balance = account.gold + hidden_balance_tracker[user.id]
 
     await ctx.send(
         embed=discord.Embed(
             title="Factors",
             color=0xff7518  # pumpkin
         ).add_field(
-            name="Balance factor",
+            name="Gold factor",
             value=str(
                 round(
                     math.exp(
@@ -961,42 +969,42 @@ async def factors_(ctx, user_attr=None):
     help="Used for getting the leaderboards for this server.",
     usage="leaderboard [balance/accuracy]"
 )
-async def leaderboard_(ctx, category="balance", size=10):
+async def leaderboard_(ctx, category="gold", size=10):
     if category in ["accuracy", "acc", "a"]:
         category = "a"
     else:
-        category = "b"
+        category = "g"
 
     if size <= 0:
         size = 10
 
     guild = ctx.guild
 
-    user_accounts = []
+    accounts = []
 
     for member in guild.members:
         user = bot.get_user(member.id)
 
-        if await check_user_account(user):
-            user_account = await get_user_account(user)
+        if await Account.check(user):
+            account = await Account.get(user)
 
-            user_accounts.append(user_account)
+            accounts.append(account)
 
     # leaderboard is just sorted collection
     collection = {}
     leaderboard = {}
 
     if category == "a":
-        for user_account in user_accounts:
-            mean_accuracy = user_account["mean_accuracy"]
+        for account in accounts:
+            mean_accuracy = account.mean_accuracy
 
             if mean_accuracy:
-                collection[user_account["user_id"]] = mean_accuracy
+                collection[account.user_id] = mean_accuracy
     else:
-        for user_account in user_accounts:
-            balance = user_account["balance"]
+        for account in accounts:
+            gold = account.gold
 
-            collection[user_account["user_id"]] = balance
+            collection[account.user_id] = gold
 
     for user_id in sorted(collection, key=collection.get, reverse=True):
         leaderboard[user_id] = collection[user_id]
@@ -1010,7 +1018,7 @@ async def leaderboard_(ctx, category="balance", size=10):
         )
     else:
         embed = discord.Embed(
-            title=f"Gold Balance Leaderboard of {str(guild)}",
+            title=f"Gold Leaderboard of {str(guild)}",
             description="*Not on this leaderboard? Go bet on some posts!*",
             color=0xffd700  # gold
         )
@@ -1032,14 +1040,14 @@ async def leaderboard_(ctx, category="balance", size=10):
         for user_id in leaderboard:
             user = bot.get_user(user_id)
 
-            user_account = await get_user_account(user)
+            account = await Account.get(user)
 
             embed.add_field(
                 name=f"{determine_medal(i)} {str(user)}",
                 value=f"{round(leaderboard[user_id] * 100, 1)}% "
                       f"("
                       f"Total bets: "
-                      f"{separate_digits(user_account['total_bets'])}"
+                      f"{separate_digits(account.total_bets)}"
                       f")",
                 inline=False
             )
@@ -1073,9 +1081,9 @@ async def leaderboard_(ctx, category="balance", size=10):
     help="Used for getting the bot's server prefixes."
 )
 async def prefix_(ctx):
-    guild_prefixes = await get_guild_prefixes(ctx.guild)
+    accessory = await Accessory.get(ctx.guild)
 
-    prefixes = guild_prefixes["prefixes"]
+    prefixes = accessory.prefixes
 
     await ctx.send(
         embed=discord.Embed(
@@ -1108,7 +1116,7 @@ async def set_prefix(ctx, *, args):
 
                         return
 
-    await set_guild_prefixes(ctx.guild, prefixes)
+    await Accessory.set_prefixes(ctx.guild, prefixes)
 
     await ctx.send(
         f"You have changed the server "

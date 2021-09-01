@@ -11,19 +11,19 @@ D_TOKEN = None
 
 
 # for custom server-specific prefixes
-async def get_prefix(_, message):
-    from custom import get_guild_prefixes
+async def get_prefixes(_, message):
+    from Accessory import Accessory
 
-    guild_prefixes = await get_guild_prefixes(message.guild)
+    accessory = await Accessory.get(message.guild)
 
-    return guild_prefixes["prefixes"]
+    return accessory.prefixes
 
 
 intents = discord.Intents.default()
 intents.members = True
 
 bot = commands.Bot(
-    command_prefix=get_prefix,
+    command_prefix=get_prefixes,
     intents=intents
 )
 
