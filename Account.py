@@ -2,8 +2,6 @@ import discord
 
 import config
 
-connection = config.connection
-
 
 class Account:
     def __init__(
@@ -41,8 +39,8 @@ class Account:
             )
         )
 
-        async with connection.transaction():
-            await connection.execute(
+        async with config.connection.transaction():
+            await config.connection.execute(
                 "INSERT INTO accounts VALUES ($1, $2, $3, $4, $5, $6);",
                 user.id,
                 250,
@@ -54,8 +52,8 @@ class Account:
 
     @staticmethod
     async def get(user):
-        async with connection.transaction():
-            values = tuple(await connection.fetchrow(
+        async with config.connection.transaction():
+            values = tuple(await config.connection.fetchrow(
                 "SELECT * FROM accounts WHERE user_id=$1;",
                 user.id
             ).values())
@@ -63,8 +61,8 @@ class Account:
         if not values:
             await Account.open(user)
 
-            async with connection.transaction():
-                values = tuple(connection.fetchrow(
+            async with config.connection.transaction():
+                values = tuple(config.connection.fetchrow(
                     "SELECT * FROM accounts WHERE user_id=$1;",
                     user.id
                 ).values())
@@ -83,8 +81,8 @@ class Account:
         if self.gold > 2147483647:
             self.gold = 2147483647
 
-        async with connection.transaction():
-            await connection.execute(
+        async with config.connection.transaction():
+            await config.connection.execute(
                 "UPDATE accounts SET gold = $2, platinum = $3, "
                 "active_bets = $4, total_bets = $5, mean_accuracy = $6 "
                 "WHERE user_id = $1;",
@@ -98,8 +96,8 @@ class Account:
 
     @staticmethod
     async def check(user):
-        async with connection.transaction():
-            account_ = tuple(await connection.fetchrow(
+        async with config.connection.transaction():
+            account_ = tuple(await config.connection.fetchrow(
                 "SELECT * FROM accounts WHERE user_id=$1;",
                 user.id
             ).values())

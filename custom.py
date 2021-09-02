@@ -4,19 +4,17 @@ import config
 
 bot = config.bot
 
-connection = config.connection
-
 
 # clears active bets on every restart (runs in main.py)
 async def clear_active_bets():
-    async with connection.transaction():
-        await connection.execute(
+    async with config.connection.transaction():
+        await config.connection.execute(
             "UPDATE accounts SET active_bets = 0 WHERE active_bets > 0;"
         )
 
 
 async def disconnect_database():
-    await connection.close()
+    await config.connection.close()
 
 
 # argument user_attr (user attribute) is something related to the user

@@ -2,8 +2,6 @@ import config
 
 bot = config.bot
 
-connection = config.connection
-
 
 # rename "prefixes" table to "accessories"
 
@@ -14,8 +12,8 @@ class Accessory:
 
     @staticmethod
     async def open(guild):
-        async with connection.transaction():
-            await connection.execute(
+        async with config.connection.transaction():
+            await config.connection.execute(
                 "INSERT INTO accessories VALUES ($1, $2);",
                 guild.id,
                 ["$"]  # default prefix
@@ -23,8 +21,8 @@ class Accessory:
 
     @staticmethod
     async def get(guild):
-        async with connection.transaction():
-            values = tuple(await connection.fetchrow(
+        async with config.connection.transaction():
+            values = tuple(await config.connection.fetchrow(
                 "SELECT * FROM accessories WHERE guild_id = $1;",
                 guild.id
             ).values())
@@ -32,8 +30,8 @@ class Accessory:
         if not values:
             await Accessory.open(guild)
 
-            async with connection.transaction():
-                values = tuple(await connection.fetchrow(
+            async with config.connection.transaction():
+                values = tuple(await config.connection.fetchrow(
                     "SELECT * FROM accessories WHERE guild_id = $1;",
                     guild.id
                 ).values())
@@ -41,8 +39,8 @@ class Accessory:
         return Accessory(*values)
 
     async def store(self):
-        async with connection.transaction():
-            await connection.execute(
+        async with config.connection.transaction():
+            await config.connection.execute(
                 "UPDATE accessories "
                 "SET prefixes = $2 "
                 "WHERE guild_id = $1;",
@@ -69,8 +67,8 @@ class Accessory:
 
     @staticmethod
     async def remove(guild):
-        async with connection.transaction():
-            await connection.execute(
+        async with config.connection.transaction():
+            await config.connection.execute(
                 "DELETE FROM accessories WHERE guild_id = %(guild_id)s;",
                 {"guild_id": guild.id}
             )
@@ -80,8 +78,8 @@ class Accessory:
         guilds = bot.guilds
 
         for guild in guilds:
-            async with connection.transaction():
-                value = tuple(await connection.fetchrow(
+            async with config.connection.transaction():
+                value = tuple(await config.connection.fetchrow(
                     "SELECT * FROM accessories WHERE guild_id = %(guild_id)s;",
                     {"guild_id": guild.id}
                 ).values())
