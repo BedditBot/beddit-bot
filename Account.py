@@ -56,7 +56,7 @@ class Account:
             values = tuple(await config.connection.fetchrow(
                 "SELECT * FROM accounts WHERE user_id=$1;",
                 user.id
-            ))
+            ).values())
 
         if not values:
             await Account.open(user)
@@ -65,7 +65,7 @@ class Account:
                 values = tuple(config.connection.fetchrow(
                     "SELECT * FROM accounts WHERE user_id=$1;",
                     user.id
-                ))
+                ).values())
 
         account = Account(*values)
 
@@ -100,6 +100,6 @@ class Account:
             account_ = tuple(await config.connection.fetchrow(
                 "SELECT * FROM accounts WHERE user_id=$1;",
                 user.id
-            ))
+            ).values())
 
         return bool(account_)
