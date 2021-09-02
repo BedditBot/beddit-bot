@@ -1,3 +1,4 @@
+import discord
 import asyncpraw
 import asyncio
 import random
