@@ -97,9 +97,9 @@ class Account:
     @staticmethod
     async def check(user):
         async with config.connection.transaction():
-            account_ = tuple(await config.connection.fetchrow(
+            account_ = await config.connection.fetchrow(
                 "SELECT * FROM accounts WHERE user_id=$1;",
                 user.id
-            ))
+            )
 
         return bool(account_)

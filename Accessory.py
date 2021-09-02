@@ -79,10 +79,10 @@ class Accessory:
 
         for guild in guilds:
             async with config.connection.transaction():
-                value = tuple(await config.connection.fetchrow(
+                record = await config.connection.fetchrow(
                     "SELECT * FROM accessories WHERE guild_id = $1;",
                     guild.id
-                ))
+                )
 
-            if not value:
+            if not record:
                 await Accessory.set_prefixes(guild)
