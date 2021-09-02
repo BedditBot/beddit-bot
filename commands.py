@@ -166,7 +166,10 @@ async def help_(ctx):
                 except discord.errors.Forbidden:
                     pass
             elif str(reaction) == "❌":
-                await help_message.clear_reactions()
+                try:
+                    await help_message.clear_reactions()
+                except discord.errors.Forbidden:
+                    pass
 
                 break
             else:
