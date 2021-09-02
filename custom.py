@@ -1,4 +1,4 @@
-import discord
+from sys import exit as sys_exit
 
 import config
 
@@ -15,6 +15,16 @@ async def clear_active_bets():
 
 async def disconnect_database():
     await config.connection.close()
+
+
+async def terminate(_, __):
+    print("Terminating...")
+
+    await bot.logout()
+
+    await disconnect_database()
+
+    sys_exit()
 
 
 # argument user_attr (user attribute) is something related to the user

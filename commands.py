@@ -1,5 +1,3 @@
-import sys
-
 import asyncpraw
 import asyncio
 import random
@@ -7,7 +5,6 @@ from discord.ext import commands
 import datetime
 import math
 
-from main import terminate
 from custom import *
 from Account import Account
 from Accessory import Accessory
