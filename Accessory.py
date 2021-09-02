@@ -25,7 +25,7 @@ class Accessory:
             values = tuple(await config.connection.fetchrow(
                 "SELECT * FROM accessories WHERE guild_id = $1;",
                 guild.id
-            ))
+            ).values())
 
         if not values:
             await Accessory.open(guild)
