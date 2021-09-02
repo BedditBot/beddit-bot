@@ -1,3 +1,5 @@
+import discord.errors
+
 import config
 
 bot = config.bot
@@ -54,16 +56,19 @@ class Accessory:
             # sets default prefix ($)
             prefixes_list = ["$"]
 
-        prefixes = await Accessory.get(guild)
+        accessory = await Accessory.get(guild)
 
-        prefixes.prefixes = prefixes_list
+        accessory.prefixes = prefixes_list
 
         bot_user = bot.user
         bot_member = guild.get_member(bot.user.id)
 
-        await bot_member.edit(nick=f"{bot_user.name} | {prefixes_list[0]}")
+        try:
+            await bot_member.edit(nick=f"{bot_user.name} | {prefixes_list[0]}")
+        except discord.errors.Forbidden:
+            pass
 
-        await prefixes.store()
+        await accessory.store()
 
     @staticmethod
     async def remove(guild):
