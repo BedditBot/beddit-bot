@@ -1,5 +1,5 @@
 from custom import *
-from Account import Account
+from setup import database_setup
 from Accessory import Accessory
 
 bot = config.bot
@@ -7,6 +7,8 @@ bot = config.bot
 
 @bot.event
 async def on_ready():
+    await database_setup()
+
     await Accessory.ensure_integrity()
 
     await clear_active_bets()

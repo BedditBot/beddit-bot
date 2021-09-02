@@ -14,59 +14,41 @@ class Accessory:
 
     @staticmethod
     async def open(guild):
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "INSERT INTO accessories VALUES (%(guild_id)s, %(prefixes)s);",
-            {
-                "guild_id": guild.id,
-                "prefixes": ["$"]  # default prefix
-            }
-        )
-
-        connection.commit()
-        cursor.close()
+        async with connection.transaction():
+            await connection.execute(
+                "INSERT INTO accessories VALUES ($1, $2);",
+                guild.id,
+                ["$"]  # default prefix
+            )
 
     @staticmethod
     async def get(guild):
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "SELECT * FROM accessories WHERE guild_id = %(guild_id)s;",
-            {"guild_id": guild.id}
-        )
-
-        values = cursor.fetchone()
+        async with connection.transaction():
+            values = tuple(await connection.fetchrow(
+                "SELECT * FROM accessories WHERE guild_id = $1;",
+                guild.id
+            ).values())
 
         if not values:
             await Accessory.open(guild)
 
-            cursor.execute(
-                "SELECT * FROM accessories WHERE guild_id = %(guild_id)s;",
-                {"guild_id": guild.id}
-            )
-
-            values = cursor.fetchone()
-
-        cursor.close()
+            async with connection.transaction():
+                values = tuple(await connection.fetchrow(
+                    "SELECT * FROM accessories WHERE guild_id = $1;",
+                    guild.id
+                ).values())
 
         return Accessory(*values)
 
     async def store(self):
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "UPDATE accessories "
-            "SET prefixes = %(prefixes)s "
-            "WHERE guild_id = %(guild_id)s;",
-            {
-                "guild_id": self.guild_id,
-                "prefixes": self.prefixes
-            }
-        )
-
-        connection.commit()
-        cursor.close()
+        async with connection.transaction():
+            await connection.execute(
+                "UPDATE accessories "
+                "SET prefixes = $2 "
+                "WHERE guild_id = $1;",
+                self.guild_id,
+                self.prefixes
+            )
 
     @staticmethod
     async def set_prefixes(guild, prefixes_list=None):
@@ -87,29 +69,22 @@ class Accessory:
 
     @staticmethod
     async def remove(guild):
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "DELETE FROM accessories WHERE guild_id = %(guild_id)s;",
-            {"guild_id": guild.id}
-        )
-
-        connection.commit()
-        cursor.close()
-
-    @staticmethod
-    async def ensure_integrity():
-        cursor = connection.cursor()
-
-        guilds = bot.guilds
-
-        for guild in guilds:
-            cursor.execute(
-                "SELECT * FROM accessories WHERE guild_id = %(guild_id)s;",
+        async with connection.transaction():
+            await connection.execute(
+                "DELETE FROM accessories WHERE guild_id = %(guild_id)s;",
                 {"guild_id": guild.id}
             )
 
-            if not cursor.fetchone():
-                await Accessory.set_prefixes(guild)
+    @staticmethod
+    async def ensure_integrity():
+        guilds = bot.guilds
 
-        cursor.close()
+        for guild in guilds:
+            async with connection.transaction():
+                value = tuple(await connection.fetchrow(
+                    "SELECT * FROM accessories WHERE guild_id = %(guild_id)s;",
+                    {"guild_id": guild.id}
+                ).values())
+
+            if not value:
+                await Accessory.set_prefixes(guild)
