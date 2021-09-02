@@ -69,8 +69,8 @@ class Accessory:
     async def remove(guild):
         async with config.connection.transaction():
             await config.connection.execute(
-                "DELETE FROM accessories WHERE guild_id = $1;",
-                guild.id
+                "DELETE FROM accessories WHERE guild_id = %(guild_id)s;",
+                {"guild_id": guild.id}
             )
 
     @staticmethod
@@ -80,8 +80,8 @@ class Accessory:
         for guild in guilds:
             async with config.connection.transaction():
                 value = tuple(await config.connection.fetchrow(
-                    "SELECT * FROM accessories WHERE guild_id = $1;",
-                    guild.id
+                    "SELECT * FROM accessories WHERE guild_id = %(guild_id)s;",
+                    {"guild_id": guild.id}
                 ))
 
             if not value:
