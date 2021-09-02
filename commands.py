@@ -165,18 +165,13 @@ async def help_(ctx):
                     await help_message.remove_reaction(reaction, user)
                 except discord.errors.Forbidden:
                     pass
-            elif str(reaction) == "❌":
+            else:
                 try:
                     await help_message.clear_reactions()
                 except discord.errors.Forbidden:
                     pass
 
                 break
-            else:
-                try:
-                    await help_message.remove_reaction(reaction, user)
-                except discord.errors.Forbidden:
-                    pass
         except asyncio.TimeoutError:
             try:
                 await help_message.clear_reactions()
@@ -245,15 +240,13 @@ async def developer_help(ctx):
                     await help_message.remove_reaction(reaction, user)
                 except discord.errors.Forbidden:
                     pass
-            elif str(reaction) == "❌":
-                await help_message.clear_reactions()
-
-                break
             else:
                 try:
-                    await help_message.remove_reaction(reaction, user)
+                    await help_message.clear_reactions()
                 except discord.errors.Forbidden:
                     pass
+
+                break
         except asyncio.TimeoutError:
             try:
                 await help_message.clear_reactions()
