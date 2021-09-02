@@ -12,6 +12,8 @@ from custom import disconnect_database
 
 
 async def terminate(_, __):
+    print("Terminating...")
+
     await bot.logout()
 
     await disconnect_database()

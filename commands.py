@@ -7,6 +7,7 @@ from discord.ext import commands
 import datetime
 import math
 
+from main import terminate
 from custom import *
 from Account import Account
 from Accessory import Accessory
@@ -45,13 +46,9 @@ async def cease(ctx):
     if not await bot.is_owner(ctx.author):
         return
 
-    await disconnect_database()
-
     await ctx.send("Farewell...")
-    print("Done.")
 
-    await bot.close()
-    sys.exit()
+    await terminate(None, None)
 
 
 def get_help_pages(dev):
