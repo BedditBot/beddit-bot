@@ -978,7 +978,7 @@ async def factors_(ctx, user_attr=None):
     usage="leaderboard [balance/accuracy]"
 )
 async def leaderboard_(ctx, category="gold", size=10):
-    if category in ["accuracy", "acc", "a"]:
+    if category in "accuracy":
         category = "a"
     else:
         category = "g"
