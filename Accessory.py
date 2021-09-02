@@ -34,7 +34,7 @@ class Accessory:
                 values = tuple(await config.connection.fetchrow(
                     "SELECT * FROM accessories WHERE guild_id = $1;",
                     guild.id
-                ).values())
+                ))
 
         return Accessory(*values)
 
@@ -82,7 +82,7 @@ class Accessory:
                 value = tuple(await config.connection.fetchrow(
                     "SELECT * FROM accessories WHERE guild_id = %(guild_id)s;",
                     {"guild_id": guild.id}
-                ).values())
+                ))
 
             if not value:
                 await Accessory.set_prefixes(guild)
