@@ -131,7 +131,10 @@ async def help_(ctx):
         await help_message.add_reaction(react_emote)
 
     def check(reaction_in, user_in):
-        return user_in == ctx.author and str(reaction_in) in react_emotes
+        return (
+                user_in == ctx.author and str(reaction_in) in react_emotes and
+                reaction_in.message == help_message
+        )
 
     while True:
         try:
@@ -206,7 +209,10 @@ async def developer_help(ctx):
         await help_message.add_reaction(react_emote)
 
     def check(reaction_in, user_in):
-        return user_in == ctx.author and str(reaction_in) in react_emotes
+        return (
+                user_in == ctx.author and str(reaction_in) in react_emotes and
+                reaction_in.message == help_message
+        )
 
     while True:
         try:
