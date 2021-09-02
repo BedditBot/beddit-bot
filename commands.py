@@ -482,10 +482,12 @@ async def daily(ctx):
             color=0xffd700  # gold
         ).add_field(
             name="Gold",
-            value=(separate_digits(account.gold) + " (+100)")
+            value=(separate_digits(account.gold) + " (+100)"),
+            inline=False
         ).add_field(
             name="Platinum",
-            value=separate_digits(account.platinum)
+            value=separate_digits(account.platinum),
+            inline=False
         ).set_thumbnail(
             url="https://i.imgur.com/9aAfwcJ.png"
         ).set_footer(
