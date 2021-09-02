@@ -185,7 +185,7 @@ async def help_(ctx):
 
 
 @bot.command(
-    name="dhelp",
+    name="devhelp",
     aliases=["dh"],
     help="Used for getting this message.",
     hidden=True
