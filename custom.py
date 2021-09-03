@@ -1,3 +1,4 @@
+import asyncio
 from sys import exit as sys_exit
 
 import config
@@ -17,19 +18,27 @@ async def disconnect_database():
     await config.connection.close()
 
 
-async def terminate(_, __):
+async def terminate():
     print("Terminating...")
 
     await bot.logout()
 
+    print("test1")
+
     await disconnect_database()
+
+    print("test2")
+
+    asyncio.get_event_loop().stop()
+
+    print("test3")
 
     sys_exit()
 
 
 # argument user_attr (user attribute) is something related to the user
 # like ID, name or name with discriminator
-async def find_user(ctx, user_attr):
+def find_user(ctx, user_attr):
     user = None
 
     def not_mention(text):

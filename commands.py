@@ -46,7 +46,7 @@ async def cease(ctx):
 
     await ctx.send("Farewell...")
 
-    await terminate(None, None)
+    await terminate()
 
 
 def get_help_pages(dev):
@@ -390,7 +390,7 @@ async def balance_(ctx, user_attr=None):
     if not user_attr:
         user = ctx.author
     else:
-        user = await find_user(ctx, user_attr)
+        user = find_user(ctx, user_attr)
         if not user:
             return
 
@@ -430,7 +430,7 @@ async def balance_(ctx, user_attr=None):
 #     if not user_attr:
 #         user = ctx.author
 #     else:
-#         user = await find_user(ctx, user_attr)
+#         user = find_user(ctx, user_attr)
 #         if not user:
 #             await ctx.send("This user wasn't found!")
 #
@@ -480,7 +480,7 @@ async def daily(ctx):
 
     await ctx.send(
         embed=discord.Embed(
-            title="Balance",
+            title="Balance (+Daily reward)",
             color=0xffd700  # gold
         ).add_field(
             name="Gold",
@@ -540,7 +540,7 @@ async def transfer(ctx, *, args):
     if amount == 0:
         return
 
-    receiver = await find_user(ctx, receiver_attr)
+    receiver = find_user(ctx, receiver_attr)
 
     if not receiver:
         return
@@ -866,7 +866,7 @@ async def active_bets_(ctx, user_attr=None):
     if not user_attr:
         user = ctx.author
     else:
-        user = await find_user(ctx, user_attr)
+        user = find_user(ctx, user_attr)
 
         if not user:
             return
@@ -895,7 +895,7 @@ async def stats(ctx, user_attr=None):
     if not user_attr:
         user = ctx.author
     else:
-        user = await find_user(ctx, user_attr)
+        user = find_user(ctx, user_attr)
 
         if not user:
             return
@@ -937,7 +937,7 @@ async def factors_(ctx, user_attr=None):
     if not user_attr:
         user = ctx.author
     else:
-        user = await find_user(ctx, user_attr)
+        user = find_user(ctx, user_attr)
 
         if not user:
             return

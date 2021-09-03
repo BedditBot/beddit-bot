@@ -1,3 +1,5 @@
+from signal import SIGTERM
+
 from custom import *
 from setup import database_setup
 from Accessory import Accessory
@@ -7,6 +9,10 @@ bot = config.bot
 
 @bot.event
 async def on_ready():
+    bot.loop.add_signal_handler(
+        SIGTERM, lambda: asyncio.create_task(terminate())
+    )
+
     await database_setup()
 
     await Accessory.ensure_integrity()
