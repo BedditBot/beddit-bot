@@ -1,3 +1,4 @@
+import asyncio
 from signal import SIGTERM
 
 from custom import *
@@ -9,9 +10,9 @@ bot = config.bot
 
 @bot.event
 async def on_ready():
-    bot.loop.add_signal_handler(
-        SIGTERM, lambda: asyncio.create_task(terminate())
-    )
+    # bot.loop.add_signal_handler(
+    #     SIGTERM, lambda: asyncio.ensure_future(terminate())
+    # )
 
     await database_setup()
 

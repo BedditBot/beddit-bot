@@ -1,3 +1,5 @@
+import sys
+
 import discord
 import asyncpraw
 import random
@@ -5,7 +7,7 @@ from discord.ext import commands
 import datetime
 import math
 
-import custom
+# import custom
 from custom import *
 from Account import Account
 from Accessory import Accessory
@@ -46,8 +48,9 @@ async def cease(ctx):
 
     await ctx.send("Farewell...")
 
-    await custom.terminate()
+    # await custom.terminate()
 
+    sys.exit()
 
 def get_help_pages(dev):
     commands_list = []
