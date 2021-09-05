@@ -822,6 +822,11 @@ async def convert_(ctx):
             except discord.errors.Forbidden:
                 pass
         except asyncio.TimeoutError:
+            try:
+                await message.clear_reactions()
+            except discord.errors.Forbidden:
+                pass
+
             break
 
 
