@@ -680,8 +680,12 @@ async def platinum(ctx):
     ).add_field(
         name="3 Platinum",
         value=f"{separate_digits(plat_3)}<:MessageGold:755792715257479229>"
+    ).add_field(
+        name="Use reactions to buy an amount of platinum!",
+        inline=False
     ).set_footer(
-        text="Use reactions to buy an amount of platinum!"
+        text=str(user),
+        icon_url=str(user.avatar_url)
     ).set_thumbnail(
         url="https://i.imgur.com/XorQJKS.png"
     )    
@@ -719,8 +723,12 @@ async def platinum(ctx):
         ).add_field(
             name="3 Platinum",
             value=f"{separate_digits(plat_3)}<:MessageGold:755792715257479229>"
+        ).add_field(
+            name="Use reactions to buy an amount of platinum!",
+            inline=False
         ).set_footer(
-            text="Use reactions to buy an amount of platinum!"
+            text=str(user),
+            icon_url=str(user.avatar_url)
         ).set_thumbnail(
             url="https://i.imgur.com/XorQJKS.png"
         )   
@@ -763,7 +771,7 @@ async def platinum(ctx):
                     account.gold -= plat_3
                     account.platinum += 3
                     await account.store()
-                    
+
                     plat_1,plat_2,plat_3 = await bought(3)
                 else:
                     await ctx.send("You do not have enough Gold<:MessageGold:755792715257479229> to buy this!")    
