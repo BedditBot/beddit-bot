@@ -669,7 +669,7 @@ async def platinum(ctx):
     plat_3 = 2 ** (platinum_balance + 2)
 
     embed = discord.Embed(
-        title=f"{str(user)}'s Platinum shop",
+        title="Platinum shop",
         color=0xc2c2c2  # platinum
     ).add_field(
         name="1 Platinum",
@@ -709,7 +709,7 @@ async def platinum(ctx):
         plat_3 = 2 ** (platinum_balance + 2)        
 
         embed2 = discord.Embed(
-            title=f"{str(user)}'s Platinum shop",
+            title="Platinum shop",
             color=0xc2c2c2  # platinum
         ).add_field(
             name=f"You succesfully purchased {amount} platinum!",
