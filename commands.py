@@ -390,7 +390,7 @@ async def post_information(ctx, link):
 @bot.command(
     name="balance",
     aliases=["bal"],
-    help=f"Used for getting the Gold{gold_emote} "
+    help=f"Used for getting the gold{gold_emote} "
          "balance of a user."
 )
 async def balance_(ctx, user_attr=None):
@@ -511,7 +511,7 @@ TRANSFER_TAX_RATE = 0.05  # 5%
 
 
 @bot.command(
-    help=f"Used for transferring Gold{gold_emote} "
+    help=f"Used for transferring gold{gold_emote} "
          f"to another user (with a {TRANSFER_TAX_RATE * 100}% tax)."
 )
 async def transfer(ctx, *, args):
@@ -529,7 +529,7 @@ async def transfer(ctx, *, args):
             embed=discord.Embed(
                 title="Error",
                 color=0x000000,  # black
-                description=f"Can't transfer Gold"
+                description=f"Can't transfer gold"
                             f"{gold_emote} "
                             f"between users with active bets."
             ).set_footer(
@@ -566,7 +566,7 @@ async def transfer(ctx, *, args):
             embed=discord.Embed(
                 title="Error",
                 color=0x000000,  # black
-                description=f"Can't transfer Gold"
+                description=f"Can't transfer gold"
                             f"{gold_emote} "
                             f"between users with active bets."
             ).set_footer(
@@ -588,7 +588,7 @@ async def transfer(ctx, *, args):
             title="Transfer",
             color=0xffd700,  # gold
             description=f"Transferred {amount} "
-                        f"Gold{gold_emote} "
+                        f"gold{gold_emote} "
                         f"from `{str(sender)}` to `{str(receiver)}` "
                         f"with a {round(TRANSFER_TAX_RATE * 100)}% tax rate."
         ).set_footer(
@@ -599,7 +599,7 @@ async def transfer(ctx, *, args):
 
 
 @bot.command(
-    help=f"Used to gamble 50 Gold{gold_emote}. "
+    help=f"Used to gamble 50 gold{gold_emote}. "
          f"(Try it out and hope for the jackpot!)"
 )
 @commands.cooldown(1, 1, commands.BucketType.user)
@@ -634,9 +634,9 @@ async def gamble(ctx):
         embed=discord.Embed(
             title="Gambling",
             color=0x39ff14,  # neon green
-            description=f"Gambled 50 Gold{gold_emote} "
+            description=f"Gambled 50 gold{gold_emote} "
                         f"and won {winnings} "
-                        f"Gold{gold_emote}."
+                        f"gold{gold_emote}."
         ).set_footer(
             text=str(user),
             icon_url=str(user.avatar_url)
@@ -648,8 +648,8 @@ hidden_balance_tracker = dict()
 
 
 @bot.command(
-    name="covert",
-    aliases=["con"],
+    name="convert",
+    aliases=["con", "c"],
     help=f"Used for converting gold{gold_emote} to platinum{platinum_emote}."
 )
 @commands.cooldown(1, 30, commands.BucketType.user)
@@ -668,20 +668,24 @@ async def convert_(ctx):
     message = await ctx.send(
         embed=discord.Embed(
             title="Platinum Conversion",
-            description="React to convert gold to platinum.",
+            description=f"React to convert gold{gold_emote} to "
+                        f"platinum{platinum_emote}.",
             color=0xe5e4e2  # platinum
         ).add_field(
             name="Option 1",
             value=f"{separate_digits(price_1)}{gold_emote} to"
-                  f"1{platinum_emote}"
+                  f"1{platinum_emote}",
+            inline=False
         ).add_field(
             name="Option 2",
             value=f"{separate_digits(price_2)}{gold_emote} to"
-                  f"2{platinum_emote}"
+                  f"2{platinum_emote}",
+            inline=False
         ).add_field(
             name="Option 3",
             value=f"{separate_digits(price_3)}{gold_emote} to"
-                  f"3{platinum_emote}"
+                  f"3{platinum_emote}",
+            inline=False
         ).set_footer(
             text=str(user),
             icon_url=str(user.avatar_url)
@@ -717,15 +721,18 @@ async def convert_(ctx):
             ).add_field(
                 name="Option 1",
                 value=f"{separate_digits(price_1)}{gold_emote} to"
-                      f"1{platinum_emote}"
+                      f"1{platinum_emote}",
+                inline=False
             ).add_field(
                 name="Option 2",
                 value=f"{separate_digits(price_2)}{gold_emote} to"
-                      f"2{platinum_emote}"
+                      f"2{platinum_emote}",
+                inline=False
             ).add_field(
                 name="Option 3",
                 value=f"{separate_digits(price_3)}{gold_emote} to"
-                      f"3{platinum_emote}"
+                      f"3{platinum_emote}",
+                inline=False
             ).set_footer(
                 text=str(user),
                 icon_url=str(user.avatar_url)
@@ -819,10 +826,10 @@ async def convert_(ctx):
 
 
 @bot.command(
-    help="Used to bet on Reddit posts. *Use as [Reddit post URL] "
-         "[bet amount (in Gold{gold_emote})] "
-         "[time (in s/m/h)] "
-         "[predicted upvotes on that post after that time].*"
+    help=f"Used to bet on Reddit posts. *Use as [Reddit post URL] "
+         f"[bet amount (in gold{gold_emote})] "
+         f"[time (in s/m/h)] "
+         f"[predicted upvotes on that post after that time].*"
 )
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def bet(ctx, link, amount, time, predicted_ups):
@@ -934,7 +941,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
         f"This post has {separate_digits(initial_ups)} "
         f"upvotes right now! "
         f"You bet {separate_digits(amount)} "
-        f"Gold{gold_emote} on it reaching "
+        f"gold{gold_emote} on it reaching "
         f"{separate_digits(predicted_ups)} upvotes in {time}!"
     )
 
@@ -1017,7 +1024,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
             f"{separate_digits(final_ups)} upvotes right now! "
             f"You were {accuracy_in_pct}% "
             f"accurate and won {separate_digits(true_winnings)} "
-            f"Gold{gold_emote}!"
+            f"gold{gold_emote}!"
         )
     elif true_winnings == 0:
         await ctx.send(
@@ -1032,7 +1039,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
             f"{separate_digits(final_ups)} upvotes right now! "
             f"You were {accuracy_in_pct}% "
             f"accurate and lost {separate_digits(abs(true_winnings))} "
-            f"Gold{gold_emote}!"
+            f"gold{gold_emote}!"
         )
 
 
@@ -1250,7 +1257,7 @@ async def leaderboard_(ctx, category="gold", size=10):
             embed.add_field(
                 name=f"{determine_medal(i)} {str(user)}",
                 value=f"{separate_digits(leaderboard[user_id])} "
-                      f"Gold{gold_emote}",
+                      f"gold{gold_emote}",
                 inline=False
             )
 
