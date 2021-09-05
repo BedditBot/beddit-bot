@@ -681,8 +681,8 @@ async def platinum(ctx):
         name="3 Platinum",
         value=f"{separate_digits(plat_3)}<:MessageGold:755792715257479229>"
     ).add_field(
-        name="Use reactions to buy an amount of platinum!",
-        value="",
+        name="\u200b",
+        value="Use reactions to buy an amount of platinum!",
         inline=False
     ).set_footer(
         text=str(user),
@@ -725,8 +725,8 @@ async def platinum(ctx):
             name="3 Platinum",
             value=f"{separate_digits(plat_3)}<:MessageGold:755792715257479229>"
         ).add_field(
-            name="Use reactions to buy an amount of platinum!",
-            value="",
+            name="\u200b",
+            value="Use reactions to buy an amount of platinum!",
             inline=False
         ).set_footer(
             text=str(user),
