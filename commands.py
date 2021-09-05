@@ -641,6 +641,137 @@ async def gamble(ctx):
 
 hidden_balance_tracker = dict()
 
+@bot.command(
+    aliases=["plat"],
+    help="Used for buying platinum."
+)
+@commands.cooldown(1, 30, commands.BucketType.user)
+async def platinum(ctx):
+    user = ctx.author
+
+    account = await Account.get(user)
+    balance = account.gold
+    platinum_balance = account.platinum
+
+    if platinum_balance == 0:
+        plat_1 = 2
+
+    else:
+        plat_1 = platinum_balance
+
+    plat_1 = int(plat_1)
+    platinum_balance = int(platinum_balance)
+
+    plat_1 = 2 ** platinum_balance
+
+    plat_2 = 2 ** (platinum_balance + 1)
+
+    plat_3 = 2 ** (platinum_balance + 2)
+
+    embed = discord.Embed(
+        title=f"{str(user)}'s Platinum shop",
+        color=0xc2c2c2  # platinum
+    ).add_field(
+        name="1 Platinum",
+        value=f"{separate_digits(plat_1)}<:MessageGold:755792715257479229>"
+    ).add_field(
+        name="2 Platinum",
+        value=f"{separate_digits(plat_2)}<:MessageGold:755792715257479229>"
+    ).add_field(
+        name="3 Platinum",
+        value=f"{separate_digits(plat_3)}<:MessageGold:755792715257479229>"
+    ).set_footer(
+        text="Use reactions to buy an amount of platinum!"
+    ).set_thumbnail(
+        url="https://i.imgur.com/XorQJKS.png"
+    )    
+
+    message = await ctx.send(embed=embed)
+
+    await message.add_reaction("1️⃣")
+    await message.add_reaction("2️⃣")
+    await message.add_reaction("3️⃣")
+
+    async def bought(amount):
+        account = await Account.get(user)
+        balance = account.gold
+        platinum_balance = account.platinum
+
+        plat_1 = 2 ** platinum_balance
+
+        plat_2 = 2 ** (platinum_balance + 1)
+
+        plat_3 = 2 ** (platinum_balance + 2)        
+
+        embed2 = discord.Embed(
+            title=f"{str(user)}'s Platinum shop",
+            color=0xc2c2c2  # platinum
+        ).add_field(
+            name=f"You succesfully purchased {amount} platinum!",
+            value='Would you like to buy some more?',
+            inline=False
+        ).add_field(
+            name="1 Platinum",
+            value=f"{separate_digits(plat_1)}<:MessageGold:755792715257479229>"
+        ).add_field(
+            name="2 Platinum",
+            value=f"{separate_digits(plat_2)}<:MessageGold:755792715257479229>"
+        ).add_field(
+            name="3 Platinum",
+            value=f"{separate_digits(plat_3)}<:MessageGold:755792715257479229>"
+        ).set_footer(
+            text="Use reactions to buy an amount of platinum!"
+        ).set_thumbnail(
+            url="https://i.imgur.com/XorQJKS.png"
+        )   
+        await message.edit(embed=embed2) 
+        return (plat_1, plat_2, plat_3)
+
+    def check(reaction_in, user_in):
+        return user_in == ctx.author and str(reaction_in.emoji) in ("1️⃣", "2️⃣","3️⃣")
+
+    while True:
+        try:
+            reaction, user = await bot.wait_for(
+                "reaction_add",
+                check=check,
+                timeout=30
+            )
+
+            if str(reaction.emoji) == "1️⃣":
+                if balance >= plat_1:
+
+                    account.gold -= plat_1
+                    account.platinum += 1
+                    await account.store()
+                    plat_1,plat_2,plat_3 = await bought(1)
+                else:
+                    await ctx.send("You do not have enough Gold<:MessageGold:755792715257479229> to buy this!")
+
+            elif str(reaction.emoji) == "2️⃣":
+                if balance >= plat_2:
+                    account.gold -= plat_2
+                    account.platinum += 2
+                    await account.store()
+
+                    plat_1,plat_2,plat_3 = await bought(2)
+                else:
+                    await ctx.send("You do not have enough Gold<:MessageGold:755792715257479229> to buy this!")
+
+            elif str(reaction.emoji) == "3️⃣":
+                if balance >= plat_3:
+                    account.gold -= plat_3
+                    account.platinum += 3
+                    await account.store()
+                    
+                    plat_1,plat_2,plat_3 = await bought(3)
+                else:
+                    await ctx.send("You do not have enough Gold<:MessageGold:755792715257479229> to buy this!")    
+
+            await message.remove_reaction(reaction, user)
+
+        except asyncio.TimeoutError:
+            break
 
 @bot.command(
     help="Used to bet on Reddit posts. *Use as [Reddit post URL] "
