@@ -22,6 +22,9 @@ reddit_client = asyncpraw.Reddit(
     user_agent=config.R_USER_AGENT
 )
 
+gold_emote = " <:gold:884085535965065266>"
+platinum_emote = " <:platinum:884147435709030440>"
+
 
 @bot.command(
     aliases=["latency"],
@@ -51,6 +54,7 @@ async def cease(ctx):
     # await custom.terminate()
 
     sys.exit()
+
 
 def get_help_pages(dev):
     commands_list = []
@@ -386,7 +390,7 @@ async def post_information(ctx, link):
 @bot.command(
     name="balance",
     aliases=["bal"],
-    help="Used for getting the Gold<:MessageGold:755792715257479229> "
+    help=f"Used for getting the Gold{gold_emote} "
          "balance of a user."
 )
 async def balance_(ctx, user_attr=None):
@@ -412,7 +416,8 @@ async def balance_(ctx, user_attr=None):
             value=separate_digits(account.platinum),
             inline=False
         ).set_thumbnail(
-            url="https://i.imgur.com/9aAfwcJ.png"
+            url="https://static.wikia.nocookie.net/reddit/images/1/10/Gold.png"
+                "/revision/latest/scale-to-width-down/512?cb=20200815001830"
         ).set_footer(
             text=str(user),
             icon_url=str(user.avatar_url)
@@ -506,7 +511,7 @@ TRANSFER_TAX_RATE = 0.05  # 5%
 
 
 @bot.command(
-    help="Used for transferring Gold<:MessageGold:755792715257479229> "
+    help=f"Used for transferring Gold{gold_emote} "
          f"to another user (with a {TRANSFER_TAX_RATE * 100}% tax)."
 )
 async def transfer(ctx, *, args):
@@ -524,9 +529,9 @@ async def transfer(ctx, *, args):
             embed=discord.Embed(
                 title="Error",
                 color=0x000000,  # black
-                description="Can't transfer Gold"
-                            "<:MessageGold:755792715257479229> "
-                            "between users with active bets."
+                description=f"Can't transfer Gold"
+                            f"{gold_emote} "
+                            f"between users with active bets."
             ).set_footer(
                 text=str(sender),
                 icon_url=str(sender.avatar_url)
@@ -561,9 +566,9 @@ async def transfer(ctx, *, args):
             embed=discord.Embed(
                 title="Error",
                 color=0x000000,  # black
-                description="Can't transfer Gold"
-                            "<:MessageGold:755792715257479229> "
-                            "between users with active bets."
+                description=f"Can't transfer Gold"
+                            f"{gold_emote} "
+                            f"between users with active bets."
             ).set_footer(
                 text=str(sender),
                 icon_url=str(sender.avatar_url)
@@ -583,7 +588,7 @@ async def transfer(ctx, *, args):
             title="Transfer",
             color=0xffd700,  # gold
             description=f"Transferred {amount} "
-                        f"Gold<:MessageGold:755792715257479229> "
+                        f"Gold{gold_emote} "
                         f"from `{str(sender)}` to `{str(receiver)}` "
                         f"with a {round(TRANSFER_TAX_RATE * 100)}% tax rate."
         ).set_footer(
@@ -594,8 +599,8 @@ async def transfer(ctx, *, args):
 
 
 @bot.command(
-    help="Used to gamble 50 Gold<:MessageGold:755792715257479229>. "
-         "(Try it out and hope for the jackpot!)"
+    help=f"Used to gamble 50 Gold{gold_emote}. "
+         f"(Try it out and hope for the jackpot!)"
 )
 @commands.cooldown(1, 1, commands.BucketType.user)
 async def gamble(ctx):
@@ -629,9 +634,9 @@ async def gamble(ctx):
         embed=discord.Embed(
             title="Gambling",
             color=0x39ff14,  # neon green
-            description=f"Gambled 50 Gold<:MessageGold:755792715257479229> "
+            description=f"Gambled 50 Gold{gold_emote} "
                         f"and won {winnings} "
-                        f"Gold<:MessageGold:755792715257479229>."
+                        f"Gold{gold_emote}."
         ).set_footer(
             text=str(user),
             icon_url=str(user.avatar_url)
@@ -641,151 +646,181 @@ async def gamble(ctx):
 
 hidden_balance_tracker = dict()
 
+
 @bot.command(
-    aliases=["plat"],
-    help="Used for buying platinum."
+    name="covert",
+    aliases=["con"],
+    help=f"Used for converting gold{gold_emote} to platinum{platinum_emote}."
 )
 @commands.cooldown(1, 30, commands.BucketType.user)
-async def platinum(ctx):
+async def convert_(ctx):
     user = ctx.author
 
     account = await Account.get(user)
-    balance = account.gold
-    platinum_balance = account.platinum
 
-    if platinum_balance == 0:
-        plat_1 = 2
+    gold = account.gold
+    platinum = account.platinum
 
-    else:
-        plat_1 = platinum_balance
+    price_1 = 2 ** platinum
+    price_2 = 2 ** (platinum + 1)
+    price_3 = 2 ** (platinum + 2)
 
-    plat_1 = int(plat_1)
-    platinum_balance = int(platinum_balance)
-
-    plat_1 = 2 ** platinum_balance
-
-    plat_2 = 2 ** (platinum_balance + 1)
-
-    plat_3 = 2 ** (platinum_balance + 2)
-
-    embed = discord.Embed(
-        title="Platinum shop",
-        color=0xc2c2c2  # platinum
-    ).add_field(
-        name="1 Platinum",
-        value=f"{separate_digits(plat_1)}<:MessageGold:755792715257479229>"
-    ).add_field(
-        name="2 Platinum",
-        value=f"{separate_digits(plat_2)}<:MessageGold:755792715257479229>"
-    ).add_field(
-        name="3 Platinum",
-        value=f"{separate_digits(plat_3)}<:MessageGold:755792715257479229>"
-    ).add_field(
-        name="\u200b",
-        value="Use reactions to buy an amount of platinum!",
-        inline=False
-    ).set_footer(
-        text=str(user),
-        icon_url=str(user.avatar_url)
-    ).set_thumbnail(
-        url="https://i.imgur.com/XorQJKS.png"
-    )    
-
-    message = await ctx.send(embed=embed)
+    message = await ctx.send(
+        embed=discord.Embed(
+            title="Platinum Conversion",
+            description="React to convert gold to platinum.",
+            color=0xe5e4e2  # platinum
+        ).add_field(
+            name="Option 1",
+            value=f"{separate_digits(price_1)}{gold_emote} to"
+                  f"1{platinum_emote}"
+        ).add_field(
+            name="Option 2",
+            value=f"{separate_digits(price_2)}{gold_emote} to"
+                  f"2{platinum_emote}"
+        ).add_field(
+            name="Option 3",
+            value=f"{separate_digits(price_3)}{gold_emote} to"
+                  f"3{platinum_emote}"
+        ).set_footer(
+            text=str(user),
+            icon_url=str(user.avatar_url)
+        ).set_thumbnail(
+            url="https://static.wikia.nocookie.net/reddit/images/a/ac/"
+                "Platinum.png/revision/latest/scale-to-width-down/512"
+                "?cb=20200815001756"
+        )
+    )
 
     await message.add_reaction("1️⃣")
     await message.add_reaction("2️⃣")
     await message.add_reaction("3️⃣")
 
-    async def bought(amount):
+    async def update(price, amount):
+        nonlocal account, gold, platinum, price_1, price_2, price_3
+
         account = await Account.get(user)
-        balance = account.gold
-        platinum_balance = account.platinum
 
-        plat_1 = 2 ** platinum_balance
+        gold = account.gold
+        platinum = account.platinum
 
-        plat_2 = 2 ** (platinum_balance + 1)
+        price_1 = 2 ** platinum
+        price_2 = 2 ** (platinum + 1)
+        price_3 = 2 ** (platinum + 2)
 
-        plat_3 = 2 ** (platinum_balance + 2)        
-
-        embed2 = discord.Embed(
-            title="Platinum shop",
-            color=0xc2c2c2  # platinum
-        ).add_field(
-            name=f"You succesfully purchased {amount} platinum!",
-            value='Would you like to buy some more?',
-            inline=False
-        ).add_field(
-            name="1 Platinum",
-            value=f"{separate_digits(plat_1)}<:MessageGold:755792715257479229>"
-        ).add_field(
-            name="2 Platinum",
-            value=f"{separate_digits(plat_2)}<:MessageGold:755792715257479229>"
-        ).add_field(
-            name="3 Platinum",
-            value=f"{separate_digits(plat_3)}<:MessageGold:755792715257479229>"
-        ).add_field(
-            name="\u200b",
-            value="Use reactions to buy an amount of platinum!",
-            inline=False
-        ).set_footer(
-            text=str(user),
-            icon_url=str(user.avatar_url)
-        ).set_thumbnail(
-            url="https://i.imgur.com/XorQJKS.png"
-        )   
-        await message.edit(embed=embed2) 
-        return (plat_1, plat_2, plat_3)
+        await message.edit(
+            embed=discord.Embed(
+                title="Platinum Conversion",
+                description=f"Converted {price}{gold_emote} to "
+                            f"{amount}{platinum_emote}.",
+                color=0xe5e4e2  # platinum
+            ).add_field(
+                name="Option 1",
+                value=f"{separate_digits(price_1)}{gold_emote} to"
+                      f"1{platinum_emote}"
+            ).add_field(
+                name="Option 2",
+                value=f"{separate_digits(price_2)}{gold_emote} to"
+                      f"2{platinum_emote}"
+            ).add_field(
+                name="Option 3",
+                value=f"{separate_digits(price_3)}{gold_emote} to"
+                      f"3{platinum_emote}"
+            ).set_footer(
+                text=str(user),
+                icon_url=str(user.avatar_url)
+            ).set_thumbnail(
+                url="https://static.wikia.nocookie.net/reddit/images/a/ac/"
+                    "Platinum.png/revision/latest/scale-to-width-down/512"
+                    "?cb=20200815001756"
+            )
+        )
 
     def check(reaction_in, user_in):
-        return user_in == ctx.author and str(reaction_in.emoji) in ("1️⃣", "2️⃣","3️⃣")
+        return (
+                user_in == ctx.author and str(reaction_in.emoji) in
+                ("1️⃣", "2️⃣", "3️⃣") and reaction_in.message == message
+        )
 
     while True:
         try:
             reaction, user = await bot.wait_for(
                 "reaction_add",
                 check=check,
-                timeout=30
+                timeout=45
             )
 
             if str(reaction.emoji) == "1️⃣":
-                if balance >= plat_1:
-
-                    account.gold -= plat_1
+                if gold >= price_1:
+                    account.gold -= price_1
                     account.platinum += 1
-                    await account.store()
-                    plat_1,plat_2,plat_3 = await bought(1)
-                else:
-                    await ctx.send("You do not have enough Gold<:MessageGold:755792715257479229> to buy this!")
 
+                    await account.store()
+
+                    await update(price_1, 1)
+                else:
+                    await ctx.send(
+                        embed=discord.Embed(
+                            title="Error",
+                            color=0x000000,  # black
+                            description=f"Insufficient gold{gold_emote} for "
+                                        f"conversion."
+                        ).set_footer(
+                            text=str(user),
+                            icon_url=str(user.avatar_url)
+                        )
+                    )
             elif str(reaction.emoji) == "2️⃣":
-                if balance >= plat_2:
-                    account.gold -= plat_2
+                if gold >= price_2:
+                    account.gold -= price_2
                     account.platinum += 2
+
                     await account.store()
 
-                    plat_1,plat_2,plat_3 = await bought(2)
+                    await update(price_2, 2)
                 else:
-                    await ctx.send("You do not have enough Gold<:MessageGold:755792715257479229> to buy this!")
-
+                    await ctx.send(
+                        embed=discord.Embed(
+                            title="Error",
+                            color=0x000000,  # black
+                            description=f"Insufficient gold{gold_emote} for "
+                                        f"conversion."
+                        ).set_footer(
+                            text=str(user),
+                            icon_url=str(user.avatar_url)
+                        )
+                    )
             elif str(reaction.emoji) == "3️⃣":
-                if balance >= plat_3:
-                    account.gold -= plat_3
+                if gold >= price_3:
+                    account.gold -= price_3
                     account.platinum += 3
+
                     await account.store()
 
-                    plat_1,plat_2,plat_3 = await bought(3)
+                    await update(price_3, 3)
                 else:
-                    await ctx.send("You do not have enough Gold<:MessageGold:755792715257479229> to buy this!")    
-
-            await message.remove_reaction(reaction, user)
-
+                    await ctx.send(
+                        embed=discord.Embed(
+                            title="Error",
+                            color=0x000000,  # black
+                            description=f"Insufficient gold{gold_emote} for "
+                                        f"conversion."
+                        ).set_footer(
+                            text=str(user),
+                            icon_url=str(user.avatar_url)
+                        )
+                    )
+            try:
+                await message.remove_reaction(reaction, user)
+            except discord.errors.Forbidden:
+                pass
         except asyncio.TimeoutError:
             break
 
+
 @bot.command(
     help="Used to bet on Reddit posts. *Use as [Reddit post URL] "
-         "[bet amount (in Gold<:MessageGold:755792715257479229>)] "
+         "[bet amount (in Gold{gold_emote})] "
          "[time (in s/m/h)] "
          "[predicted upvotes on that post after that time].*"
 )
@@ -899,7 +934,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
         f"This post has {separate_digits(initial_ups)} "
         f"upvotes right now! "
         f"You bet {separate_digits(amount)} "
-        f"Gold<:MessageGold:755792715257479229> on it reaching "
+        f"Gold{gold_emote} on it reaching "
         f"{separate_digits(predicted_ups)} upvotes in {time}!"
     )
 
@@ -982,7 +1017,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
             f"{separate_digits(final_ups)} upvotes right now! "
             f"You were {accuracy_in_pct}% "
             f"accurate and won {separate_digits(true_winnings)} "
-            f"Gold<:MessageGold:755792715257479229>!"
+            f"Gold{gold_emote}!"
         )
     elif true_winnings == 0:
         await ctx.send(
@@ -997,7 +1032,7 @@ async def bet(ctx, link, amount, time, predicted_ups):
             f"{separate_digits(final_ups)} upvotes right now! "
             f"You were {accuracy_in_pct}% "
             f"accurate and lost {separate_digits(abs(true_winnings))} "
-            f"Gold<:MessageGold:755792715257479229>!"
+            f"Gold{gold_emote}!"
         )
 
 
@@ -1215,7 +1250,7 @@ async def leaderboard_(ctx, category="gold", size=10):
             embed.add_field(
                 name=f"{determine_medal(i)} {str(user)}",
                 value=f"{separate_digits(leaderboard[user_id])} "
-                      f"Gold<:MessageGold:755792715257479229>",
+                      f"Gold{gold_emote}",
                 inline=False
             )
 
