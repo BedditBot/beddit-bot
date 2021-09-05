@@ -409,11 +409,11 @@ async def balance_(ctx, user_attr=None):
             color=0xffd700  # gold
         ).add_field(
             name="Gold",
-            value=separate_digits(account.gold),
+            value=f"{separate_digits(account.gold)}{gold_emote}",
             inline=False
         ).add_field(
             name="Platinum",
-            value=separate_digits(account.platinum),
+            value=f"{separate_digits(account.platinum)}{platinum_emote}",
             inline=False
         ).set_thumbnail(
             url="https://static.wikia.nocookie.net/reddit/images/1/10/Gold.png"
