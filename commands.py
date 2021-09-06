@@ -655,17 +655,17 @@ async def convert_(ctx):
                         f"platinum{platinum_emote}.",
             color=0xe5e4e2  # platinum
         ).add_field(
-            name="1️⃣",
+            name="Option 1️⃣",
             value=f"{separate_digits(price_1)}{gold_emote} to "
                   f"1{platinum_emote}",
             inline=False
         ).add_field(
-            name="Option 2",
+            name="2️⃣",
             value=f"{separate_digits(price_2)}{gold_emote} to "
                   f"2{platinum_emote}",
             inline=False
         ).add_field(
-            name="Option 3",
+            name="3️⃣",
             value=f"{separate_digits(price_3)}{gold_emote} to "
                   f"3{platinum_emote}",
             inline=False
@@ -753,6 +753,8 @@ async def convert_(ctx):
                         ctx,
                         f"Insufficient gold{gold_emote} for conversion."
                     )
+
+                    return
             elif str(reaction.emoji) == "2️⃣":
                 if gold >= price_2:
                     account.gold -= price_2
@@ -766,6 +768,8 @@ async def convert_(ctx):
                         ctx,
                         f"Insufficient gold{gold_emote} for conversion."
                     )
+
+                    return
             elif str(reaction.emoji) == "3️⃣":
                 if gold >= price_3:
                     account.gold -= price_3
@@ -779,6 +783,8 @@ async def convert_(ctx):
                         ctx,
                         f"Insufficient gold{gold_emote} for conversion."
                     )
+
+                    return
             try:
                 await message.remove_reaction(reaction, user)
             except discord.errors.Forbidden:
