@@ -673,17 +673,17 @@ async def convert_(ctx):
             color=0xe5e4e2  # platinum
         ).add_field(
             name="Option 1",
-            value=f"{separate_digits(price_1)}{gold_emote} to"
+            value=f"{separate_digits(price_1)}{gold_emote} to "
                   f"1{platinum_emote}",
             inline=False
         ).add_field(
             name="Option 2",
-            value=f"{separate_digits(price_2)}{gold_emote} to"
+            value=f"{separate_digits(price_2)}{gold_emote} to "
                   f"2{platinum_emote}",
             inline=False
         ).add_field(
             name="Option 3",
-            value=f"{separate_digits(price_3)}{gold_emote} to"
+            value=f"{separate_digits(price_3)}{gold_emote} to "
                   f"3{platinum_emote}",
             inline=False
         ).set_footer(
@@ -720,17 +720,17 @@ async def convert_(ctx):
                 color=0xe5e4e2  # platinum
             ).add_field(
                 name="Option 1",
-                value=f"{separate_digits(price_1)}{gold_emote} to"
+                value=f"{separate_digits(price_1)}{gold_emote} to "
                       f"1{platinum_emote}",
                 inline=False
             ).add_field(
                 name="Option 2",
-                value=f"{separate_digits(price_2)}{gold_emote} to"
+                value=f"{separate_digits(price_2)}{gold_emote} to "
                       f"2{platinum_emote}",
                 inline=False
             ).add_field(
                 name="Option 3",
-                value=f"{separate_digits(price_3)}{gold_emote} to"
+                value=f"{separate_digits(price_3)}{gold_emote} to "
                       f"3{platinum_emote}",
                 inline=False
             ).set_footer(
