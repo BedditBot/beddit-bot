@@ -1,6 +1,5 @@
 import sys
 
-import discord
 import asyncpraw
 import random
 from discord.ext import commands
@@ -525,17 +524,9 @@ async def transfer(ctx, *, args):
     sender_account = await Account.get(sender)
 
     if sender_account.active_bets > 0:
-        await ctx.send(
-            embed=discord.Embed(
-                title="Error",
-                color=0x000000,  # black
-                description=f"Can't transfer gold"
-                            f"{gold_emote} "
-                            f"between users with active bets."
-            ).set_footer(
-                text=str(sender),
-                icon_url=str(sender.avatar_url)
-            )
+        await send_error(
+            ctx,
+            f"Can't transfer gold{gold_emote} between users with active bets."
         )
 
         return
@@ -562,17 +553,9 @@ async def transfer(ctx, *, args):
     receiver_account = await Account.get(receiver)
 
     if receiver_account.active_bets > 0:
-        await ctx.send(
-            embed=discord.Embed(
-                title="Error",
-                color=0x000000,  # black
-                description=f"Can't transfer gold"
-                            f"{gold_emote} "
-                            f"between users with active bets."
-            ).set_footer(
-                text=str(sender),
-                icon_url=str(sender.avatar_url)
-            )
+        await send_error(
+            ctx,
+            f"Can't transfer gold{gold_emote} between users with active bets."
         )
 
         return
@@ -662,8 +645,8 @@ async def convert_(ctx):
     platinum = account.platinum
 
     price_1 = platinum ** 3
-    price_2 = (platinum + 1) ** 3
-    price_3 = (platinum + 2) ** 3
+    price_2 = 2 * price_1
+    price_3 = 3 * price_1
 
     message = await ctx.send(
         embed=discord.Embed(
@@ -709,8 +692,8 @@ async def convert_(ctx):
         platinum = account.platinum
 
         price_1 = platinum ** 3
-        price_2 = (platinum + 1) ** 3
-        price_3 = (platinum + 2) ** 3
+        price_2 = 2 * price_1
+        price_3 = 3 * price_1
 
         await message.edit(
             embed=discord.Embed(
@@ -766,16 +749,9 @@ async def convert_(ctx):
 
                     await update(price_1, 1)
                 else:
-                    await ctx.send(
-                        embed=discord.Embed(
-                            title="Error",
-                            color=0x000000,  # black
-                            description=f"Insufficient gold{gold_emote} for "
-                                        f"conversion."
-                        ).set_footer(
-                            text=str(user),
-                            icon_url=str(user.avatar_url)
-                        )
+                    await send_error(
+                        ctx,
+                        f"Insufficient gold{gold_emote} for conversion."
                     )
             elif str(reaction.emoji) == "2️⃣":
                 if gold >= price_2:
@@ -786,16 +762,9 @@ async def convert_(ctx):
 
                     await update(price_2, 2)
                 else:
-                    await ctx.send(
-                        embed=discord.Embed(
-                            title="Error",
-                            color=0x000000,  # black
-                            description=f"Insufficient gold{gold_emote} for "
-                                        f"conversion."
-                        ).set_footer(
-                            text=str(user),
-                            icon_url=str(user.avatar_url)
-                        )
+                    await send_error(
+                        ctx,
+                        f"Insufficient gold{gold_emote} for conversion."
                     )
             elif str(reaction.emoji) == "3️⃣":
                 if gold >= price_3:
@@ -806,16 +775,9 @@ async def convert_(ctx):
 
                     await update(price_3, 3)
                 else:
-                    await ctx.send(
-                        embed=discord.Embed(
-                            title="Error",
-                            color=0x000000,  # black
-                            description=f"Insufficient gold{gold_emote} for "
-                                        f"conversion."
-                        ).set_footer(
-                            text=str(user),
-                            icon_url=str(user.avatar_url)
-                        )
+                    await send_error(
+                        ctx,
+                        f"Insufficient gold{gold_emote} for conversion."
                     )
             try:
                 await message.remove_reaction(reaction, user)

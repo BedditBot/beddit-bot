@@ -1,5 +1,6 @@
 import asyncio
 from sys import exit as sys_exit
+import discord
 
 import config
 
@@ -34,6 +35,18 @@ async def disconnect_database():
 #     print("test3")
 #
 #     sys_exit()
+
+async def send_error(ctx, message):
+    await ctx.send(
+        embed=discord.Embed(
+            title="Error",
+            color=0x000000,  # black
+            description=message
+        ).set_footer(
+            text=str(ctx.author),
+            icon_url=str(ctx.author.avatar_url)
+        )
+    )
 
 
 # argument user_attr (user attribute) is something related to the user
