@@ -661,9 +661,9 @@ async def convert_(ctx):
     gold = account.gold
     platinum = account.platinum
 
-    price_1 = 2 ** platinum
-    price_2 = 2 ** (platinum + 1)
-    price_3 = 2 ** (platinum + 2)
+    price_1 = platinum ** 3
+    price_2 = (platinum + 1) ** 3
+    price_3 = (platinum + 2) ** 3
 
     message = await ctx.send(
         embed=discord.Embed(
@@ -708,9 +708,9 @@ async def convert_(ctx):
         gold = account.gold
         platinum = account.platinum
 
-        price_1 = 2 ** platinum
-        price_2 = 2 ** (platinum + 1)
-        price_3 = 2 ** (platinum + 2)
+        price_1 = platinum ** 3
+        price_2 = (platinum + 1) ** 3
+        price_3 = (platinum + 2) ** 3
 
         await message.edit(
             embed=discord.Embed(
