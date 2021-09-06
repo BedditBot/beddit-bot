@@ -655,7 +655,7 @@ async def convert_(ctx):
                         f"platinum{platinum_emote}.",
             color=0xe5e4e2  # platinum
         ).add_field(
-            name="Option 1",
+            name="1️⃣",
             value=f"{separate_digits(price_1)}{gold_emote} to "
                   f"1{platinum_emote}",
             inline=False
